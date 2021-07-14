@@ -152,12 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cf8201c46d64540bd3466485204e538, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  map: {fileID: 0}
-  comps:
-    compName: Monterrey
-    latitude: 25.686613
-    longitude: -100.316116
-    segments: []
+  map: {fileID: 325707039}
+  comps: []
 --- !u!4 &189223494
 Transform:
   m_ObjectHideFlags: 0
@@ -257,3 +253,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e6b749c6d877f4c19a5a5c3c0783d53b, type: 3}
+--- !u!114 &325707039 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114478715909612932, guid: e6b749c6d877f4c19a5a5c3c0783d53b, type: 3}
+  m_PrefabInstance: {fileID: 325707038}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd961b1c9541a4cee99686069ecce852, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

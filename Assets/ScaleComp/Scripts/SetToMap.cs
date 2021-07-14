@@ -1,6 +1,5 @@
 ﻿using Mapbox.Unity.Map;
 using Mapbox.Utils;
-using TMPro;
 using UnityEngine;
 
 namespace ScaleComp.Scripts
@@ -12,7 +11,7 @@ namespace ScaleComp.Scripts
     [SerializeField] private AbstractMap map;
     [SerializeField] private GameObject comp;
 
-    [SerializeField] private ScaleComp comps;
+    [SerializeField] private ScaleCompPolyline compsPolyline;
 
     [SerializeField] private bool lockComp;
     [SerializeField] private bool eventSet;
@@ -20,8 +19,6 @@ namespace ScaleComp.Scripts
 
     private void Start()
     {
-
-
       Connect();
     }
 
@@ -53,8 +50,8 @@ namespace ScaleComp.Scripts
 
       cachedPos = map.WorldToGeoPosition(comp.transform.localPosition);
 
-
     }
+    
     private void Connect()
     {
       if (map == null) return;

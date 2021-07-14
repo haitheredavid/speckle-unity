@@ -1,27 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using Objects.Geometry;
-using Speckle.Core.Models;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace ScaleComp.Scripts
-
 {
-  [Serializable]
-  public class ScaleCompBase : Base
+  public class ScaleComp : MonoBehaviour
   {
-    // speckle reference
-    public Polyline polyline { get;  set; }
-    public string compName;
-    public string latitude, longitude;
+    [SerializeField] private ScaleCompPolyline comp;
 
-  }
+    public string Location => string.Join(comp.latitude, comp.longitude);
 
-  [Serializable]
-  public class ScaleComp : ScaleCompBase
-  {
-    // field for unity editor
-    public List<Vector3> segments;
+    // TODO: set scale from speckle props and current map zoom level
+    public Vector3 Scale => Vector3.one;
 
+    public ScaleCompPolyline Comp
+    {
+      get => comp;
+      set => comp = value;
+    }
   }
 }
