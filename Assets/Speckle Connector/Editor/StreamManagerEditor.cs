@@ -187,7 +187,6 @@ namespace Speckle.ConnectorUnity
     {
       _streamManager = (StreamManager)target;
 
-
       #region Account GUI
       if (Accounts == null)
       {
