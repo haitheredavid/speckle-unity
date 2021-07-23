@@ -68,5 +68,15 @@ namespace Speckle.ConnectorUnity
       return new Color(argb.R / 255.0f, argb.G / 255.0f, argb.B / 255.0f);
     }
 
+    // ref from https://stackoverflow.com/questions/2692313/implementing-toargb
+    public static Color32 ToUnityColor32(this int c)
+    {
+      // From integer 
+      return new Color32((byte) (c >> 24),
+                         (byte) (c >> 16),
+                         (byte) (c >> 8),
+                         (byte) (c));
+    }
+
   }
 }

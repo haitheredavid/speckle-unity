@@ -7,6 +7,7 @@ using Objects.Other;
 using Objects.Primitive;
 using Speckle.ConnectorUnity;
 using Speckle.Core.Models;
+using Speckle_Connector.MonoBase;
 using UnityEditor;
 using UnityEngine;
 using Mesh = Objects.Geometry.Mesh;
@@ -436,6 +437,15 @@ namespace Objects.Converter.Unity
       {
         @base[key] = sd.Data[key];
       }
+    }
+    private object PointCloudToNative(Pointcloud pointcloud)
+    {
+      var go = new GameObject("SpeckleCloud").AddComponent<SpeckleCloud>();
+      var points = pointcloud.GetPoints().ToArray();
+      go.FromBase(points.Valid() ? points.Select(VectorFromPoint).ToList() : null,
+                  pointcloud.colors.Valid() ? pointcloud.colors.Select(c => c.ToUnityColor32()).ToList() : null);
+
+      return go;
     }
   }
 }
