@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Objects.BuiltElements;
+using Objects.ViewTo;
 using UnityEngine;
 using Mesh = Objects.Geometry.Mesh;
 
@@ -69,6 +70,16 @@ namespace Objects.Converter.Unity
         //Built elements with a mesh representation implement this interface
         case IDisplayMesh o:
           return MeshToNative((Base) o);
+        //ViewTo Objects
+        case ViewStudyBase o:
+          return ViewStudyToNative(o);
+        case ViewCloudBase o:
+          return ViewCloudToNative(o);
+        case ContentBundleBase o:
+          return ContentBundleToNative(o);
+        case ViewContentBase o:
+          return ViewContentToNative(o);
+
         default:
           //capture any other object that might have a mesh representation
           if (@object["displayMesh"] is Mesh)
@@ -115,6 +126,16 @@ namespace Objects.Converter.Unity
         //   return true;
         // case View2D _:
         //   return false;
+        case Pointcloud _:
+          return true;
+        case ViewStudyBase _:
+          return true;
+        case ViewCloudBase _:
+          return true;
+        case ContentBundleBase _:
+          return true;
+        case ViewContentBase _:
+          return true;
         case IDisplayMesh _:
           return true;
         case Mesh _:
