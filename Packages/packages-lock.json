@@ -1,5 +1,27 @@
 {
   "dependencies": {
+    "com.sasaki.viewobjects.mono": {
+      "version": "file:com.sasaki.viewobjects.mono",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "jp.keijiro.pcx": "1.0.1"
+      }
+    },
+    "com.sasaki.viewobjects.mono.converter": {
+      "version": "file:com.sasaki.viewobjects.mono-converter",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "com.sasaki.viewto.tool": {
+      "version": "file:com.sasaki.viewto-tool",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.sasaki.viewobjects.mono": "1.1.0"
+      }
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
@@ -13,6 +35,13 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "2.0.0"
       },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.editorcoroutines": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.ext.nunit": {

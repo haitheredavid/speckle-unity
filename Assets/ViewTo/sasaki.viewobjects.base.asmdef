@@ -1,0 +1,17 @@
+{
+    "name": "sasaki.viewobjects.base",
+    "rootNamespace": "",
+    "references": [
+        "GUID:18bfc2f9ad2508d4faca985ee068e57c",
+        "GUID:dae77595a93198e48bd0e45f01fdf715"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

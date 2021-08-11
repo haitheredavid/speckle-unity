@@ -1,0 +1,20 @@
+{
+  "name": "com.sasaki.viewto.tool",
+  "version": "1.0.0",
+  "displayName": "viewto-tool",
+  "description": "GPU View Analysis tool for ViewTo",
+  "unity": "2020.3",
+  "dependencies": {
+    "com.sasaki.viewobjects.mono": "1.1.0"
+  },
+  "keywords": [
+    "Analysis",
+    "Design",
+    "GPU"
+  ],
+  "author": {
+    "name": "david morgan",
+    "email": "dmorgan@sasaki.com",
+    "url": "https://www.sasaki.com"
+  }
+}

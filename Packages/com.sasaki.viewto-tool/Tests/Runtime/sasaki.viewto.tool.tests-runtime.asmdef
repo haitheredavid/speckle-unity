@@ -1,0 +1,36 @@
+{
+    "name": "sasaki.viewto.tool.tests-runtime",
+    "rootNamespace": "",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "speckle.connector",
+        "sasaki.viewto.tool",
+        "sasaki.viewto.objects.mono",
+        "sasaki.viewobjects.mono.tests",
+        "sasaki.viewobjects.base"
+    ],
+    "includePlatforms": [
+        "Editor",
+        "WindowsStandalone32",
+        "WindowsStandalone64"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "SpeckleCore2.dll",
+        "Objects.dll",
+        "ViewToCore.dll",
+        "ViewObjects.dll",
+        "ViewObjects.Structure.dll",
+        "ViewObjects.Base.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

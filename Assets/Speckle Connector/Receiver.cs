@@ -1,18 +1,13 @@
-﻿using Objects.Converter.Unity;
-using Speckle.Core.Api;
+﻿using Speckle.Core.Api;
 using Speckle.Core.Api.SubscriptionModels;
 using Speckle.Core.Credentials;
 using Speckle.Core.Logging;
-using Speckle.Core.Models;
 using Speckle.Core.Transports;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sentry;
-using Sentry.Protocol;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity

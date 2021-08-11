@@ -1,0 +1,20 @@
+{
+  "name": "com.sasaki.viewobjects.mono",
+  "version": "1.1.0",
+  "displayName": "viewobj-mono",
+  "description": "ViewObjects for Unity",
+  "unity": "2020.3",
+  "dependencies": {
+    "jp.keijiro.pcx": "1.0.1"
+  },
+  "keywords": [
+    "Analysis",
+    "Design",
+    "GPU"
+  ],
+  "author": {
+    "name": "david morgan",
+    "email": "dmorgan@sasaki.com",
+    "url": "https://www.sasaki.com"
+  }
+}

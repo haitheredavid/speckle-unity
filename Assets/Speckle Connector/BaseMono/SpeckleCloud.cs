@@ -3,6 +3,11 @@ using System.Linq;
 using Pcx;
 using UnityEngine;
 
+public interface ICanMono
+{
+  GameObject BuildMono();
+}
+
 namespace Speckle_Connector.MonoBase
 {
   public class SpeckleCloud : MonoBehaviour

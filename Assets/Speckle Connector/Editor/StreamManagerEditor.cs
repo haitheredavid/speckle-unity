@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Sentry;
 using Speckle.Core.Api;
@@ -11,7 +9,6 @@ using Speckle.Core.Logging;
 using Speckle.Core.Transports;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Speckle.ConnectorUnity
 {
@@ -76,6 +73,19 @@ namespace Speckle.ConnectorUnity
       get { return _streamManager.SelectedStream; }
       set { _streamManager.SelectedStream = value; }
     }
+    
+    
+    private int SelectedKitIndex
+    {
+      get { return _streamManager.SelectedKitIndex; }
+      set { _streamManager.SelectedKitIndex = value; }
+    }
+    private int OldKitIndex
+    {
+      get { return _streamManager.OldSelectedKitIndex; }
+      set { _streamManager.OldSelectedKitIndex = value; }
+    }
+
 
     public List<Account> Accounts
     {
@@ -149,7 +159,6 @@ namespace Speckle.ConnectorUnity
       EditorUtility.ClearProgressBar();
     }
 
-
     private async Task Receive()
     {
       EditorUtility.DisplayProgressBar("Receving data...", "", 0);
@@ -160,18 +169,18 @@ namespace Speckle.ConnectorUnity
 
         var transport = new ServerTransport(SelectedAccount, SelectedStream.id);
         var @base = await Operations.Receive(
-            Branches[SelectedBranchIndex].commits.items[SelectedCommitIndex].referencedObject,
-            remoteTransport: transport,
-            onProgressAction: dict =>
-            {
-              EditorUtility.DisplayProgressBar("Receving data...", "",
-                              Convert.ToSingle(dict.Values.Average() / _totalChildrenCount));
-            },
-            onTotalChildrenCountKnown: count => { _totalChildrenCount = count; }
+          Branches[SelectedBranchIndex].commits.items[SelectedCommitIndex].referencedObject,
+          remoteTransport: transport,
+          onProgressAction: dict =>
+          {
+            EditorUtility.DisplayProgressBar("Receving data...", "",
+                                             Convert.ToSingle(dict.Values.Average() / _totalChildrenCount));
+          },
+          onTotalChildrenCountKnown: count => { _totalChildrenCount = count; }
         );
 
         var go = _streamManager.ConvertRecursivelyToNative(@base,
-            Branches[SelectedBranchIndex].commits.items[SelectedCommitIndex].id);
+                                                           Branches[SelectedBranchIndex].commits.items[SelectedCommitIndex].id);
 
       }
       catch (Exception e)
@@ -186,7 +195,19 @@ namespace Speckle.ConnectorUnity
     public override async void OnInspectorGUI()
     {
       _streamManager = (StreamManager)target;
-
+      
+      // EditorGUILayout.BeginHorizontal();
+      // SelectedAccountIndex = EditorGUILayout.Popup("Kits", SelectedKitIndex,
+      //                                              _streamManager.GetKits.ToArray(),
+      //                                              GUILayout.ExpandWidth(true), GUILayout.Height(20));
+      //
+      // if (OldKitIndex != SelectedKitIndex)
+      // {
+      //
+      //   _streamManager.LoadKit();
+      // }
+      // EditorGUILayout.EndHorizontal();
+      
       #region Account GUI
       if (Accounts == null)
       {
@@ -198,8 +219,8 @@ namespace Speckle.ConnectorUnity
       EditorGUILayout.BeginHorizontal();
 
       SelectedAccountIndex = EditorGUILayout.Popup("Accounts", SelectedAccountIndex,
-          Accounts.Select(x => x.userInfo.email + " | " + x.serverInfo.name).ToArray(),
-          GUILayout.ExpandWidth(true), GUILayout.Height(20));
+                                                   Accounts.Select(x => x.userInfo.email + " | " + x.serverInfo.name).ToArray(),
+                                                   GUILayout.ExpandWidth(true), GUILayout.Height(20));
 
       if (OldSelectedAccountIndex != SelectedAccountIndex)
       {
@@ -224,16 +245,16 @@ namespace Speckle.ConnectorUnity
         EditorGUI.BeginDisabledGroup(true);
 
         EditorGUILayout.TextField("Name", SelectedAccount.userInfo.name,
-            GUILayout.Height(20),
-            GUILayout.ExpandWidth(true));
+                                  GUILayout.Height(20),
+                                  GUILayout.ExpandWidth(true));
 
         EditorGUILayout.TextField("Server", SelectedAccount.serverInfo.name,
-            GUILayout.Height(20),
-            GUILayout.ExpandWidth(true));
+                                  GUILayout.Height(20),
+                                  GUILayout.ExpandWidth(true));
 
         EditorGUILayout.TextField("URL", SelectedAccount.serverInfo.url,
-            GUILayout.Height(20),
-            GUILayout.ExpandWidth(true));
+                                  GUILayout.Height(20),
+                                  GUILayout.ExpandWidth(true));
 
         EditorGUI.EndDisabledGroup();
       }
@@ -249,8 +270,8 @@ namespace Speckle.ConnectorUnity
       EditorGUILayout.BeginHorizontal();
 
       SelectedStreamIndex = EditorGUILayout.Popup("Streams",
-          SelectedStreamIndex, Streams.Select(x => x.name).ToArray(), GUILayout.Height(20),
-          GUILayout.ExpandWidth(true));
+                                                  SelectedStreamIndex, Streams.Select(x => x.name).ToArray(), GUILayout.Height(20),
+                                                  GUILayout.ExpandWidth(true));
 
       if (OldSelectedStreamIndex != SelectedStreamIndex)
       {
@@ -274,8 +295,8 @@ namespace Speckle.ConnectorUnity
       EditorGUILayout.BeginHorizontal();
 
       SelectedBranchIndex = EditorGUILayout.Popup("Branches",
-          SelectedBranchIndex, Branches.Select(x => x.name).ToArray(), GUILayout.Height(20),
-          GUILayout.ExpandWidth(true));
+                                                  SelectedBranchIndex, Branches.Select(x => x.name).ToArray(), GUILayout.Height(20),
+                                                  GUILayout.ExpandWidth(true));
       EditorGUILayout.EndHorizontal();
 
 
@@ -286,10 +307,10 @@ namespace Speckle.ConnectorUnity
       EditorGUILayout.BeginHorizontal();
 
       SelectedCommitIndex = EditorGUILayout.Popup("Commits",
-          SelectedCommitIndex,
-          Branches[SelectedBranchIndex].commits.items.Select(x => x.message).ToArray(),
-          GUILayout.Height(20),
-          GUILayout.ExpandWidth(true));
+                                                  SelectedCommitIndex,
+                                                  Branches[SelectedBranchIndex].commits.items.Select(x => x.message).ToArray(),
+                                                  GUILayout.Height(20),
+                                                  GUILayout.ExpandWidth(true));
 
       EditorGUILayout.EndHorizontal();
       #endregion
@@ -304,7 +325,6 @@ namespace Speckle.ConnectorUnity
 
       GUILayout.EndHorizontal();
     }
-
 
   }
 }

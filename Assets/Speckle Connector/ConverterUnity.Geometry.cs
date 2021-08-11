@@ -4,19 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Objects.Other;
-using Objects.Primitive;
 using Speckle.ConnectorUnity;
 using Speckle.Core.Models;
 using Speckle_Connector.MonoBase;
-using UnityEditor;
 using UnityEngine;
 using Mesh = Objects.Geometry.Mesh;
-using Object = UnityEngine.Object;
 
 namespace Objects.Converter.Unity
 {
   public partial class ConverterUnity
   {
+
     #region helper methods
     /// <summary>
     /// 
@@ -29,14 +27,14 @@ namespace Objects.Converter.Unity
     {
       // switch y and z
       return new Vector3((float)ScaleToNative(x, units), (float)ScaleToNative(z, units),
-          (float)ScaleToNative(y, units));
+                         (float)ScaleToNative(y, units));
     }
 
     public Vector3 VectorFromPoint(Point p)
     {
       // switch y and z
       return new Vector3((float)ScaleToNative(p.x, p.units), (float)ScaleToNative(p.z, p.units),
-          (float)ScaleToNative(p.y, p.units));
+                         (float)ScaleToNative(p.y, p.units));
     }
 
     /// <summary>
@@ -88,7 +86,8 @@ namespace Objects.Converter.Unity
 
 
       // get size of mesh
-      for (int i = 0; i < points.Length; i++) { }
+      for (int i = 0; i < points.Length; i++)
+      { }
 
       return points;
     }
@@ -107,7 +106,6 @@ namespace Objects.Converter.Unity
       //switch y and z
       return new Point(p.x, p.z, p.y);
     }
-
 
     /// <summary>
     /// Converts a Speckle mesh to a GameObject with a mesh renderer
@@ -190,10 +188,9 @@ namespace Objects.Converter.Unity
     {
       Vector3 newPt = VectorByCoordinates(point.x, point.y, point.z, point.units);
 
-      var go = NewPointBasedGameObject(new Vector3[2] { newPt, newPt }, point.speckle_type);
+      var go = NewPointBasedGameObject(new Vector3[2] {newPt, newPt}, point.speckle_type);
       return go;
     }
-
 
     /// <summary>
     /// Converts a Speckle line to a GameObject with a line renderer
@@ -202,7 +199,7 @@ namespace Objects.Converter.Unity
     /// <returns></returns>
     public GameObject LineToNative(Line line)
     {
-      var points = new List<Vector3> { VectorFromPoint(line.start), VectorFromPoint(line.end) };
+      var points = new List<Vector3> {VectorFromPoint(line.start), VectorFromPoint(line.end)};
 
       var go = NewPointBasedGameObject(points.ToArray(), line.speckle_type);
       return go;
@@ -233,14 +230,13 @@ namespace Objects.Converter.Unity
       return go;
     }
 
-
     public GameObject MeshToNative(Base speckleMeshObject)
     {
       if (!(speckleMeshObject["displayMesh"] is Mesh))
         return null;
 
       return MeshToNative(speckleMeshObject["displayMesh"] as Mesh,
-          speckleMeshObject["renderMaterial"] as RenderMaterial, speckleMeshObject.GetMembers());
+                          speckleMeshObject["renderMaterial"] as RenderMaterial, speckleMeshObject.GetMembers());
     }
     /// <summary>
     /// Converts a Speckle mesh to a GameObject with a mesh renderer
@@ -250,8 +246,8 @@ namespace Objects.Converter.Unity
     /// <param name="properties">If provided will override the properties on the mesh itself</param>
     /// <returns></returns>
     public GameObject MeshToNative(
-        Mesh speckleMesh, RenderMaterial renderMaterial = null,
-        Dictionary<string, object> properties = null
+      Mesh speckleMesh, RenderMaterial renderMaterial = null,
+      Dictionary<string, object> properties = null
     )
     {
       if (speckleMesh.vertices.Count == 0 || speckleMesh.faces.Count == 0)
@@ -295,8 +291,8 @@ namespace Objects.Converter.Unity
       }
 
 
-      var go = new GameObject { name = speckleMesh.speckle_type };
-      var mesh = new UnityEngine.Mesh { name = speckleMesh.speckle_type };
+      var go = new GameObject {name = speckleMesh.speckle_type};
+      var mesh = new UnityEngine.Mesh {name = speckleMesh.speckle_type};
 
       if (verts.Length >= 65535)
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
@@ -323,8 +319,6 @@ namespace Objects.Converter.Unity
           verts[l] -= meshBounds.center;
         }
       }
-
-
 
 
       mesh.SetVertices(verts);
@@ -359,10 +353,10 @@ namespace Objects.Converter.Unity
       if (properties == null)
       {
         var meshprops = typeof(Mesh).GetProperties(BindingFlags.Instance | BindingFlags.Public).Select(x => x.Name)
-            .ToList();
+          .ToList();
         properties = speckleMesh.GetMembers()
-            .Where(x => !meshprops.Contains(x.Key))
-            .ToDictionary(x => x.Key, x => x.Value);
+          .Where(x => !meshprops.Contains(x.Key))
+          .ToDictionary(x => x.Key, x => x.Value);
       }
 
       AttachSpeckleProperties(go, properties);
@@ -381,10 +375,6 @@ namespace Objects.Converter.Unity
       return uv;
     }
     #endregion
-
-
-
-
 
     private Material GetMaterial(RenderMaterial renderMaterial)
     {
@@ -425,7 +415,6 @@ namespace Objects.Converter.Unity
       var sd = go.AddComponent<SpeckleProperties>();
       sd.Data = properties;
     }
-
 
     private void AttachUnityProperties(Base @base, GameObject go)
     {

@@ -1,13 +1,4 @@
-﻿using Objects.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using Mesh = Objects.Geometry.Mesh;
-
-namespace Objects.Converter.Unity
+﻿namespace Objects.Converter.Unity
 {
   public partial class ConverterUnity
   {

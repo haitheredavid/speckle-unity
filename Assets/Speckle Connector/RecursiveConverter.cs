@@ -10,22 +10,24 @@ using UnityEngine;
 
 namespace Speckle.ConnectorUnity
 {
+
   public class RecursiveConverter : MonoBehaviour
   {
-
     private ConverterUnity _converter = new ConverterUnity();
 
     /// <summary>
     /// Converts a Base object to a GameObject Recursively
     /// </summary>
     /// <param name="base"></param>
+    /// <param name="id"></param>
     /// <returns></returns>
-    public GameObject ConvertRecursivelyToNative(Base @base, string name)
+    public GameObject ConvertRecursivelyToNative(Base @base, string id)
     {
+  
       //using the ApplicationPlaceholderObject to pass materials
       //available in Assets/Materials to the converters
       var materials = Resources.LoadAll("Materials", typeof(Material)).Cast<Material>()
-          .Select(x => new ApplicationPlaceholderObject { NativeObject = x }).ToList();
+        .Select(x => new ApplicationPlaceholderObject {NativeObject = x}).ToList();
       _converter.SetContextObjects(materials);
 
 
@@ -51,7 +53,7 @@ namespace Speckle.ConnectorUnity
         //empty game object with the commit id as name, used to contain all the rest
         var go = new GameObject
         {
-          name = name.Valid() ? name : "Base"
+          name = id.Valid() ? id : "Base"
         };
 
         foreach (var member in members)
@@ -67,7 +69,6 @@ namespace Speckle.ConnectorUnity
         return go;
       }
     }
-
 
     /// <summary>
     /// Converts an object recursively to a list of GameObjects
@@ -162,10 +163,7 @@ namespace Speckle.ConnectorUnity
           throw new SpeckleException(e.Message, e, true, SentryLevel.Error);
         }
       }
-
-      return null;
     }
-
 
     private static bool IsList(object @object)
     {
@@ -173,8 +171,7 @@ namespace Speckle.ConnectorUnity
         return false;
 
       var type = @object.GetType();
-      return (typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type) &&
-               type != typeof(string));
+      return(typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type) && type != typeof(string));
     }
 
     private static bool IsDictionary(object @object)

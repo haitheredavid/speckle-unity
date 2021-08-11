@@ -1,5 +1,4 @@
 ﻿using Objects.BuiltElements;
-using Objects.Geometry;
 using UnityEngine;
 
 namespace Objects.Converter.Unity
