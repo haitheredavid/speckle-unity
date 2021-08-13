@@ -12,10 +12,10 @@ using Random = System.Random;
 
 namespace ViewToUnity.Tests.Units
 {
-  
+
   public class RigCreationTests
   {
-    
+
     [TestCase(true)]
     [TestCase(false)]
     public void To_RigObj(bool isValid)
@@ -56,10 +56,7 @@ namespace ViewToUnity.Tests.Units
 
       Assert.NotNull(@base);
 
-      var converter = new ViewObjBaseMonoConverter
-      {
-        app = Applications.Script
-      };
+      var converter = new ViewObjMonoConverter();
 
       var mono = converter.ConvertRecursivelyToUnity(@base);
 

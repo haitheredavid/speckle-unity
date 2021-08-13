@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Objects.Converter.Unity;
+using ConnectorUnity;
+using ConnectorUnity.Converters;
 using Sentry;
 using Speckle.Core.Logging;
 using Speckle.Core.Models;
@@ -10,27 +11,26 @@ using UnityEngine;
 using ViewTo.Connector.Unity;
 using ViewTo.Objects.Speckle;
 using ViewTo.Objects.Structure;
+using Utils = ConnectorUnity.Utils;
 
 namespace Speckle.ConnectorUnity
 {
 
-  public class ViewObjBaseConverter : BaseMonoConverter<ViewToKit>
+  public class ViewObjConverter : MonoConverter<ViewToKit>
   {
     private ViewObjConverterScript _converter;
     private ConverterUnity _basicConverter;
-
+    
+    public string app { get; set; }
 
     private GameObject ConvertToViewCloud(Base @base)
     {
-
       var pts = @base["points"];
       return null;
     }
     
     public GameObject ConvertRecursivelyToUnity(Base @base)
     {
-
-
       _converter ??= LoadConverter<ViewObjConverterScript>(app);
       if (_converter != null)
       {

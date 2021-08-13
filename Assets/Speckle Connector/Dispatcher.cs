@@ -19,7 +19,7 @@ using Speckle.Core.Kits;
 using Speckle.Core.Logging;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity
+namespace ConnectorUnity
 {
 	/// Author: Pim de Witte (pimdewitte.com) and contributors, https://github.com/PimDeWitte/UnityMainThreadDispatcher
 	/// <summary>

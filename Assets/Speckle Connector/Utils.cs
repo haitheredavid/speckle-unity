@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity
+namespace ConnectorUnity
 {
   public static class ObjectToDictionaryHelper
   {

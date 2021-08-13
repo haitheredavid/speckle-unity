@@ -3,31 +3,28 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Speckle.ConnectorUnity;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
+using Speckle.Core.Kits;
 using UnityEngine;
 
-namespace Speckle_Connector
+namespace ConnectorUnity
 {
 
   [ExecuteAlways]
   public class SimpleStreamManager : MonoBehaviour
   {
 
-    public enum ManagerState
-    {
-      Primed,
-      AccountSelected,
-      AccountLoaded,
-      StreamSelected,
-      BranchSelected,
-      CommitSelected,
-      NoAccounts,
-      NoStreams,
-      NoCommits,
-      ClientError
-    }
+    [HideInInspector]
+    [SerializeField] private InputDataShell dataShell = new InputDataShell();
+
+    [SerializeField] private int accountIndex, streamIndex, branchIndex, commitIndex, kitIndex;
+
+    [HideInInspector]
+    [SerializeField] private string[] testvalues = new string[]{"test"};
+    
+    [HideInInspector]
+    [SerializeField] private bool inProcess, isPrimed, isValid;
 
     public bool IsPrimed
     {
@@ -43,23 +40,56 @@ namespace Speckle_Connector
 
     private Client client;
 
-    private ManagerCache cache { get; set; } = new ManagerCache();
-
-    private Account account => accounts.Valid() && accounts.Count > cache.account ? accounts[cache.account] : null;
-    private Stream stream => streams.Valid() && streams.Count > cache.stream ? streams[cache.stream] : null;
-    private Branch branch => branches.Valid() && branches.Count > cache.branch ? branches[cache.branch] : null;
-    private Commit commit => commits.Valid() && commits.Count > cache.commit ? commits[cache.commit] : null;
+    
+    private Account account => accounts.Valid() && accounts.Count > dataShell.account ? accounts[dataShell.account] : null;
+    private Stream stream => streams.Valid() && streams.Count > dataShell.stream ? streams[dataShell.stream] : null;
+    private Branch branch => branches.Valid() && branches.Count > dataShell.branch ? branches[dataShell.branch] : null;
+    private Commit commit => commits.Valid() && commits.Count > dataShell.commit ? commits[dataShell.commit] : null;
+    private ISpeckleKit kit => kits.Valid() && kits.Count > dataShell.kit ? kits[dataShell.kit] : null;
 
     public List<Account> accounts { get; private set; } = new List<Account>();
     public List<Stream> streams { get; private set; } = new List<Stream>();
     public List<Branch> branches { get; private set; } = new List<Branch>();
     public List<Commit> commits { get; private set; } = new List<Commit>();
+    public List<ISpeckleKit> kits { get; private set; } = new List<ISpeckleKit>();
 
     public event Action<ManagerState> StateChangeEvent;
 
+    private void OnValidate()
+    {
+
+      // if (!inProcess && IsStale())
+      // {
+      //   Debug.Log("Cache is stale");
+      //   await manager.SetInput(cache);
+      // }
+    }
+
     private async void OnEnable()
     {
+      RefreshKits();
       await PrimeManager();
+    }
+
+    public async Task SetInput(InputDataShell input)
+    {
+      if (dataShell.account != input.account)
+        await SelectAccount(input.account);
+      else if (dataShell.stream != input.stream)
+        await SelectStream(input.stream);
+      else if (dataShell.branch != input.branch)
+        SelectBranch(input.branch);
+      else if (dataShell.commit != input.commit)
+        SelectCommit(input.commit);
+      else if (dataShell.kit != input.kit)
+        SelectKit(input.kit);
+      else
+        Debug.Log("Cache is up to date");
+    }
+    public void RefreshKits()
+    {
+      Debug.Log("Loading Kits");
+      kits = KitManager.Kits.ToList();
     }
 
     public async Task PrimeManager()
@@ -88,7 +118,7 @@ namespace Speckle_Connector
     {
       Debug.Log("Selecting Account");
 
-      cache.account = LoadFromList(index, accounts);
+      dataShell.account = LoadFromList(index, accounts);
       if (account == null)
       {
         StateChangeEvent?.Invoke(ManagerState.ClientError);
@@ -126,7 +156,7 @@ namespace Speckle_Connector
       Debug.Log("Selecting Stream");
       try
       {
-        cache.stream = LoadFromList(index, streams);
+        dataShell.stream = LoadFromList(index, streams);
         branches = await client.StreamGetBranches(stream.id);
       }
       catch (Exception e)
@@ -143,36 +173,30 @@ namespace Speckle_Connector
       }
     }
 
-    public void SelectBranch(int index = 0)
+    private void SelectBranch(int index = 0)
     {
       Debug.Log("Selecting Branch");
-      cache.branch = LoadFromList(index, branches);
+      dataShell.branch = LoadFromList(index, branches);
 
       commits = branch != null ? branch.commits.items : new List<Commit>();
       StateChangeEvent?.Invoke(ManagerState.BranchSelected);
       SelectCommit();
     }
 
-    public void SelectCommit(int index = 0)
+    private void SelectCommit(int index = 0)
     {
       Debug.Log("Selecting Commit");
-      cache.commit = LoadFromList(index, commits);
+      dataShell.commit = LoadFromList(index, commits);
       StateChangeEvent?.Invoke(commits == null || !commits.Any() ? ManagerState.NoCommits : ManagerState.CommitSelected);
     }
 
-    internal async Task SetInput(ManagerCache input)
+    private void SelectKit(int index = 0)
     {
-      if (cache.account != input.account)
-        await SelectAccount(input.account);
-      else if (cache.stream != input.stream)
-        await SelectStream(input.stream);
-      else if (cache.branch != input.branch)
-        SelectBranch(input.branch);
-      else if (cache.commit != input.commit)
-        SelectCommit(input.commit);
-      else
-        Debug.Log("Cache is up to date");
+      Debug.Log("Selecting Kit");
+      dataShell.kit = LoadFromList(index, kits);
+      StateChangeEvent?.Invoke(ManagerState.KitSelected);
     }
+
     private static int LoadFromList(int index, ICollection list)
     {
       if (list == null)
@@ -187,6 +211,11 @@ namespace Speckle_Connector
       }
 
       return index;
+    }
+
+    public void Load()
+    {
+      Debug.Log("Loading to reciever!");
     }
   }
 }

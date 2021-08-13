@@ -2,13 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Objects.Converter.Unity;
 using Sentry;
 using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity
+namespace ConnectorUnity
 {
   public class SimpleRecursiveConverter
   {

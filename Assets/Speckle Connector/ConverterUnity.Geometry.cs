@@ -1,16 +1,15 @@
-﻿using Objects.Geometry;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using ConnectorUnity.MonoBase;
+using Objects.Geometry;
 using Objects.Other;
-using Speckle.ConnectorUnity;
 using Speckle.Core.Models;
-using Speckle_Connector.MonoBase;
 using UnityEngine;
 using Mesh = Objects.Geometry.Mesh;
 
-namespace Objects.Converter.Unity
+namespace ConnectorUnity
 {
   public partial class ConverterUnity
   {

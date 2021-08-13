@@ -1,4 +1,4 @@
-﻿namespace Objects.Converter.Unity
+﻿namespace ConnectorUnity
 {
   public partial class ConverterUnity
   {

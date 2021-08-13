@@ -1,18 +1,17 @@
-﻿using Objects.Converter.Unity;
-using Speckle.Core.Api;
-using Speckle.Core.Credentials;
-using Speckle.Core.Logging;
-using Speckle.Core.Models;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sentry;
+using Speckle.Core.Api;
+using Speckle.Core.Credentials;
 using Speckle.Core.Kits;
+using Speckle.Core.Logging;
+using Speckle.Core.Models;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity
+namespace ConnectorUnity
 {
   /// <summary>
   /// A Speckle Sender, it's a wrapper around a basic Speckle Client

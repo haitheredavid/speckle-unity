@@ -206,49 +206,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &955105177
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 955105179}
-  - component: {fileID: 955105178}
-  m_Layer: 0
-  m_Name: SimpleManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &955105178
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 955105177}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48589793fee74c7781985b5b69dbada1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &955105179
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 955105177}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1247239211
 GameObject:
   m_ObjectHideFlags: 0
@@ -342,3 +299,86 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1313495034
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1313495036}
+  - component: {fileID: 1313495035}
+  m_Layer: 0
+  m_Name: GameObject (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1313495035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313495034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 778d0b9b83909ea479c6a5cd707567bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  managerData:
+    account: 0
+    stream: 1
+    branch: 0
+    commit: 0
+    kit: 0
+    Accounts:
+    - dmorgan@sasaki.com | Speckle XYZ
+    - morgandavid424@gmail.com | Speckle XYZ
+    Streams:
+    - SimpleBigStudy | 23115c54cf
+    - ViewToWorld | bc46347877
+    - testonetwo | 268424c9fd
+    - Vietnam ViewStudy Test | c35331f7bd
+    - ViewToWorld | a3d2b37bfc
+    - ViewToWorld | 21b8a5e908
+    - ViewToWorld | 30a020c3ac
+    - BaseSpace | ee40ed1881
+    - V2-TestProject | 2628f8a387
+    - worldhello | 4ae32ffb59
+    Branches:
+    - sample-branch
+    - main
+    Commits:
+    - 96c20717a8
+    Kits:
+    - ViewToKit | David Morgan
+    - CoreKit | Dimitrie
+    - Objects | Speckle
+  activeReceiver: []
+  receivers: []
+  cache:
+    account: 0
+    stream: 1
+    branch: 0
+    commit: 0
+    kit: 0
+  receiveEvent:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &1313495036
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313495034}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

@@ -1,93 +1,119 @@
 ﻿using System.Linq;
-using Speckle_Connector;
-using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity
+namespace ConnectorUnity
 {
   [CustomEditor(typeof(SimpleStreamManager))]
   public class SimpleStreamManagerEditor : Editor
   {
 
-    private EditorCoroutine logCoro;
     private string[]
-      _accounts = new[] {"idle"},
-      _streams = new[] {"idle"},
-      _branches = new[] {"idle"},
-      _commits = new[] {"idle"};
+      _accounts = {"idle"},
+      _streams = {"idle"},
+      _branches = {"idle"},
+      _commits = {"idle"},
+      _kits = {"idle"};
 
     private string progressMessage = "Hello!";
 
-    private ManagerCache cache { get; set; } = new ManagerCache();
-    private ManagerCache stale { get; set; } = new ManagerCache();
+    [SerializeField] private InputDataShell dataShell;
+    private InputDataShell stale { get; set; } = new InputDataShell();
+
+    private SerializedProperty kit, account, stream, branch, commit;
+    private SerializedProperty cache;
 
     private void OnEnable()
     {
+      Debug.Log("On Enable call ");
+
+      cache = serializedObject.FindProperty("data");
+
+      kit = serializedObject.FindProperty("kitIndex");
+      account = serializedObject.FindProperty("accountIndex");
+      stream = serializedObject.FindProperty("streamIndex");
+      branch = serializedObject.FindProperty("branchIndex");
+      commit = serializedObject.FindProperty("commitIndex");
+
       var manager = (SimpleStreamManager)serializedObject.targetObject;
       manager.StateChangeEvent += ManagerOnStateChange;
       ResetCache();
     }
 
+    private void OnDisable()
+    {
+      Debug.Log("On Disable call ");
+    }
+
+    private async void Reset()
+    {
+      ResetCache();
+      var manager = (SimpleStreamManager)serializedObject.targetObject;
+      await manager.PrimeManager();
+    }
+
     private void ResetCache()
     {
-      cache = new ManagerCache();
-      stale = new ManagerCache
+      dataShell = new InputDataShell();
+      stale = new InputDataShell
       {
         account = -1, stream = -1, branch = -1, commit = -1
       };
-
     }
 
-    private void ManagerOnStateChange(SimpleStreamManager.ManagerState state)
+    private void ManagerOnStateChange(ManagerState state)
     {
       var manager = (SimpleStreamManager)target;
       progressMessage = state.ToString().Split('.').Last();
 
       switch (state)
       {
-        case SimpleStreamManager.ManagerState.NoAccounts:
+        case ManagerState.NoAccounts:
           Debug.LogWarning("No accounts found");
           ClearAll();
           break;
-        case SimpleStreamManager.ManagerState.NoStreams:
+        case ManagerState.NoStreams:
           Debug.LogWarning("No streams found with this account");
           UpdateLists(true, true, true);
           break;
-        case SimpleStreamManager.ManagerState.NoCommits:
+        case ManagerState.NoCommits:
           UpdateLists(false, false, true);
           break;
 
-        case SimpleStreamManager.ManagerState.Primed:
+        case ManagerState.Primed:
           ClearAll();
           _accounts = manager.accounts.Format();
           break;
 
-        case SimpleStreamManager.ManagerState.AccountSelected:
+        case ManagerState.AccountSelected:
           UpdateLists(true, true, true);
           _streams = manager.streams.Format();
           break;
-        
-        case SimpleStreamManager.ManagerState.AccountLoaded:
+
+        case ManagerState.AccountLoaded:
           UpdateLists(false, true, true);
           _streams = manager.streams.Format();
           break;
-        
-        case SimpleStreamManager.ManagerState.StreamSelected:
+
+        case ManagerState.StreamSelected:
           UpdateLists(false, true, true);
           _branches = manager.branches.Format();
           break;
-        case SimpleStreamManager.ManagerState.BranchSelected:
+        case ManagerState.BranchSelected:
           UpdateLists(false, false, false);
           _commits = manager.commits.Format();
           break;
-        case SimpleStreamManager.ManagerState.CommitSelected:
+        case ManagerState.CommitSelected:
           Debug.Log("commit selected and ready");
           break;
-        
-        case SimpleStreamManager.ManagerState.ClientError:
+
+        case ManagerState.ClientError:
           UpdateLists(true, true, true);
           Debug.Log("Client was not setup with account");
+          break;
+
+        case ManagerState.KitSelected:
+          _kits = manager.kits.Format();
           break;
         default:
           Debug.Log("Not valid content");
@@ -113,81 +139,93 @@ namespace Speckle.ConnectorUnity
         _streams = new[] {"none"};
         _branches = new[] {"none"};
         _commits = new[] {"none"};
-        cache.stream = 0;
-        cache.branch = 0;
-        cache.commit = 0;
+        dataShell.stream = 0;
+        dataShell.branch = 0;
+        dataShell.commit = 0;
       }
       else if (branches)
       {
         _branches = new[] {"none"};
         _commits = new[] {"none"};
-        cache.branch = 0;
-        cache.commit = 0;
+        dataShell.branch = 0;
+        dataShell.commit = 0;
       }
       else if (commits)
       {
         _commits = new[] {"none"};
-        cache.commit = 0;
+        dataShell.commit = 0;
       }
     }
 
     public override async void OnInspectorGUI()
     {
-      // DrawDefaultInspector( );
       var manager = (SimpleStreamManager)serializedObject.targetObject;
+      var inProcess = manager.InProcess;
+      var isValid = manager.IsValid && !inProcess;
+      serializedObject.Update();
 
       GUILayout.BeginHorizontal();
+
       EditorGUI.BeginDisabledGroup(true);
       EditorGUILayout.TextField("Progress", progressMessage, GUILayout.Height(20), GUILayout.ExpandWidth(true));
       EditorGUI.EndDisabledGroup();
 
-      EditorGUI.BeginDisabledGroup(manager.InProcess);
-      if (GUILayout.Button("Load Accounts!"))
+      EditorGUI.BeginDisabledGroup(inProcess);
+      if (GUILayout.Button("Referesh"))
       {
         await manager.PrimeManager();
         return;
       }
       EditorGUI.EndDisabledGroup();
+
       GUILayout.EndHorizontal();
 
-      cache.account = EditorGUILayout.Popup("Accounts", cache.account, _accounts, GUILayout.ExpandWidth(true), GUILayout.Height(20));
-      cache.stream = EditorGUILayout.Popup("Streams", cache.stream, _streams, GUILayout.ExpandWidth(true), GUILayout.Height(20));
-      cache.branch = EditorGUILayout.Popup("Branches", cache.branch, _branches, GUILayout.ExpandWidth(true), GUILayout.Height(20));
-      cache.commit = EditorGUILayout.Popup("Commits", cache.commit, _commits, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+      // EditorGUILayout.PropertyField(cache, true);
+      // data.account = EditorGUILayout.Popup("test pop", data.account, _accounts, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+      EditorGUILayout.PropertyField(serializedObject.FindProperty("testvalues"));
 
-      if (!manager.InProcess && IsStale())
-      {
-        Debug.Log("Cache is stale");
-        await manager.SetInput(cache);
-      }
+      dataShell.account = EditorGUILayout.Popup("Accounts", dataShell.account, _accounts, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+      dataShell.stream = EditorGUILayout.Popup("Streams", dataShell.stream, _streams, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+      dataShell.branch = EditorGUILayout.Popup("Branches", dataShell.branch, _branches, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+      dataShell.commit = EditorGUILayout.Popup("Commits", dataShell.commit, _commits, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+
+      GUILayout.BeginHorizontal();
+
+
+      dataShell.kit = EditorGUILayout.Popup("Kits", dataShell.kit, _kits, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+
+      EditorGUI.BeginDisabledGroup(!isValid);
+
+      if (GUILayout.Button("Recieve"))
+        manager.Load();
+
+      EditorGUI.EndDisabledGroup();
+
+      GUILayout.EndHorizontal();
+
+      serializedObject.FindProperty("kitIndex").intValue = dataShell.kit;
+      serializedObject.FindProperty("accountIndex").intValue = dataShell.account;
+      serializedObject.FindProperty("streamIndex").intValue = dataShell.stream;
+      serializedObject.FindProperty("branchIndex").intValue = dataShell.branch;
+      serializedObject.FindProperty("commitIndex").intValue = dataShell.commit;
+
+      serializedObject.ApplyModifiedProperties();
     }
 
     private bool IsStale()
     {
       var value = false;
-      if (!cache.Compare(stale))
-      {
-        value = true;
-        stale.account = cache.account;
-        stale.stream = cache.stream;
-        stale.branch = cache.branch;
-        stale.commit = cache.commit;
-      }
+      // if (!data.Compare(stale))
+      // {
+      //   value = true;
+      //   stale.account = data.account;
+      //   stale.stream = data.stream;
+      //   stale.branch = data.branch;
+      //   stale.commit = data.commit;
+      //   stale.kit = data.kit;
+      // }
       return value;
     }
   }
 
-  internal class ManagerCache
-  {
-    public int account;
-    public int stream;
-    public int branch;
-    public int commit;
-
-    public bool Compare(ManagerCache input)
-    {
-      return input != null && input.account == account && input.stream == stream && input.branch == branch && input.commit == commit;
-
-    }
-  }
 }

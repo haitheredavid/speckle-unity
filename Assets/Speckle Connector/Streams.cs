@@ -4,7 +4,7 @@ using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using Speckle.Core.Logging;
 
-namespace Speckle.ConnectorUnity
+namespace ConnectorUnity
 {
   public static class Streams
   {

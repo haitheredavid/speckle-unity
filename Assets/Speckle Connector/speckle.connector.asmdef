@@ -1,6 +1,6 @@
 {
     "name": "speckle.connector",
-    "rootNamespace": "",
+    "rootNamespace": "ConnectorUnity",
     "references": [
         "Pcx",
         "sasaki.viewto.objects.mono",

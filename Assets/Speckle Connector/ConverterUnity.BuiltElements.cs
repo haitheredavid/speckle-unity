@@ -1,7 +1,7 @@
 ﻿using Objects.BuiltElements;
 using UnityEngine;
 
-namespace Objects.Converter.Unity
+namespace ConnectorUnity
 {
   public partial class ConverterUnity
   {

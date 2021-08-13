@@ -1,24 +1,27 @@
 ﻿using System.Collections.Generic;
-using Objects.Converter.Unity;
+using ConnectorUnity;
+using ConnectorUnity.Converters;
 using Objects.Geometry;
+using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using UnityEngine;
 using ViewTo.Objects.Speckle;
 using ViewTo.Objects.Structure;
 using ViewTo.Connector.Unity;
 using ViewTo.Objects;
+using Utils = ConnectorUnity.Utils;
 
 namespace Speckle.ConnectorUnity
 {
 
-  public partial class ViewObjBaseMonoConverter : BaseMonoConverter<ViewToKit>
+  public partial class ViewObjMonoConverter : MonoConverter<ViewToKit>
   {
     private ViewObjConverterScript _converter;
     private ConverterUnity _basicConverter;
 
     public GameObject ConvertRecursivelyToUnity(Base @base)
     {
-      _converter ??= LoadConverter<ViewObjConverterScript>(app);
+      _converter ??= LoadConverter<ViewObjConverterScript>(Applications.Script);
       if (_converter != null)
       {
         Debug.Log($"Trying to base to {@base.TypeName()}");
@@ -41,7 +44,7 @@ namespace Speckle.ConnectorUnity
               for (var i = 0; i < content.targets.Count; i++)
               {
                 var item = content.targets[i];
-                var contentName = item.TypeName() + " " + i + " " + (item.viewName.Valid() ? item.viewName : "");
+                var contentName = item.TypeName() + " " + i + " " + (Utils.Valid(item.viewName) ? item.viewName : "");
                 // item.content = new Box();
                 var go = simpleConverter.ConvertRecursivelyToNative(item.content, contentName);
                 if (go != null)
@@ -67,7 +70,7 @@ namespace Speckle.ConnectorUnity
               for (int i = 0; i < content.designs.Count; i++)
               {
                 var item = content.designs[i];
-                var contentName = item.TypeName() + i + (item.viewName.Valid() ? item.viewName : "");
+                var contentName = item.TypeName() + i + (Utils.Valid(item.viewName) ? item.viewName : "");
                 item.content = new Box();
                 var go = simpleConverter.ConvertRecursivelyToNative(item.content, contentName);
                 if (go != null)

@@ -1,16 +1,16 @@
-﻿using Speckle.Core.Api;
-using Speckle.Core.Api.SubscriptionModels;
-using Speckle.Core.Credentials;
-using Speckle.Core.Logging;
-using Speckle.Core.Transports;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using Sentry;
+using Speckle.Core.Api;
+using Speckle.Core.Api.SubscriptionModels;
+using Speckle.Core.Credentials;
+using Speckle.Core.Logging;
+using Speckle.Core.Transports;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity
+namespace ConnectorUnity
 {
   /// <summary>
   /// A Speckle Receiver, it's a wrapper around a basic Speckle Client
@@ -31,7 +31,6 @@ namespace Speckle.ConnectorUnity
     private Action<string, Exception> OnErrorAction;
     private Action<int> OnTotalChildrenCountKnown;
     private Action<GameObject> OnDataReceivedAction;
-
 
     private Client Client { get; set; }
 

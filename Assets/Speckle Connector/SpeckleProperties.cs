@@ -4,7 +4,7 @@ using Speckle.Core.Api;
 using Speckle.Core.Models;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity
+namespace ConnectorUnity
 {
 
   /// <summary>

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ConnectorUnity;
 using Speckle.Core.Api;
 using UnityEngine;
 using UnityEngine.UI;
