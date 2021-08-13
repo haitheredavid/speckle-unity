@@ -1,11 +1,7 @@
 {
-    "name": "speckle.connector",
-    "rootNamespace": "ConnectorUnity",
-    "references": [
-        "Pcx",
-        "speckle.connector.mono",
-        "speckle.connector.utilities"
-    ],
+    "name": "speckle.connector.utilities",
+    "rootNamespace": "ConnectorUnity.Utilis",
+    "references": [],
     "includePlatforms": [
         "Editor",
         "WindowsStandalone32",

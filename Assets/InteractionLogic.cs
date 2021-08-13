@@ -59,13 +59,13 @@ namespace Speckle.ConnectorUnity
         onTotalChildrenCountKnown: (count) => { receiver.TotalChildrenCount = count; },
         onProgressAction: (dict) =>
         {
-          //Run on a dispatcher as GOs can only be retrieved on the main thread
-          Dispatcher.Instance().Enqueue(() =>
-          {
-            var val = dict.Values.Average() / receiver.TotalChildrenCount;
-            receiveProgress.gameObject.SetActive(true);
-            receiveProgress.value = (float) val;
-          });
+          // //Run on a dispatcher as GOs can only be retrieved on the main thread
+          // Dispatcher.Instance().Enqueue(() =>
+          // {
+          //   var val = dict.Values.Average() / receiver.TotalChildrenCount;
+          //   receiveProgress.gameObject.SetActive(true);
+          //   receiveProgress.value = (float) val;
+          // });
         });
 
 
@@ -143,22 +143,22 @@ namespace Speckle.ConnectorUnity
           sender.Send(stream.id, objs,
             onProgressAction: (dict) =>
             {
-              //Run on a dispatcher as GOs can only be retrieved on the main thread
-              Dispatcher.Instance().Enqueue(() =>
-              {
-                var val = dict.Values.Average() / objs.Count;
-                sendProgress.gameObject.SetActive(true);
-                sendProgress.value = (float) val;
-              });
+              // //Run on a dispatcher as GOs can only be retrieved on the main thread
+              // Dispatcher.Instance().Enqueue(() =>
+              // {
+              //   var val = dict.Values.Average() / objs.Count;
+              //   sendProgress.gameObject.SetActive(true);
+              //   sendProgress.value = (float) val;
+              // });
             },
             onDataSentAction: (commitId) =>
             {
-              Dispatcher.Instance().Enqueue(() =>
-              {
-                MakeButtonsInteractable(true);
-                statusText.text = $"Sent {commitId}";
-                sendProgress.gameObject.SetActive(false); //hide
-              });
+              // Dispatcher.Instance().Enqueue(() =>
+              // {
+              //   MakeButtonsInteractable(true);
+              //   statusText.text = $"Sent {commitId}";
+              //   sendProgress.gameObject.SetActive(false); //hide
+              // });
             });
         }
       );

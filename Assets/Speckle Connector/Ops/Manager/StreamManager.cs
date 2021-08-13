@@ -183,7 +183,7 @@ namespace ConnectorUnity
 
       if (receivers != null && receivers.Any())
         for (int i = receivers.Count - 1; i >= 0; i--)
-          Utils.SafeDestroy(receivers[i]);
+          ConnectorUtilities.SafeDestroy(receivers[i]);
 
       receivers = new List<Receiver>();
 

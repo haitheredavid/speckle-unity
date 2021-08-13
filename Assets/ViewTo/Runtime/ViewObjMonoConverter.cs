@@ -9,7 +9,6 @@ using ViewTo.Objects.Speckle;
 using ViewTo.Objects.Structure;
 using ViewTo.Connector.Unity;
 using ViewTo.Objects;
-using Utils = ConnectorUnity.Utils;
 
 namespace Speckle.ConnectorUnity
 {
@@ -39,46 +38,46 @@ namespace Speckle.ConnectorUnity
               Debug.Log("Found Content Bundle, loading");
 
               _basicConverter = new ConverterUnity();
-              var simpleConverter = new SimpleRecursiveConverter();
-
-              for (var i = 0; i < content.targets.Count; i++)
-              {
-                var item = content.targets[i];
-                var contentName = item.TypeName() + " " + i + " " + (Utils.Valid(item.viewName) ? item.viewName : "");
-                // item.content = new Box();
-                var go = simpleConverter.ConvertRecursivelyToNative(item.content, contentName);
-                if (go != null)
-                {
-                  hackyContent.Add(_converter.ConvertToNative(item));
-                  hackyBase.Add(item.content);
-                  hackyMesh.Add(go);
-                }
-
-              }
-              for (int i = 0; i < content.blockers.Count; i++)
-              { 
-                var item = content.blockers[i];
-                var contentName = item.TypeName() + i;
-                item.content = new Box();
-                var go = simpleConverter.ConvertRecursivelyToNative(item.content, contentName);
-                if (go != null)
-                {
-                  hackyContent.Add(_converter.ConvertToNative(item));
-                  hackyMesh.Add(go);
-                }
-              }
-              for (int i = 0; i < content.designs.Count; i++)
-              {
-                var item = content.designs[i];
-                var contentName = item.TypeName() + i + (Utils.Valid(item.viewName) ? item.viewName : "");
-                item.content = new Box();
-                var go = simpleConverter.ConvertRecursivelyToNative(item.content, contentName);
-                if (go != null)
-                {
-                  hackyContent.Add(_converter.ConvertToNative(item));
-                  hackyMesh.Add(go);
-                }
-              }
+              // var simpleConverter = new SimpleRecursiveConverter();
+              //
+              // for (var i = 0; i < content.targets.Count; i++)
+              // {
+              //   var item = content.targets[i];
+              //   var contentName = item.TypeName() + " " + i + " " + (item.viewName.Valid() ? item.viewName : "");
+              //   // item.content = new Box();
+              //   var go = simpleConverter.ConvertRecursivelyToNative(item.content, contentName);
+              //   if (go != null)
+              //   {
+              //     hackyContent.Add(_converter.ConvertToNative(item));
+              //     hackyBase.Add(item.content);
+              //     hackyMesh.Add(go);
+              //   }
+              //
+              // }
+              // for (int i = 0; i < content.blockers.Count; i++)
+              // { 
+              //   var item = content.blockers[i];
+              //   var contentName = item.TypeName() + i;
+              //   item.content = new Box();
+              //   var go = simpleConverter.ConvertRecursivelyToNative(item.content, contentName);
+              //   if (go != null)
+              //   {
+              //     hackyContent.Add(_converter.ConvertToNative(item));
+              //     hackyMesh.Add(go);
+              //   }
+              // }
+              // for (int i = 0; i < content.designs.Count; i++)
+              // {
+              //   var item = content.designs[i];
+              //   var contentName = item.TypeName() + i + (ConnectorUtilities.Valid(item.viewName) ? item.viewName : "");
+              //   item.content = new Box();
+              //   var go = simpleConverter.ConvertRecursivelyToNative(item.content, contentName);
+              //   if (go != null)
+              //   {
+              //     hackyContent.Add(_converter.ConvertToNative(item));
+              //     hackyMesh.Add(go);
+              //   }
+              // }
             }
 
           }

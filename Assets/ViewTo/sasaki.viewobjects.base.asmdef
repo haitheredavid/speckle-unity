@@ -3,9 +3,15 @@
     "rootNamespace": "",
     "references": [
         "GUID:18bfc2f9ad2508d4faca985ee068e57c",
-        "GUID:dae77595a93198e48bd0e45f01fdf715"
+        "GUID:dae77595a93198e48bd0e45f01fdf715",
+        "GUID:368ab6ff8a100bb40b3e554d897983dd",
+        "GUID:dc18671e710f0c549a431e12ee92f3ef"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor",
+        "WindowsStandalone32",
+        "WindowsStandalone64"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

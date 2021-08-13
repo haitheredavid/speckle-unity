@@ -35,9 +35,6 @@ namespace ConnectorUnity
     private Client Client { get; set; }
 
 
-    public Receiver()
-    {
-    }
 
     /// <summary>
     /// Initializes the Receiver manually
@@ -133,17 +130,18 @@ namespace ConnectorUnity
           onTotalChildrenCountKnown: OnTotalChildrenCountKnown,
           disposeTransports: true
         );
-        Dispatcher.Instance().Enqueue(() =>
-        {
-          
-          var rc = GetComponent<RecursiveConverter>();
-          var go = rc.ConvertRecursivelyToNative(@base, commitId);
-          //remove previously received object
-          if (DeleteOld && ReceivedData != null)
-            Destroy(ReceivedData);
-          ReceivedData = go;
-          OnDataReceivedAction?.Invoke(go);
-        });
+        
+        // Dispatcher.Instance().Enqueue(() =>
+        // {
+        //   
+        //   var rc = GetComponent<RecursiveConverter>();
+        //   var go = rc.ConvertRecursivelyToNative(@base, commitId);
+        //   //remove previously received object
+        //   if (DeleteOld && ReceivedData != null)
+        //     Destroy(ReceivedData);
+        //   ReceivedData = go;
+        //   OnDataReceivedAction?.Invoke(go);
+        // });
       }
       catch (Exception e)
       {

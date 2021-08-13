@@ -12,9 +12,8 @@ namespace ConnectorUnity.Converters
     {
       Kit = LoadKit();
     }
-
+    
     protected TKit Kit { get; set; }
-
 
     private TKit LoadKit()
     {

@@ -310,7 +310,7 @@ GameObject:
   - component: {fileID: 1313495036}
   - component: {fileID: 1313495035}
   m_Layer: 0
-  m_Name: GameObject (1)
+  m_Name: StreamManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -330,10 +330,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   managerData:
     account: 0
-    stream: 1
-    branch: 0
-    commit: 0
-    kit: 0
+    stream: 0
+    branch: 1
+    commit: 1
+    kit: 2
     Accounts:
     - dmorgan@sasaki.com | Speckle XYZ
     - morgandavid424@gmail.com | Speckle XYZ
@@ -349,22 +349,30 @@ MonoBehaviour:
     - V2-TestProject | 2628f8a387
     - worldhello | 4ae32ffb59
     Branches:
-    - sample-branch
+    - globals
     - main
     Commits:
-    - 96c20717a8
+    - 58e4c70eeb
+    - 3b6c516d66
+    - bf4ced3a5c
+    - 6022031ca7
+    - 1776f65ada
+    - b6c002f7a0
+    - bf07c42a72
+    - 9d8c84d33c
+    - d3fc0b23b5
+    - bc5682b1f1
     Kits:
     - ViewToKit | David Morgan
     - CoreKit | Dimitrie
     - Objects | Speckle
-  activeReceiver: []
   receivers: []
   cache:
     account: 0
-    stream: 1
-    branch: 0
-    commit: 0
-    kit: 0
+    stream: 0
+    branch: 1
+    commit: 1
+    kit: 2
   receiveEvent:
     m_PersistentCalls:
       m_Calls: []

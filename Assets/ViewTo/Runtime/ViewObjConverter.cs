@@ -11,7 +11,6 @@ using UnityEngine;
 using ViewTo.Connector.Unity;
 using ViewTo.Objects.Speckle;
 using ViewTo.Objects.Structure;
-using Utils = ConnectorUnity.Utils;
 
 namespace Speckle.ConnectorUnity
 {
@@ -20,7 +19,7 @@ namespace Speckle.ConnectorUnity
   {
     private ViewObjConverterScript _converter;
     private ConverterUnity _basicConverter;
-    
+
     public string app { get; set; }
 
     private GameObject ConvertToViewCloud(Base @base)
@@ -28,7 +27,7 @@ namespace Speckle.ConnectorUnity
       var pts = @base["points"];
       return null;
     }
-    
+
     public GameObject ConvertRecursivelyToUnity(Base @base)
     {
       _converter ??= LoadConverter<ViewObjConverterScript>(app);
@@ -43,14 +42,13 @@ namespace Speckle.ConnectorUnity
       return null;
     }
 
-  
     private GameObject RecurseTreeToNative(object @object)
     {
       if (IsList(@object))
       {
         var list = ((IEnumerable)@object).Cast<object>();
         var objects = list.Select(RecurseTreeToNative).Where(x => x != null).ToList();
-      
+
         if (objects.Any())
         {
           var go = new GameObject
@@ -69,7 +67,6 @@ namespace Speckle.ConnectorUnity
     }
 
     #region Copy Pasta from speckle
-    
     private GameObject TryConvertItemToNative(object value)
     {
       if (value == null)
@@ -106,7 +103,7 @@ namespace Speckle.ConnectorUnity
         //if no children is valid, return null
         if (!goos.Any())
         {
-          Utils.SafeDestroy(go);
+          ConnectorUtilities.SafeDestroy(go);
           return null;
         }
 
@@ -137,7 +134,7 @@ namespace Speckle.ConnectorUnity
         }
       }
     }
-    
+
     private static bool IsList(object @object)
     {
       if (@object == null)

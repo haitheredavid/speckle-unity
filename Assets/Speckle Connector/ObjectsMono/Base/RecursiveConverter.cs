@@ -132,7 +132,7 @@ namespace ConnectorUnity
         //if no children is valid, return null
         if (!goos.Any())
         {
-          Utils.SafeDestroy(go);
+          ConnectorUtilities.SafeDestroy(go);
           return null;
         }
 
