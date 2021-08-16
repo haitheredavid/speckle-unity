@@ -1,8 +1,13 @@
 ﻿using System;
 using UnityEngine;
 
-namespace ConnectorUnity.GUI
+namespace ConnectorUnity
 {
+
+  [AttributeUsage(AttributeTargets.Field)]
+  public class ReadOnlyAttribute : PropertyAttribute
+  { }
+
   [AttributeUsage(AttributeTargets.Method)]
   public class ButtonAttribute : PropertyAttribute
   {

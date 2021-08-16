@@ -2,28 +2,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ConnectorUnity.GUI;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using Speckle.Core.Kits;
+using Speckle.Core.Models;
 using UnityEngine;
 using UnityEngine.Events;
+using ViewTo.Objects.Converter.Unity;
+using ViewTo.Objects.Speckle;
 
 namespace ConnectorUnity
 {
 
   [ExecuteAlways]
-  public class StreamManager : MonoBehaviour
+  [RequireComponent(typeof(SpeckleConverter))]
+  public class SpeckleConnector : MonoBehaviour
   {
-    [SerializeField] private ManagerData managerData;
+    [SerializeField] private SpeckleConnectorInput input;
     [SerializeField] private List<Receiver> receivers;
-    [SerializeField] private SpeckleManagerCache cache;
+    [SerializeField] private SpeckleConnectorCache cache;
 
     [SerializeField] private UnityEvent receiveEvent;
 
     private Client client;
 
-    public StreamManager Instance { get; set; }
+    public static SpeckleConnector Instance { get; set; }
+    public static SpeckleConverter Converter { get; set; }
 
     public bool IsPrimed
     {
@@ -42,7 +46,7 @@ namespace ConnectorUnity
       private set
       {
         cache.Accounts = value;
-        managerData.Set(value);
+        input.Set(value);
       }
     }
 
@@ -52,7 +56,7 @@ namespace ConnectorUnity
       private set
       {
         cache.Streams = value;
-        managerData.Set(value);
+        input.Set(value);
       }
     }
 
@@ -62,7 +66,7 @@ namespace ConnectorUnity
       private set
       {
         cache.Branches = value;
-        managerData.Set(value);
+        input.Set(value);
       }
     }
 
@@ -72,7 +76,7 @@ namespace ConnectorUnity
       private set
       {
         cache.Commits = value;
-        managerData.Set(value);
+        input.Set(value);
       }
     }
 
@@ -82,33 +86,33 @@ namespace ConnectorUnity
       private set
       {
         cache.Kits = value;
-        managerData.Set(value);
+        input.Set(value);
       }
     }
 
     public Account account
     {
-      get => cache.Accounts.CheckList(managerData.account);
+      get => cache.Accounts.CheckList(input.account);
     }
 
     public Stream stream
     {
-      get => cache.Streams.CheckList(managerData.stream);
+      get => cache.Streams.CheckList(input.stream);
     }
 
     public Branch branch
     {
-      get => cache.Branches.CheckList(managerData.branch);
+      get => cache.Branches.CheckList(input.branch);
     }
 
     public Commit commit
     {
-      get => cache.Commits.CheckList(managerData.commit);
+      get => cache.Commits.CheckList(input.commit);
     }
 
     public ISpeckleKit kit
     {
-      get => cache.Kits.CheckList(managerData.kit);
+      get => cache.Kits.CheckList(input.kit);
     }
     #endregion
 
@@ -116,7 +120,8 @@ namespace ConnectorUnity
     private void OnEnable()
     {
       Instance = this;
-      managerData ??= new ManagerData();
+      Converter = gameObject.GetComponent<SpeckleConverter>();
+      input ??= new SpeckleConnectorInput();
     }
 
     private async void OnValidate()
@@ -127,7 +132,7 @@ namespace ConnectorUnity
         return;
       }
 
-      var states = cache.UpdateAndCheck(managerData);
+      var states = cache.UpdateAndCheck(input);
 
       if (!states.Any())
       {
@@ -140,19 +145,19 @@ namespace ConnectorUnity
       var ordered = states.ToDictionary(s => s, s => (int)s).OrderBy(key => key.Value);
       switch (ordered.FirstOrDefault().Key)
       {
-        case SpeckleManagerStates.AccountChanged:
+        case SpeckleConnectorState.AccountChanged:
           await LoadAccount();
           break;
-        case SpeckleManagerStates.StreamChanged:
+        case SpeckleConnectorState.StreamChanged:
           await LoadStream();
           break;
-        case SpeckleManagerStates.BranchChanged:
+        case SpeckleConnectorState.BranchChanged:
           LoadBranch();
           break;
-        case SpeckleManagerStates.CommitChanged:
+        case SpeckleConnectorState.CommitChanged:
           LoadCommit();
           break;
-        case SpeckleManagerStates.KitChanged:
+        case SpeckleConnectorState.KitChanged:
           LoadKit();
           break;
         default:
@@ -162,6 +167,30 @@ namespace ConnectorUnity
     #endregion
 
     #region gui
+    [Button("Receive")]
+    private void CreateReceiver()
+    {
+      Debug.Log("Recieve Called");
+
+      if (IsReady)
+      {
+
+        receivers ??= new List<Receiver>();
+        var r = new GameObject().AddComponent<Receiver>();
+
+        // TODO: look into kit references for unity
+        ISpeckleConverter converter = default;
+        if (kit is ViewToKit)
+          converter = new ViewObjUnityConverter();
+
+        r.Init(new StreamShell
+                 {streamId = stream.id, branch = branch.name, streamName = stream.name, commitId = commit.id}, account, converter);
+
+        r.Receive();
+        receivers.Add(r);
+      }
+    }
+
     [Button("Reset")]
     private async void Reset()
     {
@@ -183,25 +212,10 @@ namespace ConnectorUnity
 
       if (receivers != null && receivers.Any())
         for (int i = receivers.Count - 1; i >= 0; i--)
-          ConnectorUtilities.SafeDestroy(receivers[i]);
+          ConnectorUtilities.SafeDestroy(receivers[i].gameObject);
 
       receivers = new List<Receiver>();
 
-    }
-
-    [Button("Receive")]
-    private void CreateReceiver()
-    {
-      Debug.Log("Recieve Called");
-
-      if (IsReady)
-      {
-        receivers ??= new List<Receiver>();
-        var r = new GameObject().AddComponent<Receiver>();
-        r.Init(stream.id, false, true, account);
-        r.Receive();
-        receivers.Add(r);
-      }
     }
     #endregion
 
@@ -267,6 +281,7 @@ namespace ConnectorUnity
     {
       Debug.Log("Loading Kits");
       kits = KitManager.Kits.ToList();
+
     }
 
     private void LoadKit()

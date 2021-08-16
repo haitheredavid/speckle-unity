@@ -11,9 +11,9 @@ using UnityEngine.SceneManagement;
 namespace ConnectorUnity
 {
 
-  [CustomEditor(typeof(StreamManager))]
+  [CustomEditor(typeof(SpeckleConnector))]
   [CanEditMultipleObjects]
-  public class StreamManagerEditor : Editor
+  public class SpeckleConnectorEditor : Editor
   {
 
     private SerializedProperty managerData;
@@ -24,7 +24,7 @@ namespace ConnectorUnity
     
     private void OnEnable()
     {
-      managerData = serializedObject.FindProperty("managerData");
+      managerData = serializedObject.FindProperty("input");
       receivers = serializedObject.FindProperty("receivers");
       receiveEvent = serializedObject.FindProperty("receiveEvent");
 
@@ -37,7 +37,7 @@ namespace ConnectorUnity
       serializedObject.Update();
 
 
-      EditorGUILayout.LabelField("stream setup", SpeckleEditorGUI.LabelStyle());
+      EditorGUILayout.LabelField("stream setup", SpeckleGUIStyle.LabelStyle());
       EditorGUILayout.PropertyField(managerData, GUILayout.ExpandWidth(true));
 
       EditorGUILayout.Space();
@@ -50,7 +50,7 @@ namespace ConnectorUnity
         if (methodInfo.GetParameters().All(p => p.IsOptional))
         {
           var buttonAttribute = (ButtonAttribute)methodInfo.GetCustomAttributes(typeof(ButtonAttribute), true)[0];
-          if (GUILayout.Button(buttonAttribute.Text, SpeckleEditorGUI.ButtonStyle()))
+          if (GUILayout.Button(buttonAttribute.Text, SpeckleGUIStyle.ButtonStyle()))
           {
             object[] defaultParams = methodInfo.GetParameters().Select(p => p.DefaultValue).ToArray();
             IEnumerator methodResult = methodInfo.Invoke(target, defaultParams) as IEnumerator;

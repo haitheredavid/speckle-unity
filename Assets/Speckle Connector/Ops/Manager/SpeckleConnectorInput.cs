@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using ConnectorUnity.GUI;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using Speckle.Core.Kits;
-using UnityEngine;
 
 namespace ConnectorUnity
 {
 
   [Serializable]
-  public class ManagerData
+  public class SpeckleConnectorInput
   {
 
     [DropDownString("Accounts")]

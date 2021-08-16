@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace ConnectorUnity
 {
@@ -10,17 +6,14 @@ namespace ConnectorUnity
   public static class ConnectorUtilities
   {
 
-    public static void SafeDestroy(UnityEngine.Object obj)
+    public static void SafeDestroy(Object obj)
     {
       if (Application.isPlaying)
-        UnityEngine.Object.Destroy(obj);
+        Object.Destroy(obj);
 
       else
-        UnityEngine.Object.DestroyImmediate(obj);
+        Object.DestroyImmediate(obj);
 
     }
-
-    // ref from https://stackoverflow.com/questions/2692313/implementing-toargb
-
   }
 }

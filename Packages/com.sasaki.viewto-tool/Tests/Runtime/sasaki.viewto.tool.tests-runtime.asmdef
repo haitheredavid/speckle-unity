@@ -8,8 +8,8 @@
         "sasaki.viewto.tool",
         "sasaki.viewto.objects.mono",
         "sasaki.viewobjects.mono.tests",
-        "sasaki.viewobjects.base",
-        "speckle.connector.mono"
+        "speckle.connector.mono",
+        "sasaki.viewobjects.mono.converter"
     ],
     "includePlatforms": [
         "Editor",

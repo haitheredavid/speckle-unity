@@ -4,7 +4,8 @@
     "references": [
         "Pcx",
         "speckle.connector.mono",
-        "speckle.connector.utilities"
+        "speckle.connector.utilities",
+        "sasaki.viewobjects.mono.converter"
     ],
     "includePlatforms": [
         "Editor",

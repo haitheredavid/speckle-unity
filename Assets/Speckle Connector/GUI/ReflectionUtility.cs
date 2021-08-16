@@ -93,18 +93,6 @@ namespace ConnectorUnity.GUI
       return GetAllMethods(target, m => m.Name.Equals(methodName, StringComparison.Ordinal)).FirstOrDefault();
     }
 
-    public static Type GetListElementType(Type listType)
-    {
-      if (listType.IsGenericType)
-      {
-        return listType.GetGenericArguments()[0];
-      }
-      else
-      {
-        return listType.GetElementType();
-      }
-    }
-
     /// <summary>
     ///		Get type and all base types of target, sorted as following:
     ///		<para />[target's type, base type, base's base type, ...]

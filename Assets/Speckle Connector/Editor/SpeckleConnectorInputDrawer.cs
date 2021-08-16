@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace ConnectorUnity
 {
-  [CustomPropertyDrawer(typeof(ManagerData))]
-  public class SpeckleManagerInputDrawer : PropertyDrawer
+  [CustomPropertyDrawer(typeof(SpeckleConnectorInput))]
+  public class SpeckleConnectorInputDrawer : PropertyDrawer
   {
     private const int SIZE = 20;
     private const int TOTAL = 5;

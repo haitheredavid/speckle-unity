@@ -7,10 +7,10 @@ using Speckle.Core.Kits;
 namespace ConnectorUnity
 {
   [Serializable]
-  public struct SpeckleManagerCache
+  public struct SpeckleConnectorCache
   {
 
-    public SpeckleManagerCache(int startValue = 0)
+    public SpeckleConnectorCache(int startValue = 0)
     {
       account = startValue;
       stream = startValue;
@@ -44,24 +44,24 @@ namespace ConnectorUnity
     /// Helper method for passing editor input data from the Speckle Input Manager  
     /// </summary>
     /// <param name="input">Values from editor to store</param>
-    public List<SpeckleManagerStates> UpdateAndCheck(ManagerData input)
+    public List<SpeckleConnectorState> UpdateAndCheck(SpeckleConnectorInput input)
     {
-      var states = new List<SpeckleManagerStates>();
+      var states = new List<SpeckleConnectorState>();
 
       if (account != input.account)
-        states.Add(SpeckleManagerStates.AccountChanged);
+        states.Add(SpeckleConnectorState.AccountChanged);
 
       else if (stream != input.stream)
-        states.Add(SpeckleManagerStates.StreamChanged);
+        states.Add(SpeckleConnectorState.StreamChanged);
 
       else if (branch != input.branch)
-        states.Add(SpeckleManagerStates.BranchChanged);
+        states.Add(SpeckleConnectorState.BranchChanged);
 
       else if (commit != input.commit)
-        states.Add(SpeckleManagerStates.CommitChanged);
+        states.Add(SpeckleConnectorState.CommitChanged);
 
       else if (kit != input.kit)
-        states.Add(SpeckleManagerStates.KitChanged);
+        states.Add(SpeckleConnectorState.KitChanged);
 
       account = input.account;
       stream = input.stream;

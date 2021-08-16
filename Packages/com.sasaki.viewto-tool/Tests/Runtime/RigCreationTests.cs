@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using Speckle.ConnectorUnity;
 using Speckle.Core.Api;
 using Speckle.Core.Kits;
 using ViewTo;
@@ -56,12 +55,12 @@ namespace ViewToUnity.Tests.Units
 
       Assert.NotNull(@base);
 
-      var converter = new ViewObjMonoConverter();
+      ISpeckleConverter converter = default;
 
-      var mono = converter.ConvertRecursivelyToUnity(@base);
+      var mono = converter.ConvertToNative(@base);
 
       Assert.NotNull(mono);
-      Assert.NotNull(mono.GetComponent<ViewCloudMono>());
+      // Assert.NotNull(mono.GetComponent<ViewCloudMono>());
     }
 
   }

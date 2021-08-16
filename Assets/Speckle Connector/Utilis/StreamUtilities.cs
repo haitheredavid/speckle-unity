@@ -6,7 +6,7 @@ using Speckle.Core.Logging;
 
 namespace ConnectorUnity
 {
-  public static class Streams
+  public static class StreamUtilities
   {
     public static async Task<List<Stream>> List(int limit = 10)
     {

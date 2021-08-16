@@ -6,9 +6,12 @@ using Sentry;
 using Speckle.Core.Api;
 using Speckle.Core.Api.SubscriptionModels;
 using Speckle.Core.Credentials;
+using Speckle.Core.Kits;
 using Speckle.Core.Logging;
+using Speckle.Core.Models;
 using Speckle.Core.Transports;
 using UnityEngine;
+using ViewTo.Objects.Converter.Unity;
 
 namespace ConnectorUnity
 {
@@ -16,89 +19,157 @@ namespace ConnectorUnity
   /// A Speckle Receiver, it's a wrapper around a basic Speckle Client
   /// that handles conversions and subscriptions for you
   /// </summary>
-  [RequireComponent( typeof( RecursiveConverter ) )]
+  [ExecuteAlways]
   public class Receiver : MonoBehaviour
   {
-    public string StreamId;
-    public string BranchName = "main";
-    public Stream Stream;
-    public int TotalChildrenCount = 0;
-    public GameObject ReceivedData;
+    public string streamName = "stream name", streamId = "stream id", branch = "main", commitId = "commit id";
+    [ReadOnly] public int totalChildCount;
+    [ReadOnly] public bool expired;
 
-    private bool AutoReceive;
-    private bool DeleteOld;
-    private Action<ConcurrentDictionary<string, int>> OnProgressAction;
+    [SerializeField] private Transform dataAnchor;
+    [SerializeField] private bool autoUpdate, purgeOnUpdate;
+
+    public Stream Stream { get; private set; }
     private Action<string, Exception> OnErrorAction;
     private Action<int> OnTotalChildrenCountKnown;
-    private Action<GameObject> OnDataReceivedAction;
+    private Action<ConcurrentDictionary<string, int>> OnProgressAction;
+    private Action<GameObject> OnGameObjReceivedAction;
+    private Action<object> OnObjReceivedAction;
 
-    private Client Client { get; set; }
+    private Action<Base> ConvertToUnityAction;
 
+    private Client client;
+    private ISpeckleConverter converter;
 
+    private void OnEnable()
+    {
+      ConvertToUnityAction += SendToConverter;
+    }
 
     /// <summary>
     /// Initializes the Receiver manually
     /// </summary>
-    /// <param name="streamId">Id of the stream to receive</param>
-    /// <param name="autoReceive">If true, it will automatically receive updates sent to this stream</param>
-    /// <param name="deleteOld">If true, it will delete previously received objects when new one are received</param>
+    /// <param name="shell">Simple wrapper class for passing receiver data</param>
+    /// <param name="monoConverter">Converter to use for processing base objects into unity. Defaults to Objects</param>
     /// <param name="account">Account to use, if null the default account will be used</param>
-    /// <param name="onDataReceivedAction">Action to run after new data has been received and converted</param>
+    /// <param name="onGoReceivedAction">Action to run after new data has been received and converted</param>
     /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
     /// <param name="onErrorAction">Action to run on error</param>
     /// <param name="onTotalChildrenCountKnown">Action to run when the TotalChildrenCount is known</param>
-    public void Init(string streamId, bool autoReceive = false, bool deleteOld = true, Account account = null,
-      Action<GameObject> onDataReceivedAction = null, Action<ConcurrentDictionary<string, int>> onProgressAction = null,
-      Action<string, Exception> onErrorAction = null, Action<int> onTotalChildrenCountKnown = null)
+    public void Init(
+      StreamShell shell, Account account = null, ISpeckleConverter monoConverter = null,
+      Action<GameObject> onGoReceivedAction = null, Action<object> onObjReceivedAction = null, Action<ConcurrentDictionary<string, int>> onProgressAction = null,
+      Action<string, Exception> onErrorAction = null, Action<int> onTotalChildrenCountKnown = null
+    )
     {
-      StreamId = streamId;
-      AutoReceive = autoReceive;
-      DeleteOld = deleteOld;
-      OnDataReceivedAction = onDataReceivedAction;
+      if (shell == null) return;
+
+      streamName = shell.streamName;
+      streamId = shell.streamId;
+      branch = shell.branch;
+      commitId = shell.commitId;
+      autoUpdate = shell.autoReceive;
+      purgeOnUpdate = shell.clearOnUpdate;
+
+      if (monoConverter == null)
+      {
+        Debug.Log("Using default base converter");
+        monoConverter = new ConverterUnity();
+      }
+
+      converter = monoConverter;
+
+      OnGameObjReceivedAction = onGoReceivedAction;
+      onObjReceivedAction = onObjReceivedAction;
       OnErrorAction = onErrorAction;
       OnProgressAction = onProgressAction;
       OnTotalChildrenCountKnown = onTotalChildrenCountKnown;
 
-      Client = new Client(account ?? AccountManager.GetDefaultAccount());
-
-
-      if (AutoReceive)
+      if (account == null)
       {
-        Client.SubscribeCommitCreated(StreamId);
-        Client.OnCommitCreated += Client_OnCommitCreated;
+        Debug.Log("Receiver refering to default account");
+        account = AccountManager.GetDefaultAccount();
+      }
+
+      client = new Client(account);
+      if (client == null)
+      {
+        Debug.LogWarning("Account could not be connected to Speckle Client");
+        return;
+      }
+
+      client.SubscribeCommitUpdated(streamId, commitId);
+      client.OnCommitUpdated += Client_OnCommitUpdated;
+
+      if (autoUpdate)
+      {
+        client.SubscribeCommitCreated(streamId);
+        client.OnCommitCreated += Client_OnCommitCreated;
       }
     }
-
 
     /// <summary>
     /// Gets and converts the data of the last commit on the Stream
     /// </summary>
     /// <returns></returns>
-    public void Receive()
+    public async Task Receive()
     {
-      if (Client == null || string.IsNullOrEmpty(StreamId))
+      if (client == null || string.IsNullOrEmpty(streamId))
         throw new Exception("Receiver has not been initialized. Please call Init().");
 
-      Task.Run(async () =>
+      Base @base = null;
+      try
       {
-        try
-        {
-          var mainBranch = await Client.BranchGet(StreamId, BranchName, 1);
-          if (!mainBranch.commits.items.Any())
-            throw new Exception("This branch has no commits");
-          var commit = mainBranch.commits.items[0];
-          GetAndConvertObject(commit.referencedObject, commit.id);
-        }
-        catch (Exception e)
-        {
-          throw new SpeckleException(e.Message, e, true, SentryLevel.Error);
-        }
-      });
+        Tracker.TrackPageview(Tracker.RECEIVE);
+
+        var mainBranch = await client.BranchGet(streamId, branch, 1);
+
+        if (!mainBranch.commits.items.Any())
+          throw new Exception("This branch has no commits");
+
+        var transport = new ServerTransport(client.Account, streamId);
+
+        Commit commit = mainBranch.commits.items.FirstOrDefault(item => item.id == commitId);
+        commit ??= mainBranch.commits.items.FirstOrDefault();
+
+        @base = await Operations.Receive(
+          commit.referencedObject,
+          remoteTransport: transport,
+          onErrorAction: OnErrorAction,
+          onProgressAction: OnProgressAction,
+          onTotalChildrenCountKnown: OnTotalChildrenCountKnown,
+          disposeTransports: true
+        );
+      }
+      catch (Exception e)
+      {
+        Debug.LogException(e);
+        throw new SpeckleException(e.Message, e, true, SentryLevel.Error);
+      }
+      finally
+      {
+        SendToConverter(@base);
+      }
     }
 
-
     #region private methods
+    protected void Client_OnCommitUpdated(object sender, CommitInfo e)
+    {
+      if (e.id == commitId && e.streamId == streamId)
+      {
+        Debug.Log($"Commit({e.id}) has been Updated!\n"
+                  + $"author id: {e.authorId}\n"
+                  + $"source app: {e.sourceApplication}\n"
+                  + $"message: {e.message}");
 
+        expired = true;
+        if (autoUpdate)
+          Receive();
+        else
+          Debug.Log($"Receiver is now expired: {DateTime.Now.TimeOfDay}");
+
+      }
+    }
     /// <summary>
     /// Fired when a new commit is created on this stream
     /// It receives and converts the objects and then executes the user defined _onCommitCreated action.
@@ -107,41 +178,37 @@ namespace ConnectorUnity
     /// <param name="e"></param>
     protected virtual void Client_OnCommitCreated(object sender, CommitInfo e)
     {
-      if (e.branchName == BranchName)
+      if (e.branchName == branch)
       {
-        Debug.Log("New commit created");
-        GetAndConvertObject(e.objectId, e.id);
+        Debug.Log($"Commit({e.id}) has been Created!\n"
+                  + $"author id: {e.authorId}\n"
+                  + $"source app: {e.sourceApplication}\n"
+                  + $"message: {e.message}");
+
+        commitId = e.id;
+        Receive();
       }
     }
 
-
-    private async void GetAndConvertObject(string objectId, string commitId)
+    private void SendToConverter(Base @base)
     {
+      if (@base == null) return;
+
       try
       {
-        Tracker.TrackPageview(Tracker.RECEIVE);
+        if (purgeOnUpdate && dataAnchor != null)
+          ConnectorUtilities.SafeDestroy(dataAnchor.gameObject);
 
-        var transport = new ServerTransport(Client.Account, StreamId);
-        var @base = await Operations.Receive(
-          objectId,
-          remoteTransport: transport,
-          onErrorAction: OnErrorAction,
-          onProgressAction: OnProgressAction,
-          onTotalChildrenCountKnown: OnTotalChildrenCountKnown,
-          disposeTransports: true
-        );
-        
-        // Dispatcher.Instance().Enqueue(() =>
-        // {
-        //   
-        //   var rc = GetComponent<RecursiveConverter>();
-        //   var go = rc.ConvertRecursivelyToNative(@base, commitId);
-        //   //remove previously received object
-        //   if (DeleteOld && ReceivedData != null)
-        //     Destroy(ReceivedData);
-        //   ReceivedData = go;
-        //   OnDataReceivedAction?.Invoke(go);
-        // });
+        var @object = converter.ConvertToNative(@base);
+
+        if (@object is GameObject go)
+        {
+          // TODO: handle this properly when updating
+          dataAnchor = go.transform;
+          OnObjReceivedAction?.Invoke(go);
+        }
+        else
+          OnObjReceivedAction?.Invoke(@object);
       }
       catch (Exception e)
       {
@@ -149,14 +216,15 @@ namespace ConnectorUnity
       }
     }
 
-
-    
-
     private void OnDestroy()
     {
-      Client.CommitCreatedSubscription.Dispose();
-    }
+      if (dataAnchor != null)
+        ConnectorUtilities.SafeDestroy(dataAnchor.gameObject);
 
+      client?.CommitCreatedSubscription?.Dispose();
+      client?.CommitUpdatedSubscription?.Dispose();
+    }
     #endregion
+
   }
 }

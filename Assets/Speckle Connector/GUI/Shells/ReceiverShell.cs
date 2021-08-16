@@ -2,6 +2,7 @@
 
 namespace ConnectorUnity
 {
+
   [Serializable]
   public class ReceiverShell
   {

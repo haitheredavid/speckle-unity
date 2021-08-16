@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ConnectorUnity
 {
-  public static class SpeckleEditorGUI
+  public static class SpeckleGUIStyle
   {
     public static void HorizontalLine(Rect rect, float height, Color color)
     {

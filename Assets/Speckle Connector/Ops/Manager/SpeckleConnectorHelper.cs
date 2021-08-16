@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
@@ -8,7 +7,7 @@ using UnityEngine;
 
 namespace ConnectorUnity
 {
-  public static class StreamManagerHelper
+  public static class ConnectorHelper
   {
     public static TObject CheckList<TObject>(this List<TObject> list, int index)
     {

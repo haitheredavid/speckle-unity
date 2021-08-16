@@ -250,11 +250,7 @@ namespace ConnectorUnity
     )
     {
       if (speckleMesh.vertices.Count == 0 || speckleMesh.faces.Count == 0)
-      {
         return null;
-      }
-
-      var recenterMeshTransforms = true; //TODO: figure out how best to change this?
 
 
       var verts = ArrayToPoints(speckleMesh.vertices, speckleMesh.units);
@@ -290,52 +286,38 @@ namespace ConnectorUnity
       }
 
 
-      var go = new GameObject {name = speckleMesh.speckle_type};
-      var mesh = new UnityEngine.Mesh {name = speckleMesh.speckle_type};
+      var mesh = new UnityEngine.Mesh
+      {
+        name = speckleMesh.speckle_type
+      };
 
       if (verts.Length >= 65535)
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
-
-      // center transform pivot according to the bounds of the model
-      if (recenterMeshTransforms)
-      {
-        Bounds meshBounds = new Bounds
-        {
-          center = verts[0]
-        };
-
-        foreach (var vert in verts)
-        {
-          meshBounds.Encapsulate(vert);
-        }
-
-        go.transform.position = meshBounds.center;
-
-        // offset mesh vertices
-        for (int l = 0; l < verts.Length; l++)
-        {
-          verts[l] -= meshBounds.center;
-        }
-      }
-
-
       mesh.SetVertices(verts);
       mesh.SetTriangles(tris, 0);
+
+      // mesh.bounds.center = RecenterBounds(verts);
+
 
       if (speckleMesh.bbox != null)
       {
         var uv = GenerateUV(verts, (float)speckleMesh.bbox.xSize.Length, (float)speckleMesh.bbox.ySize.Length).ToList();
         mesh.SetUVs(0, uv);
-
       }
 
       // BUG: causing some funky issues with meshes
       // mesh.RecalculateNormals( );
       mesh.Optimize();
+
       // Setting mesh to filter once all mesh modifying is done
+      var go = new GameObject(speckleMesh.speckle_type);
+      
       go.SafeMeshSet(mesh, true);
 
+      var recenterMeshTransforms = true; //TODO: figure out how best to change this?
+      if (recenterMeshTransforms)
+        go.transform.position = RecenterBounds(verts);
 
       var meshRenderer = go.AddComponent<MeshRenderer>();
       var speckleMaterial = renderMaterial ?? (RenderMaterial)speckleMesh["renderMaterial"];
@@ -351,8 +333,10 @@ namespace ConnectorUnity
       //means the mesh originated in Rhino or similar
       if (properties == null)
       {
+        // TODO: Can this move to async ? Sorta have a feeling that its taking up a lot of time
         var meshprops = typeof(Mesh).GetProperties(BindingFlags.Instance | BindingFlags.Public).Select(x => x.Name)
           .ToList();
+        
         properties = speckleMesh.GetMembers()
           .Where(x => !meshprops.Contains(x.Key))
           .ToDictionary(x => x.Key, x => x.Value);
@@ -360,6 +344,23 @@ namespace ConnectorUnity
 
       AttachSpeckleProperties(go, properties);
       return go;
+    }
+
+    private static Vector3 RecenterBounds(IList<Vector3> verts)
+    {
+      Bounds meshBounds = new Bounds
+      {
+        center = verts[0]
+      };
+
+      foreach (var vert in verts)
+        meshBounds.Encapsulate(vert);
+
+      // offset mesh vertices
+      for (int l = 0; l < verts.Count; l++)
+        verts[l] -= meshBounds.center;
+
+      return meshBounds.center;
     }
 
     private static IEnumerable<Vector2> GenerateUV(IReadOnlyList<Vector3> verts, float xSize, float ySize)

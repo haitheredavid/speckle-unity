@@ -19,7 +19,7 @@ namespace Speckle.ConnectorUnity
       InitRemove();
 
       receiver = gameObject.AddComponent<Receiver>();
-      receiver.Stream = stream;
+      // receiver.Stream = stream;
 
       var btn = gameObject.transform.Find("Btn").GetComponentInChildren<Button>();
       var streamText = gameObject.transform.Find("StreamText").GetComponentInChildren<Text>();
@@ -43,30 +43,30 @@ namespace Speckle.ConnectorUnity
         if (index == -1)
           return;
 
-        receiver.BranchName = receiver.Stream.branches.items[index].name;
+        // receiver.b = receiver.Stream.branches.items[index].name;
       });
 
-      receiver.Init(stream.id, autoReceive, true,
-        onDataReceivedAction: (go) =>
-        {
-          statusText.text = $"Received {go.name}";
-          MakeButtonsInteractable(true);
-          receiveProgress.value = 0;
-          receiveProgress.gameObject.SetActive(false);
-
-          AddComponents(go);
-        },
-        onTotalChildrenCountKnown: (count) => { receiver.TotalChildrenCount = count; },
-        onProgressAction: (dict) =>
-        {
-          // //Run on a dispatcher as GOs can only be retrieved on the main thread
-          // Dispatcher.Instance().Enqueue(() =>
-          // {
-          //   var val = dict.Values.Average() / receiver.TotalChildrenCount;
-          //   receiveProgress.gameObject.SetActive(true);
-          //   receiveProgress.value = (float) val;
-          // });
-        });
+      // receiver.Init(stream.id, autoReceive, true,
+      //   onDataReceivedAction: (go) =>
+      //   {
+      //     statusText.text = $"Received {go.name}";
+      //     MakeButtonsInteractable(true);
+      //     receiveProgress.value = 0;
+      //     receiveProgress.gameObject.SetActive(false);
+      //
+      //     AddComponents(go);
+      //   },
+      //   // onTotalChildrenCountKnown: (count) => { receiver.TotalChildrenCount = count; },
+      //   onProgressAction: (dict) =>
+      //   {
+      //     // //Run on a dispatcher as GOs can only be retrieved on the main thread
+      //     // Dispatcher.Instance().Enqueue(() =>
+      //     // {
+      //     //   var val = dict.Values.Average() / receiver.TotalChildrenCount;
+      //     //   receiveProgress.gameObject.SetActive(true);
+      //     //   receiveProgress.value = (float) val;
+      //     // });
+      //   });
 
 
       streamText.text = $"Stream: {stream.name}\nId: {stream.id} - Auto: {autoReceive}";
@@ -182,7 +182,7 @@ namespace Speckle.ConnectorUnity
         //remove received geometry
         if (receiver != null)
         {
-          Destroy(receiver.ReceivedData);
+          // Destroy(receiver.ReceivedData);
         }
 
         //update ui
