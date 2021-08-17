@@ -29,18 +29,41 @@ namespace ViewTo.Connector.Unity
       }
     }
 
-    public override ViewContent CopyObj() => throw new System.NotImplementedException();
-
     protected override void ImportValidObj()
     {
-      ViewColor = viewObj.viewColor;
-      ContentMask = MaskByType(viewObj);
+      ContentMask = MaskByType();
+      SetGeo();
       SetContentData(viewObj);
+    }
+
+    /// <summary>
+    /// references the objects converted to the view content list and imports them 
+    /// </summary>
+    protected virtual void SetGeo()
+    {
+      foreach (var obj in viewObj.objects)
+      {
+        if (obj is GameObject go)
+          go.transform.SetParent(transform);
+        else if (obj is Mesh mesh)
+        {
+          var mf = new GameObject().AddComponent<MeshFilter>();
+          mf.gameObject.AddComponent<MeshRenderer>();
+
+          if (Application.isPlaying)
+            mf.mesh = mesh;
+          else
+            mf.sharedMesh = mesh;
+
+          mf.transform.SetParent(transform);
+        }
+      }
+
     }
 
     protected abstract void SetContentData(ViewContent t);
 
-    private static int MaskByType(ViewContent t) => t switch
+    private int MaskByType() => viewObj switch
     {
       DesignContent _ => 6,
       TargetContent _ => 7,
@@ -54,10 +77,10 @@ namespace ViewTo.Connector.Unity
     where TContent : ViewContent, new()
   {
 
-    public override ViewContent CopyObj()
-    {
-      return new TContent {viewColor = ViewColor};
-    }
+    // public override ViewContent CopyObj()
+    // {
+    //   return new TContent {viewColor = ViewColor};
+    // }
 
     protected virtual void SetValidContent(TContent content)
     {

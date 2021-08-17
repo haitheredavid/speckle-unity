@@ -24,11 +24,11 @@ namespace ViewTo.Connector.Unity
       get => viewObjectName;
       set => viewObjectName = value;
     }
-
-    public override ViewContent CopyObj()
-    {
-      return new TargetContent {viewColor = ViewColor, bundles = bundles, viewName = viewName, isolate = isolate};
-    }
+    //
+    // public override ViewContent CopyObj()
+    // {
+    //   return new TargetContent {viewColor = ViewColor, bundles = bundles, viewName = viewName, isolate = isolate};
+    // }
     
     protected override void SetValidContent(TargetContent content)
     {

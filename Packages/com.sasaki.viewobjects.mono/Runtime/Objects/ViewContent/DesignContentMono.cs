@@ -14,13 +14,13 @@ namespace ViewTo.Connector.Unity
       set => viewObjectName = value;
     }
 
-    public override ViewContent CopyObj()
-    {
-      return new DesignContent
-      {
-        viewName = viewName, viewColor = ViewColor
-      };
-    }
+    // public override ViewContent CopyObj()
+    // {
+    //   return new DesignContent
+    //   {
+    //     viewName = viewName, viewColor = ViewColor
+    //   };
+    // }
     protected override void SetValidContent(DesignContent content)
     {
       viewName = content.viewName;

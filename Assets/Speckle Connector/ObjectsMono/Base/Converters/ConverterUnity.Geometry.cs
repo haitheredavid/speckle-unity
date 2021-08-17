@@ -235,99 +235,39 @@ namespace ConnectorUnity
         return null;
 
       return MeshToNative(speckleMeshObject["displayMesh"] as Mesh,
-                          speckleMeshObject["renderMaterial"] as RenderMaterial, speckleMeshObject.GetMembers());
+                          speckleMeshObject.speckle_type,
+                          speckleMeshObject["renderMaterial"] as RenderMaterial,
+                          speckleMeshObject.GetMembers());
     }
     /// <summary>
     /// Converts a Speckle mesh to a GameObject with a mesh renderer
     /// </summary>
     /// <param name="speckleMesh">Mesh to convert</param>
+    /// <param name="name">If provided will be set as gameobject name</param>
     /// <param name="renderMaterial">If provided will override the renderMaterial on the mesh itself</param>
     /// <param name="properties">If provided will override the properties on the mesh itself</param>
     /// <returns></returns>
     public GameObject MeshToNative(
-      Mesh speckleMesh, RenderMaterial renderMaterial = null,
+      Mesh speckleMesh, string name = null, RenderMaterial renderMaterial = null,
       Dictionary<string, object> properties = null
     )
     {
-      if (speckleMesh.vertices.Count == 0 || speckleMesh.faces.Count == 0)
-        return null;
+      var mesh = MeshToUnity(speckleMesh);
+      if (mesh == null) return null;
 
+      var go = new GameObject(!string.IsNullOrEmpty(name) ? name : speckleMesh.speckle_type);
 
-      var verts = ArrayToPoints(speckleMesh.vertices, speckleMesh.units);
-
-
-      //convert speckleMesh.faces into triangle array           
-      List<int> tris = new List<int>();
-      int i = 0;
-      // TODO: Check if this is causing issues with normals for mesh 
-      while (i < speckleMesh.faces.Count)
-      {
-        if (speckleMesh.faces[i] == 0)
-        {
-          //Triangles
-          tris.Add(speckleMesh.faces[i + 1]);
-          tris.Add(speckleMesh.faces[i + 3]);
-          tris.Add(speckleMesh.faces[i + 2]);
-          i += 4;
-        }
-        else
-        {
-          //Quads to triangles
-          tris.Add(speckleMesh.faces[i + 1]);
-          tris.Add(speckleMesh.faces[i + 3]);
-          tris.Add(speckleMesh.faces[i + 2]);
-
-          tris.Add(speckleMesh.faces[i + 1]);
-          tris.Add(speckleMesh.faces[i + 4]);
-          tris.Add(speckleMesh.faces[i + 3]);
-
-          i += 5;
-        }
-      }
-
-
-      var mesh = new UnityEngine.Mesh
-      {
-        name = speckleMesh.speckle_type
-      };
-
-      if (verts.Length >= 65535)
-        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-
-      mesh.SetVertices(verts);
-      mesh.SetTriangles(tris, 0);
-
-      // mesh.bounds.center = RecenterBounds(verts);
-
-
-      if (speckleMesh.bbox != null)
-      {
-        var uv = GenerateUV(verts, (float)speckleMesh.bbox.xSize.Length, (float)speckleMesh.bbox.ySize.Length).ToList();
-        mesh.SetUVs(0, uv);
-      }
-
-      // BUG: causing some funky issues with meshes
-      // mesh.RecalculateNormals( );
-      mesh.Optimize();
-
-      // Setting mesh to filter once all mesh modifying is done
-      var go = new GameObject(speckleMesh.speckle_type);
-      
-      go.SafeMeshSet(mesh, true);
-
-      var recenterMeshTransforms = true; //TODO: figure out how best to change this?
-      if (recenterMeshTransforms)
-        go.transform.position = RecenterBounds(verts);
+      // set object position first since setting position after mesh will move the mesh too
+      go.transform.position = mesh.bounds.center;
+      go.SafeMeshSet(mesh);
 
       var meshRenderer = go.AddComponent<MeshRenderer>();
-      var speckleMaterial = renderMaterial ?? (RenderMaterial)speckleMesh["renderMaterial"];
-      meshRenderer.sharedMaterial = GetMaterial(speckleMaterial);
+      meshRenderer.sharedMaterial = GetMaterial(renderMaterial ?? (RenderMaterial)speckleMesh["renderMaterial"]);
 
       //Add mesh collider
       // MeshCollider mc = go.AddComponent<MeshCollider>( );
       // mc.sharedMesh = mesh;
       //mc.convex = true;
-
 
       //attach properties on this very mesh
       //means the mesh originated in Rhino or similar
@@ -336,7 +276,7 @@ namespace ConnectorUnity
         // TODO: Can this move to async ? Sorta have a feeling that its taking up a lot of time
         var meshprops = typeof(Mesh).GetProperties(BindingFlags.Instance | BindingFlags.Public).Select(x => x.Name)
           .ToList();
-        
+
         properties = speckleMesh.GetMembers()
           .Where(x => !meshprops.Contains(x.Key))
           .ToDictionary(x => x.Key, x => x.Value);
@@ -427,6 +367,7 @@ namespace ConnectorUnity
         @base[key] = sd.Data[key];
       }
     }
+    
     private object PointCloudToNative(Pointcloud pointcloud)
     {
       var go = new GameObject("SpeckleCloud").AddComponent<SpeckleCloud>();
@@ -436,5 +377,6 @@ namespace ConnectorUnity
 
       return go;
     }
+
   }
 }

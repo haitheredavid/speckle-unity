@@ -14,28 +14,12 @@ namespace ConnectorUnity
 
     public static Mesh SafeMeshGet(this MeshFilter mf) => Application.isPlaying ? mf.mesh : mf.sharedMesh;
 
-    public static void SafeMeshSet(this GameObject go, Mesh m, bool addMeshFilterIfNotFound)
-    {
-      var mf = go.GetComponent<MeshFilter>();
-      if (mf == null)
-      {
-        if (!addMeshFilterIfNotFound) return;
-
-        mf = go.AddComponent<MeshFilter>();
-      }
-
-
-      if (Application.isPlaying)
-        mf.mesh = m;
-      else
-        mf.sharedMesh = m;
-    }
 
     public static void SafeMeshSet(this GameObject go, Mesh m)
     {
       var mf = go.GetComponent<MeshFilter>();
-      if (mf == null) return;
-
+      if (mf == null)
+        mf = go.AddComponent<MeshFilter>();
 
       if (Application.isPlaying)
         mf.mesh = m;

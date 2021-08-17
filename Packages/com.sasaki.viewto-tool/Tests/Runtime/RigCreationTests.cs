@@ -25,7 +25,7 @@ namespace ViewToUnity.Tests.Units
       s.LoadStudyToRig(ref o);
       Assert.IsTrue(o.CanRun() == isValid);
 
-      var mono = o.ToUnity();
+      var mono = o.SetMono();
       Assert.NotNull(mono);
     }
 

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using Speckle.Core.Kits;
-using Speckle.Core.Models;
 using UnityEngine;
 using UnityEngine.Events;
 using ViewTo.Objects.Converter.Unity;
@@ -15,7 +14,6 @@ namespace ConnectorUnity
 {
 
   [ExecuteAlways]
-  [RequireComponent(typeof(SpeckleConverter))]
   public class SpeckleConnector : MonoBehaviour
   {
     [SerializeField] private SpeckleConnectorInput input;
@@ -27,13 +25,18 @@ namespace ConnectorUnity
     private Client client;
 
     public static SpeckleConnector Instance { get; set; }
-    public static SpeckleConverter Converter { get; set; }
 
+    /// <summary>
+    /// boolean flag for checking if speckle account and client are properly setup
+    /// </summary>
     public bool IsPrimed
     {
       get => client != null && account != null;
     }
 
+    /// <summary>
+    /// boolean flag for checking if manager is primed with a proper stream, branch and commit
+    /// </summary>
     public bool IsReady
     {
       get => IsPrimed && stream != null && branch != null && commit != null;
@@ -120,7 +123,6 @@ namespace ConnectorUnity
     private void OnEnable()
     {
       Instance = this;
-      Converter = gameObject.GetComponent<SpeckleConverter>();
       input ??= new SpeckleConnectorInput();
     }
 
@@ -212,7 +214,9 @@ namespace ConnectorUnity
 
       if (receivers != null && receivers.Any())
         for (int i = receivers.Count - 1; i >= 0; i--)
-          ConnectorUtilities.SafeDestroy(receivers[i].gameObject);
+          if (receivers[i] != null)
+            ConnectorUtilities.SafeDestroy(receivers[i].gameObject);
+
 
       receivers = new List<Receiver>();
 
@@ -240,10 +244,13 @@ namespace ConnectorUnity
       }
       catch (Exception e)
       {
-        Debug.Log("Account is invalid, or has no streams");
+        Debug.LogException(e);
         streams = new List<Stream>();
       }
-      await LoadStream();
+      finally
+      {
+        await LoadStream();
+      }
     }
 
     private async Task LoadStream()

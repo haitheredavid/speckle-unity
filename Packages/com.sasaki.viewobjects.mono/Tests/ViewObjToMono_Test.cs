@@ -25,7 +25,7 @@ namespace ViewToUnity.Tests.Units
       var o = new ViewCloud
         {points = isValid ? pts : null};
 
-      var mono = o.ToUnity();
+      var mono = o.SetMono();
       Assert.NotNull(mono);
       Assert.True(mono.isValid == isValid);
 
@@ -40,7 +40,7 @@ namespace ViewToUnity.Tests.Units
     {
       var o = isValid ? TestMil.Study : new ViewStudy();
 
-      var mono = o.ToUnity();
+      var mono = o.SetMono();
       Assert.NotNull(mono);
     }
 
@@ -57,7 +57,7 @@ namespace ViewToUnity.Tests.Units
         }
       } : new ViewerBundle();
 
-      var mono = o.ToUnity();
+      var mono = o.SetMono();
       Assert.NotNull(mono);
 
       if (isValid)
@@ -84,7 +84,7 @@ namespace ViewToUnity.Tests.Units
         }
       } : new ViewerBundle();
 
-      var mono = o.ToUnity();
+      var mono = o.SetMono();
       Assert.NotNull(mono);
 
       if (isValid)
@@ -121,7 +121,7 @@ namespace ViewToUnity.Tests.Units
         }
       } : new RigObj();
 
-      var mono = o.ToUnity();
+      var mono = o.SetMono();
       Assert.NotNull(mono);
 
 
@@ -149,7 +149,7 @@ namespace ViewToUnity.Tests.Units
         }
       } : new ContentBundle();
 
-      var mono = o.ToUnity();
+      var mono = o.SetMono();
       Assert.NotNull(mono);
 
       if (isValid)
@@ -175,14 +175,14 @@ namespace ViewToUnity.Tests.Units
       } : new TargetContent();
 
 
-      var mono = global.ToUnity();
+      var mono = global.SetMono();
       Assert.NotNull(mono);
 
       if (isValid)
         Assert.True(mono.bundles.Count == global.bundles.Count);
 
 
-      mono = iso.ToUnity();
+      mono = iso.SetMono();
       Assert.NotNull(mono);
 
 
@@ -195,7 +195,7 @@ namespace ViewToUnity.Tests.Units
     public void To_BlockerContent()
     {
       var o = new BlockerContent();
-      var mono = o.ToUnity();
+      var mono = o.SetMono();
 
       Assert.NotNull(mono);
 
@@ -208,7 +208,7 @@ namespace ViewToUnity.Tests.Units
       var o = new DesignContent
         {viewName = isValid ? "TestName" : null};
 
-      var mono = o.ToUnity();
+      var mono = o.SetMono();
       Assert.NotNull(mono);
 
 

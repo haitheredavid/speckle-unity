@@ -1,16 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using ConnectorUnity;
 using Speckle.Core.Kits;
-using Speckle.Core.Models;
-using UnityEngine;
 using ViewTo.Connector.Unity;
 using ViewTo.Objects.Speckle;
 using ViewTo.Objects.Speckle.Contents;
 
 namespace ViewTo.Objects.Converter.Unity
 {
-  public class ViewObjUnityConverter : ViewObjConverter
+  public partial class ViewObjUnityConverter : ViewObjConverter
   {
 
     public ViewObjUnityConverter()
@@ -24,25 +21,68 @@ namespace ViewTo.Objects.Converter.Unity
 
     public override IEnumerable<string> GetServicedApplications() => new[] {Applications.Unity};
 
-    private ISpeckleConverter defaultConverter { get; }
+    private ConverterUnity defaultConverter { get; }
 
-    public override object ConvertToNative(Base @base)
+    protected override object StudyToNative(ViewStudyBase @base)
     {
-      var obj = base.ConvertToNative(@base) as ViewObj;
-      return obj?.ConvertToViewMono();
+      var study = Create<ViewStudyMono>();
+      study.ViewName = @base.viewName;
+
+      var imported = new List<ViewObjBehaviour>();
+      // load all objects
+      foreach (var obj in @base.objs)
+      {
+        if (obj == null) continue;
+
+        // first convert to view obj
+        var mono = ConvertToNative(obj) as ViewObjBehaviour;
+        if (mono == null) continue;
+
+        // add to study 
+        mono.transform.SetParent(study.transform);
+        imported.Add(mono);
+      }
+      study.ViewObjs = imported;
+      return study;
     }
-    
-    
-    
-    protected override TObj ViewContentToNative<TObj>(ViewContentBase @base)
+    protected override object ViewCloudToNative(ViewCloudBase @base)
     {
-      var content = base.ViewContentToNative<TObj>(@base);
+      var viewObj = base.ViewCloudToNative(@base) as ViewCloud;
+      return viewObj.SetMono();
+    }
+
+    protected override object ContentBundleToNative(ContentBundleBase @base)
+    {
+      // build mono obj
+      var mono = Create<ContentBundleMono>();
+      mono.name = "ContentBundle";
+
+      var items = new List<ViewContentBase>();
+      items.AddRange(@base.targets);
+      items.AddRange(@base.blockers);
+      items.AddRange(@base.designs);
+
+      foreach (var i in items)
+        if (ViewContentToNative(i) is ViewContentMono content)
+          mono.Set(content);
+
+      return mono;
+    }
+
+    protected override object ViewContentToNative(ViewContentBase @base)
+    {
+      var content = base.ViewContentToNative(@base) as ViewContent;
       if (content == null || defaultConverter == null) return content;
 
-      content.objects = @base.meshes.Select(o => defaultConverter.ConvertToNative(o)).Where(o => o != null).ToList();
-      return content;
-    }
+      content.objects = new List<object>();
+      foreach (var m in @base.meshes)
+      {
+        if (m == null) continue;
 
+        content.objects.Add(defaultConverter.ConvertToNative(m));
+      }
+      return content.SetMono();
+    }
   }
 
 }

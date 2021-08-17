@@ -29,7 +29,8 @@ namespace ViewTo.Connector.Unity
         return !(viewObj is IValidator va) || va.isValid;
       }
     }
-    public abstract TObj CopyObj();
+    
+    // public abstract TObj CopyObj();
 
     public override void TryImport(ViewObj obj)
     {
@@ -40,13 +41,13 @@ namespace ViewTo.Connector.Unity
         case TObj casted:
           // if (casted is IValidator va && !va.isValid)
           //   return;
-
+    
           viewObj = casted;
           ImportValidObj();
           break;
       }
     }
-
+    
     protected virtual void ImportValidObj()
     { }
   }

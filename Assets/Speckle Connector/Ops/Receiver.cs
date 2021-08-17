@@ -77,6 +77,8 @@ namespace ConnectorUnity
         monoConverter = new ConverterUnity();
       }
 
+      gameObject.name = "Receiver:" + streamName;
+
       converter = monoConverter;
 
       OnGameObjReceivedAction = onGoReceivedAction;
@@ -199,16 +201,14 @@ namespace ConnectorUnity
         if (purgeOnUpdate && dataAnchor != null)
           ConnectorUtilities.SafeDestroy(dataAnchor.gameObject);
 
-        var @object = converter.ConvertToNative(@base);
+        var mono = converter.ConvertToNative(@base) as MonoBehaviour;
+        
+        // TODO: handle this properly when updating
+        if (dataAnchor == null)
+          dataAnchor = new GameObject("Anchor" + ":" + streamName).transform;
 
-        if (@object is GameObject go)
-        {
-          // TODO: handle this properly when updating
-          dataAnchor = go.transform;
-          OnObjReceivedAction?.Invoke(go);
-        }
-        else
-          OnObjReceivedAction?.Invoke(@object);
+        mono.transform.SetParent(dataAnchor);
+        OnObjReceivedAction?.Invoke(mono);
       }
       catch (Exception e)
       {

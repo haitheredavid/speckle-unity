@@ -36,23 +36,23 @@ namespace ViewTo.Connector.Unity
       set => global = value;
     }
 
-    public override ViewerBundle CopyObj()
-    {
-      return hasLinks ?
-        new ViewerBundleLinked() {layouts = viewObj.layouts, linkedClouds = linkedShell} :
-        new ViewerBundle() {layouts = layouts};
-    }
-
-    protected override void ImportValidObj()
-    {
-      gameObject.name = viewObj.TypeName();
-      viewerCount = 0;
-      foreach (var l in layouts) viewerCount += l.viewers.Count;
-
-      if (viewObj is ViewerBundleLinked linked && linked.linkedClouds.Valid())
-        linkedShell = linked.linkedClouds;
-
-
-    }
+    // public override ViewerBundle CopyObj()
+    // {
+    //   return hasLinks ?
+    //     new ViewerBundleLinked() {layouts = viewObj.layouts, linkedClouds = linkedShell} :
+    //     new ViewerBundle() {layouts = layouts};
+    // }
+    //
+    // protected override void ImportValidObj()
+    // {
+    //   gameObject.name = viewObj.TypeName();
+    //   viewerCount = 0;
+    //   foreach (var l in layouts) viewerCount += l.viewers.Count;
+    //
+    //   if (viewObj is ViewerBundleLinked linked && linked.linkedClouds.Valid())
+    //     linkedShell = linked.linkedClouds;
+    //
+    //
+    // }
   }
 }

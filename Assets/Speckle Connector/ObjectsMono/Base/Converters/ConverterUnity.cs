@@ -78,7 +78,7 @@ namespace ConnectorUnity
         default:
           //capture any other object that might have a mesh representation
           if (@object["displayMesh"] is Mesh)
-            return MeshToNative(@object["displayMesh"] as Mesh);
+            return MeshToUnity(@object["displayMesh"] as Mesh);
 
           throw new NotSupportedException();
       }

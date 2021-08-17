@@ -32,10 +32,10 @@ namespace ViewTo.Connector.Unity
       set => viewObj.isolatedParams = value;
     }
     
-    public override RigObj CopyObj()
-    {
-      
-      throw new System.NotImplementedException();
-    }
+    // public override RigObj CopyObj()
+    // {
+    //   
+    //   throw new System.NotImplementedException();
+    // }
   }
 }
