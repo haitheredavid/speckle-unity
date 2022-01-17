@@ -1,31 +1,27 @@
-﻿using Objects.Converter.Unity;
-using Speckle.Core.Api;
-using Speckle.Core.Api.SubscriptionModels;
-using Speckle.Core.Credentials;
-using Speckle.Core.Logging;
-using Speckle.Core.Models;
-using Speckle.Core.Transports;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Objects.Converter.Unity;
 using Sentry;
-using Sentry.Protocol;
+using Speckle.Core.Api;
+using Speckle.Core.Credentials;
 using Speckle.Core.Kits;
+using Speckle.Core.Logging;
+using Speckle.Core.Models;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity
 {
   /// <summary>
-  /// A Speckle Sender, it's a wrapper around a basic Speckle Client
-  /// that handles conversions for you
+  ///   A Speckle Sender, it's a wrapper around a basic Speckle Client
+  ///   that handles conversions for you
   /// </summary>
   public class Sender : MonoBehaviour
   {
     /// <summary>
-    /// Converts and sends the data of the last commit on the Stream
+    ///   Converts and sends the data of the last commit on the Stream
     /// </summary>
     /// <param name="streamId">ID of the stream to send to</param>
     /// <param name="gameObjects">List of gameObjects to convert and send</param>
@@ -34,10 +30,12 @@ namespace Speckle.ConnectorUnity
     /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
     /// <param name="onErrorAction">Action to run on error</param>
     /// <exception cref="SpeckleException"></exception>
-    public void Send(string streamId, List<GameObject> gameObjects, Account account = null,
+    public void Send(
+      string streamId, List<GameObject> gameObjects, Account account = null,
       Action<string> onDataSentAction = null,
       Action<ConcurrentDictionary<string, int>> onProgressAction = null,
-      Action<string, Exception> onErrorAction = null)
+      Action<string, Exception> onErrorAction = null
+    )
     {
       try
       {
@@ -45,11 +43,11 @@ namespace Speckle.ConnectorUnity
         Task.Run(async () =>
         {
           var res = await Helpers.Send(streamId, data, "Data from unity!",
-            sourceApplication:Applications.Unity,
-            totalChildrenCount:gameObjects.Count(),
-            account: account,
-            onErrorAction: onErrorAction,
-            onProgressAction: onProgressAction);
+                                       Applications.Unity,
+                                       gameObjects.Count(),
+                                       account,
+                                       onErrorAction: onErrorAction,
+                                       onProgressAction: onProgressAction);
 
           onDataSentAction?.Invoke(res);
         });
@@ -61,13 +59,9 @@ namespace Speckle.ConnectorUnity
     }
 
     #region private methods
-
     private Base ConvertRecursivelyToSpeckle(List<GameObject> gos)
     {
-      if (gos.Count == 1)
-      {
-        return RecurseTreeToNative(gos[0]);
-      }
+      if (gos.Count == 1) return RecurseTreeToNative(gos[0]);
 
       var @base = new Base();
       @base["objects"] = gos.Select(x => RecurseTreeToNative(x)).Where(x => x != null).ToList();
@@ -78,7 +72,6 @@ namespace Speckle.ConnectorUnity
     {
       var converter = new ConverterUnity();
       if (converter.CanConvertToSpeckle(go))
-      {
         try
         {
           return converter.ConvertToSpeckle(go);
@@ -88,7 +81,6 @@ namespace Speckle.ConnectorUnity
           Debug.LogError(e);
           return null;
         }
-      }
 
       if (go.transform.childCount > 0)
       {
@@ -110,7 +102,7 @@ namespace Speckle.ConnectorUnity
 
       return null;
     }
-
     #endregion
+
   }
 }

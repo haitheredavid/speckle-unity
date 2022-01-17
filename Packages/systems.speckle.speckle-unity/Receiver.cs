@@ -1,53 +1,45 @@
-﻿using Objects.Converter.Unity;
-using Speckle.Core.Api;
-using Speckle.Core.Api.SubscriptionModels;
-using Speckle.Core.Credentials;
-using Speckle.Core.Logging;
-using Speckle.Core.Models;
-using Speckle.Core.Transports;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sentry;
-using Sentry.Protocol;
+using Speckle.Core.Api;
+using Speckle.Core.Api.SubscriptionModels;
+using Speckle.Core.Credentials;
 using Speckle.Core.Kits;
+using Speckle.Core.Logging;
+using Speckle.Core.Transports;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity
 {
   /// <summary>
-  /// A Speckle Receiver, it's a wrapper around a basic Speckle Client
-  /// that handles conversions and subscriptions for you
+  ///   A Speckle Receiver, it's a wrapper around a basic Speckle Client
+  ///   that handles conversions and subscriptions for you
   /// </summary>
-  [RequireComponent( typeof( RecursiveConverter ) )]
+  [RequireComponent(typeof(RecursiveConverter))]
   public class Receiver : MonoBehaviour
   {
     public string StreamId;
     public string BranchName = "main";
-    public Stream Stream;
-    public int TotalChildrenCount = 0;
+    public int TotalChildrenCount;
     public GameObject ReceivedData;
 
     private bool AutoReceive;
     private bool DeleteOld;
-    private Action<ConcurrentDictionary<string, int>> OnProgressAction;
-    private Action<string, Exception> OnErrorAction;
-    private Action<int> OnTotalChildrenCountKnown;
     private Action<GameObject> OnDataReceivedAction;
+    private Action<string, Exception> OnErrorAction;
+    private Action<ConcurrentDictionary<string, int>> OnProgressAction;
+    private Action<int> OnTotalChildrenCountKnown;
+    public Stream Stream;
 
+    public Receiver()
+    { }
 
     private Client Client { get; set; }
 
-
-    public Receiver()
-    {
-    }
-
     /// <summary>
-    /// Initializes the Receiver manually
+    ///   Initializes the Receiver manually
     /// </summary>
     /// <param name="streamId">Id of the stream to receive</param>
     /// <param name="autoReceive">If true, it will automatically receive updates sent to this stream</param>
@@ -57,9 +49,11 @@ namespace Speckle.ConnectorUnity
     /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
     /// <param name="onErrorAction">Action to run on error</param>
     /// <param name="onTotalChildrenCountKnown">Action to run when the TotalChildrenCount is known</param>
-    public void Init(string streamId, bool autoReceive = false, bool deleteOld = true, Account account = null,
+    public void Init(
+      string streamId, bool autoReceive = false, bool deleteOld = true, Account account = null,
       Action<GameObject> onDataReceivedAction = null, Action<ConcurrentDictionary<string, int>> onProgressAction = null,
-      Action<string, Exception> onErrorAction = null, Action<int> onTotalChildrenCountKnown = null)
+      Action<string, Exception> onErrorAction = null, Action<int> onTotalChildrenCountKnown = null
+    )
     {
       StreamId = streamId;
       AutoReceive = autoReceive;
@@ -79,9 +73,8 @@ namespace Speckle.ConnectorUnity
       }
     }
 
-
     /// <summary>
-    /// Gets and converts the data of the last commit on the Stream
+    ///   Gets and converts the data of the last commit on the Stream
     /// </summary>
     /// <returns></returns>
     public void Receive()
@@ -96,6 +89,7 @@ namespace Speckle.ConnectorUnity
           var mainBranch = await Client.BranchGet(StreamId, BranchName, 1);
           if (!mainBranch.commits.items.Any())
             throw new Exception("This branch has no commits");
+
           var commit = mainBranch.commits.items[0];
           GetAndConvertObject(commit.referencedObject, commit.id);
         }
@@ -106,12 +100,10 @@ namespace Speckle.ConnectorUnity
       });
     }
 
-
     #region private methods
-
     /// <summary>
-    /// Fired when a new commit is created on this stream
-    /// It receives and converts the objects and then executes the user defined _onCommitCreated action.
+    ///   Fired when a new commit is created on this stream
+    ///   It receives and converts the objects and then executes the user defined _onCommitCreated action.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -124,7 +116,6 @@ namespace Speckle.ConnectorUnity
       }
     }
 
-
     private async void GetAndConvertObject(string objectId, string commitId)
     {
       try
@@ -134,7 +125,7 @@ namespace Speckle.ConnectorUnity
         var transport = new ServerTransport(Client.Account, StreamId);
         var @base = await Operations.Receive(
           objectId,
-          remoteTransport: transport,
+          transport,
           onErrorAction: OnErrorAction,
           onProgressAction: OnProgressAction,
           onTotalChildrenCountKnown: OnTotalChildrenCountKnown,
@@ -142,7 +133,7 @@ namespace Speckle.ConnectorUnity
         );
         Dispatcher.Instance().Enqueue(() =>
         {
-          
+
           var rc = GetComponent<RecursiveConverter>();
           var go = rc.ConvertRecursivelyToNative(@base, commitId);
           //remove previously received object
@@ -156,7 +147,7 @@ namespace Speckle.ConnectorUnity
       {
         throw new SpeckleException(e.Message, e, true, SentryLevel.Error);
       }
-      
+
       try
       {
         await Client.CommitReceived(new CommitReceivedInput
@@ -171,17 +162,14 @@ namespace Speckle.ConnectorUnity
       {
         // Do nothing!
       }
-      
+
     }
-
-
-    
 
     private void OnDestroy()
     {
       Client?.CommitCreatedSubscription?.Dispose();
     }
-
     #endregion
+
   }
 }

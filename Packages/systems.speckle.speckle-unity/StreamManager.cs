@@ -1,14 +1,8 @@
-using System;
-using System.Collections;
+using System.Collections.Generic;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Speckle.Core.Models;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Speckle.ConnectorUnity
 {
@@ -17,6 +11,10 @@ namespace Speckle.ConnectorUnity
   public class StreamManager : MonoBehaviour
   {
 
+    #if UNITY_EDITOR
+    public static bool GenerateMaterials = false;
+    #endif
+
     public int SelectedAccountIndex = -1;
     public int SelectedStreamIndex = -1;
     public int SelectedBranchIndex = -1;
@@ -24,18 +22,13 @@ namespace Speckle.ConnectorUnity
     public int OldSelectedAccountIndex = -1;
     public int OldSelectedStreamIndex = -1;
 
+    public List<Account> Accounts;
+    public List<Branch> Branches;
+
     public Client Client;
     public Account SelectedAccount;
     public Stream SelectedStream;
-
-    public List<Account> Accounts;
     public List<Stream> Streams;
-    public List<Branch> Branches;
-
-
-#if UNITY_EDITOR
-    public static bool GenerateMaterials = false;
-#endif
 
     public GameObject ConvertRecursivelyToNative(Base @base, string id)
     {
@@ -45,7 +38,7 @@ namespace Speckle.ConnectorUnity
         rc = gameObject.AddComponent<RecursiveConverter>();
 
       return rc.ConvertRecursivelyToNative(@base,
-          Branches[SelectedBranchIndex].commits.items[SelectedCommitIndex].id);
+                                           Branches[SelectedBranchIndex].commits.items[SelectedCommitIndex].id);
     }
   }
 }
