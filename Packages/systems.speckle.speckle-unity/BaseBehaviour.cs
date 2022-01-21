@@ -8,7 +8,6 @@ namespace Objects.Converter.Unity
   /// </summary>
   public class BaseBehaviour : MonoBehaviour
   {
-
     public SpeckleProperties properties;
   }
 }

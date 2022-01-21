@@ -13,7 +13,7 @@ namespace Speckle.ConnectorUnity
   public class RecursiveConverter : MonoBehaviour
   {
 
-    private ConverterUnity _converter = new ConverterUnity();
+    // private ConverterUnity _converter = new ConverterUnity();
 
     /// <summary>
     ///   Converts a Base object to a GameObject Recursively
@@ -27,11 +27,12 @@ namespace Speckle.ConnectorUnity
       var materials = Resources.LoadAll("", typeof(Material)).Cast<Material>().ToArray();
       if (materials.Length == 0) Debug.Log("To automatically assign materials to recieved meshes, materials have to be in the \'Assets/Resources\' folder!");
       var placeholderObjects = materials.Select(x => new ApplicationPlaceholderObject { NativeObject = x }).ToList();
-      _converter.SetContextObjects(placeholderObjects);
 
+      var converter = ScriptableObject.CreateInstance<ConverterUnity>();
+      converter.SetContextObjects(placeholderObjects);
 
       // case 1: it's an item that has a direct conversion method, eg a point
-      if (_converter.CanConvertToNative(@base))
+      if (converter.CanConvertToNative(@base))
       {
         var go = TryConvertItemToNative(@base);
         return go;
@@ -105,9 +106,10 @@ namespace Speckle.ConnectorUnity
       if (value.GetType().IsSimpleType() || !(value is Base)) return null;
 
       var @base = (Base)value;
+      var converter = ScriptableObject.CreateInstance<ConverterUnity>();
 
       //it's an unsupported Base, go through each of its property and try convert that
-      if (!_converter.CanConvertToNative(@base))
+      if (!converter.CanConvertToNative(@base))
       {
         var members = @base.GetMemberNames().ToList();
 
@@ -137,7 +139,7 @@ namespace Speckle.ConnectorUnity
       }
       try
       {
-        var go = _converter.ConvertToNative(@base) as GameObject;
+        var go = converter.ConvertToNative(@base) as GameObject;
         // Some revit elements have nested elements in a "elements" property
         // for instance hosted families on a wall
         if (go != null && @base["elements"] is List<Base> l && l.Any())

@@ -8,11 +8,11 @@ using UnityEngine;
 
 namespace Speckle.ConnectorUnity
 {
-    /// <summary>
-    ///   This class gets attached to GOs and is used to store Speckle's metadata when sending / receiving
-    /// </summary>
-    [Serializable]
-  public class SpeckleProperties : ISerializationCallbackReceiver
+  /// <summary>
+  ///   This class gets attached to GOs and is used to store Speckle's metadata when sending / receiving
+  /// </summary>
+  [Serializable]
+  public class SpeckleProperties : ScriptableObject, ISerializationCallbackReceiver
   {
 
     [SerializeField] [HideInInspector]
