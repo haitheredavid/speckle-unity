@@ -21,6 +21,10 @@ namespace Speckle.ConnectorUnity
     private StreamManager _streamManager;
     private int _totalChildrenCount;
 
+    public int StreamsLimit { get; set; } = 30;
+    public int BranchesLimit { get; set; } = 30;
+    public int CommitsLimit { get; set; } = 25;
+
     private int SelectedAccountIndex
     {
       get => _streamManager.SelectedAccountIndex;
@@ -117,7 +121,7 @@ namespace Speckle.ConnectorUnity
     private async Task LoadStreams()
     {
       EditorUtility.DisplayProgressBar("Loading streams...", "", 0);
-      Streams = await Client.StreamsGet();
+      Streams = await Client.StreamsGet(StreamsLimit);
       EditorUtility.ClearProgressBar();
       if (Streams.Any())
         await SelectStream(0);
@@ -130,7 +134,7 @@ namespace Speckle.ConnectorUnity
       SelectedStream = Streams[i];
 
       EditorUtility.DisplayProgressBar("Loading stream details...", "", 0);
-      Branches = await Client.StreamGetBranches(SelectedStream.id);
+      Branches = await Client.StreamGetBranches(SelectedStream.id, BranchesLimit, CommitsLimit);
       if (Branches.Any())
       {
         SelectedBranchIndex = 0;
