@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1eec3e1325b3bf64782acc455fe406ca, type: 3}
   m_Name: UnityConverter
   m_EditorClassIdentifier: 
-  ModelUnits: m
-  useRenderMaterial: 0
-  description: 
-  author: 
-  websiteOrEmail: 
+  description: Basic Speckle Converter
+  author: Speckle
+  websiteOrEmail: speckle.systems
+  useRenderMaterial: 1
   defaultMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   baseConverter: {fileID: 11400000, guid: e93ea16606c8f3f46bee59eb2de69ed8, type: 2}
   meshConverter: {fileID: 11400000, guid: a43225decbf45074dbc001e1d91b6995, type: 2}

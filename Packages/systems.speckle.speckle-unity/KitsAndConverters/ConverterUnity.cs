@@ -54,6 +54,7 @@ namespace Objects.Converter.Unity
     /// Default Unity units are in meters
     /// </summary>
     public string ModelUnits => Speckle.Core.Kits.Units.Meters;
+    
     #endregion converter properties
 
     public ProgressReport Report { get; }
@@ -64,11 +65,22 @@ namespace Objects.Converter.Unity
 
     public List<ApplicationPlaceholderObject> ContextObjects { get; set; } = new List<ApplicationPlaceholderObject>();
 
-    public void SetContextDocument(object doc) => throw new NotImplementedException();
-
     public void SetContextObjects(List<ApplicationPlaceholderObject> objects) => ContextObjects = objects;
+    
+    public void SetContextDocument(object doc)
+    {
+      Debug.Log("Empty call from SetContextDocument");
+    }
 
-    public void SetPreviousContextObjects(List<ApplicationPlaceholderObject> objects) => throw new NotImplementedException();
+    public void SetPreviousContextObjects(List<ApplicationPlaceholderObject> objects)
+    {
+      Debug.Log("Empty call from SetPreviousContextObjects");
+    }
+
+    public void SetConverterSettings(object settings)
+    {
+      Debug.Log($"Converter Settings being set with {settings}");
+    }
 
     public void OnEnable()
     {
