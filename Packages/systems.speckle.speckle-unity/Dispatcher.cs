@@ -23,102 +23,101 @@ namespace Speckle.ConnectorUnity
 {
 	/// Author: Pim de Witte (pimdewitte.com) and contributors, https://github.com/PimDeWitte/UnityMainThreadDispatcher
 	/// <summary>
-	///   A thread-safe class which holds a queue with actions to execute on the next Update() method. It can be used to make
-	///   calls to the main thread for
-	///   things such as UI Manipulation in Unity. It was developed for use in combination with the Firebase Unity plugin,
-	///   which uses separate threads for event handling
+	/// A thread-safe class which holds a queue with actions to execute on the next Update() method. It can be used to make calls to the main thread for
+	/// things such as UI Manipulation in Unity. It was developed for use in combination with the Firebase Unity plugin, which uses separate threads for event handling
 	/// </summary>
-	public class Dispatcher : MonoBehaviour
-  {
+	public class Dispatcher : MonoBehaviour {
 
-    private static readonly Queue<Action> _executionQueue = new Queue<Action>();
+		private static readonly Queue<Action> _executionQueue = new Queue<Action>();
 
-    private static Dispatcher _instance;
+		public void Update() {
+			lock(_executionQueue) {
+				while (_executionQueue.Count > 0) {
+					_executionQueue.Dequeue().Invoke();
+				}
+			}
+		}
 
-    private void Awake()
-    {
-      Setup.Init(Applications.Unity);
+		/// <summary>
+		/// Locks the queue and adds the IEnumerator to the queue
+		/// </summary>
+		/// <param name="action">IEnumerator function that will be executed from the main thread.</param>
+		public void Enqueue(IEnumerator action) {
+			lock (_executionQueue) {
+				_executionQueue.Enqueue (() => {
+					StartCoroutine (action);
+				});
+			}
+		}
 
-      if (_instance == null)
-      {
-        _instance = this;
-        DontDestroyOnLoad(gameObject);
-      }
-    }
+		/// <summary>
+		/// Locks the queue and adds the Action to the queue
+		/// </summary>
+		/// <param name="action">function that will be executed from the main thread.</param>
+		public void Enqueue(Action action)
+		{
+			Enqueue(ActionWrapper(action));
+		}
+	
+		/// <summary>
+		/// Locks the queue and adds the Action to the queue, returning a Task which is completed when the action completes
+		/// </summary>
+		/// <param name="action">function that will be executed from the main thread.</param>
+		/// <returns>A Task that can be awaited until the action completes</returns>
+		public Task EnqueueAsync(Action action)
+		{
+			var tcs = new TaskCompletionSource<bool>();
 
-    public void Update()
-    {
-      lock (_executionQueue)
-      {
-        while (_executionQueue.Count > 0) _executionQueue.Dequeue().Invoke();
-      }
-    }
+			void WrappedAction() {
+				try 
+				{
+					action();
+					tcs.TrySetResult(true);
+				} catch (Exception ex) 
+				{
+					tcs.TrySetException(ex);
+				}
+			}
 
-    private void OnDestroy()
-    {
-      _instance = null;
-    }
+			Enqueue(ActionWrapper(WrappedAction));
+			return tcs.Task;
+		}
 
-    /// <summary>
-    ///   Locks the queue and adds the IEnumerator to the queue
-    /// </summary>
-    /// <param name="action">IEnumerator function that will be executed from the main thread.</param>
-    public void Enqueue(IEnumerator action)
-    {
-      lock (_executionQueue)
-      {
-        _executionQueue.Enqueue(() => { StartCoroutine(action); });
-      }
-    }
+	
+		IEnumerator ActionWrapper(Action a)
+		{
+			a();
+			yield return null;
+		}
 
-    /// <summary>
-    ///   Locks the queue and adds the Action to the queue
-    /// </summary>
-    /// <param name="action">function that will be executed from the main thread.</param>
-    public void Enqueue(Action action)
-    {
-      Enqueue(ActionWrapper(action));
-    }
 
-    /// <summary>
-    ///   Locks the queue and adds the Action to the queue, returning a Task which is completed when the action completes
-    /// </summary>
-    /// <param name="action">function that will be executed from the main thread.</param>
-    /// <returns>A Task that can be awaited until the action completes</returns>
-    public Task EnqueueAsync(Action action)
-    {
-      var tcs = new TaskCompletionSource<bool>();
+		private static Dispatcher _instance = null;
 
-      void WrappedAction()
-      {
-        try
-        {
-          action();
-          tcs.TrySetResult(true);
-        }
-        catch (Exception ex)
-        {
-          tcs.TrySetException(ex);
-        }
-      }
+		public static bool Exists() {
+			return _instance != null;
+		}
 
-      Enqueue(ActionWrapper(WrappedAction));
-      return tcs.Task;
-    }
+		public static Dispatcher Instance() {
+			if (!Exists ()) {
+				throw new Exception ("Could not find the Dispatcher object. Please ensure you have added a Dispatcher object with this script to your scene.");
+			}
+			return _instance;
+		}
 
-    private IEnumerator ActionWrapper(Action a)
-    {
-      a();
-      yield return null;
-    }
 
-    public static bool Exists() => _instance != null;
+		void Awake() {
+			Setup.Init(VersionedHostApplications.Unity, HostApplications.Unity.Slug);
+			
+			if (_instance == null) {
+				_instance = this;
+				DontDestroyOnLoad(this.gameObject);
+			}
+		}
 
-    public static Dispatcher Instance()
-    {
-      if (!Exists()) throw new Exception("Could not find the Dispatcher object. Please ensure you have added a Dispatcher object with this script to your scene.");
+		void OnDestroy() {
+			_instance = null;
+		}
 
-      return _instance;
-    }
-  }
+
+	}
 }

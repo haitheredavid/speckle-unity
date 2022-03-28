@@ -7,18 +7,13 @@
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "SpeckleCore2/2.1.0": {
+      "Objects/2.1.1": {
         "dependencies": {
-          "GraphQL.Client": "4.0.2",
-          "Microsoft.CSharp": "4.7.0",
           "NETStandard.Library": "2.0.3",
-          "Piwik.Tracker": "3.0.0",
-          "Sentry": "3.13.0",
-          "Speckle.Newtonsoft.Json": "12.0.3.1",
-          "System.Data.SQLite.Core": "1.0.115.5"
+          "Speckle.Core": "2.1.0"
         },
         "runtime": {
-          "SpeckleCore2.dll": {}
+          "Objects.dll": {}
         }
       },
       "GraphQL.Client/4.0.2": {
@@ -265,7 +260,7 @@
     }
   },
   "libraries": {
-    "SpeckleCore2/2.1.0": {
+    "Objects/2.1.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
