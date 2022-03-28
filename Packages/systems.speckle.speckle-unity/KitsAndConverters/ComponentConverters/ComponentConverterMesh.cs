@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Objects.Utils;
+using Speckle.ConnectorUnity;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Mesh = Objects.Geometry.Mesh;
@@ -12,39 +15,6 @@ namespace Objects.Converter.Unity
     public bool addMeshCollider = false;
     public bool addRender = true;
     public bool recenterTransform = true;
-
-    protected static List<int> FaceToTriangles(List<int> faces)
-    {
-      //convert speckleMesh.faces into triangle array           
-      var tris = new List<int>();
-      var i = 0;
-      // TODO: Check if this is causing issues with normals for mesh 
-      while (i < faces.Count)
-        if (faces[i] == 0)
-        {
-          //Triangles
-          tris.Add(faces[i + 1]);
-          tris.Add(faces[i + 3]);
-          tris.Add(faces[i + 2]);
-
-          i += 4;
-        }
-        else
-        {
-          //Quads to triangles
-          tris.Add(faces[i + 1]);
-          tris.Add(faces[i + 3]);
-          tris.Add(faces[i + 2]);
-
-          tris.Add(faces[i + 1]);
-          tris.Add(faces[i + 4]);
-          tris.Add(faces[i + 3]);
-
-          i += 5;
-        }
-
-      return tris;
-    }
 
     /// <summary>
     /// Converts a SpeckleMesh with a material to a Mesh Filter
@@ -75,47 +45,10 @@ namespace Objects.Converter.Unity
     /// <returns></returns>
     protected override Component Process(Mesh speckleMesh)
     {
-      if (speckleMesh.vertices.Count == 0 || speckleMesh.faces.Count == 0)
-      {
-        Debug.LogWarning("Trying to convert speckle mesh without proper data");
-        return null;
-      }
+      // convert the mesh data
+      MeshDataToNative(new[] { speckleMesh }, out var mesh, out var materials);
 
-      var mesh = new UnityEngine.Mesh { name = speckleMesh.speckle_type };
-
-      var verts = ArrayToPoints(speckleMesh.vertices, speckleMesh.units);
-
-      if (verts.Length >= 65535)
-        mesh.indexFormat = IndexFormat.UInt32;
-
-      // center transform pivot according to the bounds of the model
-      var meshBounds = new Bounds { center = verts[0] };
-
-      foreach (var vert in verts)
-        meshBounds.Encapsulate(vert);
-
-      // setup object for data
       var comp = New<MeshFilter>();
-      if (recenterTransform)
-        comp.transform.position = meshBounds.center;
-
-      // offset mesh vertices
-      for (var l = 0; l < verts.Length; l++)
-        verts[l] -= meshBounds.center;
-
-      mesh.SetVertices(verts);
-      mesh.SetTriangles(FaceToTriangles(speckleMesh.faces), 0);
-
-      if (speckleMesh.bbox != null)
-      {
-        var uv = GenerateUV(verts, (float)speckleMesh.bbox.xSize.Length, (float)speckleMesh.bbox.ySize.Length).ToList();
-        mesh.SetUVs(0, uv);
-      }
-
-      // BUG: causing some funky issues with meshes
-      // mesh.RecalculateNormals( );
-      mesh.Optimize();
-
       // Setting mesh to filter once all mesh modifying is done
       if (IsRuntime)
         comp.mesh = mesh;
@@ -133,5 +66,119 @@ namespace Objects.Converter.Unity
 
       return comp;
     }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="meshes">meshes to be converted as SubMeshes</param>
+    /// <param name="nativeMesh">The converted native mesh</param>
+    /// <param name="nativeMaterials">The converted materials (one per converted sub-mesh)</param>
+    private void MeshDataToNative(IReadOnlyCollection<Mesh> meshes, out UnityEngine.Mesh nativeMesh, out Material[] nativeMaterials)
+    {
+      var verts = new List<Vector3>();
+
+      var uvs = new List<Vector2>();
+      var vertexColors = new List<Color>();
+
+      var materials = new List<Material>(meshes.Count);
+      var subMeshes = new List<List<int>>(meshes.Count);
+
+      foreach (Mesh m in meshes)
+      {
+        if (m.vertices.Count == 0 || m.faces.Count == 0) continue;
+
+        List<int> tris = new List<int>();
+        SubmeshToNative(m, verts, tris, uvs, vertexColors, materials);
+        subMeshes.Add(tris);
+      }
+      nativeMaterials = materials.ToArray();
+
+      nativeMesh = new UnityEngine.Mesh
+      {
+        subMeshCount = subMeshes.Count
+      };
+
+      nativeMesh.SetVertices(verts);
+      nativeMesh.SetUVs(0, uvs);
+      nativeMesh.SetColors(vertexColors);
+
+
+      int j = 0;
+      foreach (var subMeshTriangles in subMeshes)
+      {
+        nativeMesh.SetTriangles(subMeshTriangles, j);
+        j++;
+      }
+
+      if (nativeMesh.vertices.Length >= UInt16.MaxValue)
+        nativeMesh.indexFormat = IndexFormat.UInt32;
+
+      nativeMesh.Optimize();
+      nativeMesh.RecalculateBounds();
+      nativeMesh.RecalculateNormals();
+      nativeMesh.RecalculateTangents();
+    }
+
+    private void SubmeshToNative(Mesh speckleMesh, List<Vector3> verts, List<int> tris, List<Vector2> texCoords, List<Color> vertexColors, List<Material> materials)
+    {
+      speckleMesh.AlignVerticesWithTexCoordsByIndex();
+      speckleMesh.TriangulateMesh();
+
+      int indexOffset = verts.Count;
+
+      // Convert Vertices
+      verts.AddRange(ArrayToPoints(speckleMesh.vertices, speckleMesh.units));
+
+      // Convert texture coordinates
+      bool hasValidUVs = speckleMesh.TextureCoordinatesCount == speckleMesh.VerticesCount;
+      if (speckleMesh.textureCoordinates.Count > 0 && !hasValidUVs)
+        Debug.LogWarning(
+          $"Expected number of UV coordinates to equal vertices. Got {speckleMesh.TextureCoordinatesCount} expected {speckleMesh.VerticesCount}. \nID = {speckleMesh.id}");
+
+      if (hasValidUVs)
+      {
+        texCoords.Capacity += speckleMesh.TextureCoordinatesCount;
+        for (int j = 0; j < speckleMesh.TextureCoordinatesCount; j++)
+        {
+          var (u, v) = speckleMesh.GetTextureCoordinate(j);
+          texCoords.Add(new Vector2((float)u, (float)v));
+        }
+      }
+      else if (speckleMesh.bbox != null)
+      {
+        //Attempt to generate some crude UV coordinates using bbox //TODO this will be broken for submeshes
+        texCoords.AddRange(GenerateUV(verts, (float)speckleMesh.bbox.xSize.Length, (float)speckleMesh.bbox.ySize.Length));
+      }
+
+      // Convert vertex colors
+      if (speckleMesh.colors != null)
+      {
+        if (speckleMesh.colors.Count == speckleMesh.VerticesCount)
+        {
+          vertexColors.AddRange(speckleMesh.colors.Select(c => c.ToUnityColor()));
+        }
+        else if (speckleMesh.colors.Count != 0)
+        {
+          //TODO what if only some submeshes have colors?
+          Debug.LogWarning(
+            $"{typeof(Mesh)} {speckleMesh.id} has invalid number of vertex {nameof(Mesh.colors)}. Expected 0 or {speckleMesh.VerticesCount}, got {speckleMesh.colors.Count}");
+        }
+      }
+
+      // Convert faces
+      tris.Capacity += (int)(speckleMesh.faces.Count / 4f) * 3;
+
+      for (int i = 0; i < speckleMesh.faces.Count; i += 4)
+      {
+        //We can safely assume all faces are triangles since we called TriangulateMesh
+        tris.Add(speckleMesh.faces[i + 1] + indexOffset);
+        tris.Add(speckleMesh.faces[i + 3] + indexOffset);
+        tris.Add(speckleMesh.faces[i + 2] + indexOffset);
+      }
+
+      // Convert RenderMaterial
+      // materials.Add(GetMaterial(speckleMesh["renderMaterial"] as RenderMaterial));
+    }
+
   }
 }
