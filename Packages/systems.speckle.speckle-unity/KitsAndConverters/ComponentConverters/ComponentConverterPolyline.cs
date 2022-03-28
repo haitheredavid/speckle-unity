@@ -18,7 +18,7 @@ namespace Objects.Converter.Unity
     protected override Component Process(Polyline @base)
     {
       var line = New<LineRenderer>(@base.speckle_type);
-      line.SetupLineRenderer(@base.points.Select(x => ToVector3(x)).ToArray(), diameter);
+      line.SetupLineRenderer(@base.GetPoints()?.Select(x => ToVector3(x)).ToArray(), diameter);
       return line;
     }
   }
