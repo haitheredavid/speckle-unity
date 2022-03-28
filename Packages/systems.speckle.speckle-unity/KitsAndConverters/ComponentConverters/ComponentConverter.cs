@@ -24,6 +24,19 @@ namespace Objects.Converter.Unity
       return comp;
     }
 
+    // TODO: Handle list and nested objects
+    // public Component ToComponent(IEnumerable<TBase> @base)
+    // {
+    //   
+    //   var comp = Process(@base);
+    //
+    //   if (storeProps)
+    //     comp.gameObject.AddProps(@base);
+    //
+    //   return comp;
+    // }
+    //
+
     /// <summary>
     /// Check to see if converter is processing during editor or playing mode
     /// </summary>
