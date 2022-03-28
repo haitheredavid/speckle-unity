@@ -52,7 +52,7 @@ namespace Objects.Converter.Unity
 
 
         #if UNITY_EDITOR
-        if (StreamManager.GenerateMaterials)
+        if (SpeckleConnector.GenerateMaterials)
         {
           if (!AssetDatabase.IsValidFolder("Assets/Resources")) AssetDatabase.CreateFolder("Assets", "Resources");
           if (!AssetDatabase.IsValidFolder("Assets/Resources/Materials")) AssetDatabase.CreateFolder("Assets/Resources", "Materials");

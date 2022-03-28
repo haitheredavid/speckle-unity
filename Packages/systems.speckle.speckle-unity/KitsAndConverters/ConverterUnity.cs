@@ -58,7 +58,7 @@ namespace Objects.Converter.Unity
 
     public ProgressReport Report { get; }
 
-    public IEnumerable<string> GetServicedApplications() => new[] { Applications.Unity };
+    public IEnumerable<string> GetServicedApplications() => new[] { HostApplications.Unity.Name };
 
     public HashSet<Exception> ConversionErrors { get; } = new HashSet<Exception>();
 
@@ -128,10 +128,18 @@ namespace Objects.Converter.Unity
         // return meshConverter.ToComponent(o, useRenderMaterial ? GetMaterial((RenderMaterial)o["renderMaterial"]) : defaultMaterial);
         default:
           //capture any other object that might have a mesh representation
-          if (@base["displayValue"] is Base b)
-            return TryConvert(baseConverter, b);
           if (@base["displayValue"] is Mesh mesh)
             return TryConvert(meshConverter, mesh);
+
+          if (@base["displayValue"] is IEnumerable<Base> bs)
+          {
+            // TODO: Handle lists 
+            Debug.LogWarning("Skipping display values as list as this is not handled properly");
+            return null;
+          }
+
+          if (@base["displayValue"] is Base b)
+            return TryConvert(baseConverter, b);
 
           Debug.LogWarning($"Skipping {@base.GetType()} {@base.id} - Not supported type");
           return null;

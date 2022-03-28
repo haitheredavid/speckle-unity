@@ -143,7 +143,7 @@ namespace Speckle.ConnectorUnity
           onTotalChildrenCountKnown: OnTotalChildrenCountKnown,
           disposeTransports: true
         );
-        
+
         Dispatcher.Instance().Enqueue(() =>
         {
           Debug.Log("Sending to Dispatcher");
