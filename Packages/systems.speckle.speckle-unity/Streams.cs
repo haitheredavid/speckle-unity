@@ -10,7 +10,9 @@ namespace Speckle.ConnectorUnity
   {
     public static async Task<List<Stream>> List(int limit = 10)
     {
-      Tracker.TrackPageview(Tracker.STREAM_LIST);
+      // Analytics.TrackEvent(1);
+      //TODO: Replace with new tracker stuff
+      // Tracker.TrackPageview(Tracker.STREAM_LIST);
       var account = AccountManager.GetDefaultAccount();
       if (account == null)
         return new List<Stream>();
@@ -24,7 +26,8 @@ namespace Speckle.ConnectorUnity
 
     public static async Task<Stream> Get(string streamId, int limit = 10)
     {
-      Tracker.TrackPageview(Tracker.STREAM_GET);
+      //TODO: Replace with new tracker stuff
+      // Tracker.TrackPageview(Tracker.STREAM_GET);
       var account = AccountManager.GetDefaultAccount();
       if (account == null)
         return null;
