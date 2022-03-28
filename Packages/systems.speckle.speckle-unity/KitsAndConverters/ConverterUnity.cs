@@ -26,7 +26,7 @@ namespace Objects.Converter.Unity
     [SerializeField] protected bool useRenderMaterial;
     [SerializeField] protected Material defaultMaterial;
 
-    #region Converters
+    #region converters
     [Space]
     [Header("Component Converters")]
     [SerializeField] protected ComponentConverterBase baseConverter;
@@ -54,7 +54,6 @@ namespace Objects.Converter.Unity
     /// Default Unity units are in meters
     /// </summary>
     public string ModelUnits => Speckle.Core.Kits.Units.Meters;
-    
     #endregion converter properties
 
     public ProgressReport Report { get; }
@@ -66,7 +65,7 @@ namespace Objects.Converter.Unity
     public List<ApplicationPlaceholderObject> ContextObjects { get; set; } = new List<ApplicationPlaceholderObject>();
 
     public void SetContextObjects(List<ApplicationPlaceholderObject> objects) => ContextObjects = objects;
-    
+
     public void SetContextDocument(object doc)
     {
       Debug.Log("Empty call from SetContextDocument");
@@ -101,12 +100,6 @@ namespace Objects.Converter.Unity
       }
     }
 
-    /// <summary>
-    ///   Native objects return should return as Base Behaviour objects since these speckle properties
-    /// </summary>
-    /// <param name="base"></param>
-    /// <returns></returns>
-    /// <exception cref="NotSupportedException"></exception>
     public object ConvertToNative(Base @base)
     {
       if (@base == null)
@@ -130,18 +123,19 @@ namespace Objects.Converter.Unity
         case View3D o:
           return TryConvert(view3DConverter, o);
         case Mesh o:
-          if (meshConverter != null)
-            return meshConverter.ToComponent(o, useRenderMaterial ? GetMaterial((RenderMaterial)o["renderMaterial"]) : defaultMaterial);
-
-          break;
+          return TryConvert(meshConverter, o);
+        // if (meshConverter != null) // TODO: address converters needing dependency from unity
+        // return meshConverter.ToComponent(o, useRenderMaterial ? GetMaterial((RenderMaterial)o["renderMaterial"]) : defaultMaterial);
         default:
           //capture any other object that might have a mesh representation
-          if (@base["displayMesh"] is Mesh mesh)
+          if (@base["displayValue"] is Base b)
+            return TryConvert(baseConverter, b);
+          if (@base["displayValue"] is Mesh mesh)
             return TryConvert(meshConverter, mesh);
 
-          break;
+          Debug.LogWarning($"Skipping {@base.GetType()} {@base.id} - Not supported type");
+          return null;
       }
-      throw new Exception($"type of object {@base.speckle_type} is not supported with this converter");
     }
 
     protected Component TryConvert<TBase>(ComponentConverter<TBase> converter, TBase @base) where TBase : Base
@@ -180,7 +174,7 @@ namespace Objects.Converter.Unity
         //   return true;
         // case View2D _:
         //   return false;
-        case IDisplayMesh _:
+        case IDisplayValue<Geometry.Mesh> _:
           return true;
         case Geometry.Mesh _:
           return true;
