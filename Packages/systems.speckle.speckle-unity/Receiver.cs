@@ -88,7 +88,7 @@ namespace Speckle.ConnectorUnity
     {
       Debug.Log("Receive Started");
       if (Client == null || string.IsNullOrEmpty(StreamId))
-        throw new Exception("Receiver has not been initialized. Please call Init().");
+        Debug.LogException(new Exception("Receiver has not been initialized. Please call Init()."));
 
       Task.Run(async () =>
       {
@@ -97,7 +97,7 @@ namespace Speckle.ConnectorUnity
           Debug.Log($"Calling to branch {BranchName}");
           var mainBranch = await Client.BranchGet(StreamId, BranchName, 1);
           if (!mainBranch.commits.items.Any())
-            throw new Exception("This branch has no commits");
+            Debug.LogException(new Exception("This branch has no commits"));
 
           var commit = mainBranch.commits.items[0];
           Debug.Log($"commit id={commit}");
