@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   description: Basic Speckle Converter
   author: Speckle
-  websiteOrEmail: speckle.systems
+  websiteOrEmail: https://speckle.systems/
   useRenderMaterial: 1
   defaultMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   baseConverter: {fileID: 11400000, guid: e93ea16606c8f3f46bee59eb2de69ed8, type: 2}

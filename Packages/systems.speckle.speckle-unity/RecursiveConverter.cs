@@ -19,8 +19,10 @@ namespace Speckle.ConnectorUnity
     ///   Converts a Base object to a GameObject Recursively
     /// </summary>
     /// <param name="base"></param>
+    /// <param name="name"></param>
+    /// <param name="objectConverter"></param>
     /// <returns></returns>
-    public GameObject ConvertRecursivelyToNative(Base @base, string name)
+    public GameObject ConvertRecursivelyToNative(Base @base, string name, ConverterUnity converter)
     {
       //using the ApplicationPlaceholderObject to pass materials
       //available in Assets/Materials to the converters
@@ -28,7 +30,6 @@ namespace Speckle.ConnectorUnity
       if (materials.Length == 0) Debug.Log("To automatically assign materials to recieved meshes, materials have to be in the \'Assets/Resources\' folder!");
       var placeholderObjects = materials.Select(x => new ApplicationPlaceholderObject { NativeObject = x }).ToList();
 
-      var converter = ScriptableObject.CreateInstance<ConverterUnity>();
       converter.SetContextObjects(placeholderObjects);
 
       // case 1: it's an item that has a direct conversion method, eg a point

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
+using Objects.Converter.Unity;
 using Sentry;
 using Speckle.Core.Api;
 using Speckle.Core.Api.SubscriptionModels;
@@ -33,8 +34,7 @@ namespace Speckle.ConnectorUnity
     private Action<int> OnTotalChildrenCountKnown;
     public Stream Stream;
 
-    public Receiver()
-    { }
+    [SerializeField] private ConverterUnity objectConverter;
 
     private Client Client { get; set; }
 
@@ -45,12 +45,13 @@ namespace Speckle.ConnectorUnity
     /// <param name="autoReceive">If true, it will automatically receive updates sent to this stream</param>
     /// <param name="deleteOld">If true, it will delete previously received objects when new one are received</param>
     /// <param name="account">Account to use, if null the default account will be used</param>
+    /// <param name="converter">Object converter to use </param>
     /// <param name="onDataReceivedAction">Action to run after new data has been received and converted</param>
     /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
     /// <param name="onErrorAction">Action to run on error</param>
     /// <param name="onTotalChildrenCountKnown">Action to run when the TotalChildrenCount is known</param>
     public void Init(
-      string streamId, bool autoReceive = false, bool deleteOld = true, Account account = null,
+      string streamId, bool autoReceive = false, bool deleteOld = true, Account account = null, ConverterUnity converter = null,
       Action<GameObject> onDataReceivedAction = null, Action<ConcurrentDictionary<string, int>> onProgressAction = null,
       Action<string, Exception> onErrorAction = null, Action<int> onTotalChildrenCountKnown = null
     )
@@ -62,6 +63,12 @@ namespace Speckle.ConnectorUnity
       OnErrorAction = onErrorAction;
       OnProgressAction = onProgressAction;
       OnTotalChildrenCountKnown = onTotalChildrenCountKnown;
+
+      if (this.objectConverter == null)
+      {
+        this.objectConverter = converter != null ? converter : ScriptableObject.CreateInstance<ConverterUnity>();
+      }
+
 
       Client = new Client(account ?? AccountManager.GetDefaultAccount());
 
@@ -79,6 +86,7 @@ namespace Speckle.ConnectorUnity
     /// <returns></returns>
     public void Receive()
     {
+      Debug.Log("Receive Started");
       if (Client == null || string.IsNullOrEmpty(StreamId))
         throw new Exception("Receiver has not been initialized. Please call Init().");
 
@@ -86,11 +94,13 @@ namespace Speckle.ConnectorUnity
       {
         try
         {
+          Debug.Log($"Calling to branch {BranchName}");
           var mainBranch = await Client.BranchGet(StreamId, BranchName, 1);
           if (!mainBranch.commits.items.Any())
             throw new Exception("This branch has no commits");
 
           var commit = mainBranch.commits.items[0];
+          Debug.Log($"commit id={commit}");
           GetAndConvertObject(commit.referencedObject, commit.id);
         }
         catch (Exception e)
@@ -118,9 +128,11 @@ namespace Speckle.ConnectorUnity
 
     private async void GetAndConvertObject(string objectId, string commitId)
     {
+      Debug.Log($"obj id={objectId}");
       try
       {
-        Tracker.TrackPageview(Tracker.RECEIVE);
+        //TODO: Replace with new tracker stuff
+        // Tracker.TrackPageview(Tracker.RECEIVE);
 
         var transport = new ServerTransport(Client.Account, StreamId);
         var @base = await Operations.Receive(
@@ -131,11 +143,12 @@ namespace Speckle.ConnectorUnity
           onTotalChildrenCountKnown: OnTotalChildrenCountKnown,
           disposeTransports: true
         );
+        
         Dispatcher.Instance().Enqueue(() =>
         {
-
+          Debug.Log("Sending to Dispatcher");
           var rc = GetComponent<RecursiveConverter>();
-          var go = rc.ConvertRecursivelyToNative(@base, commitId);
+          var go = rc.ConvertRecursivelyToNative(@base, commitId, objectConverter);
           //remove previously received object
           if (DeleteOld && ReceivedData != null)
             Destroy(ReceivedData);
