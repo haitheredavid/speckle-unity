@@ -64,29 +64,24 @@ namespace Objects.Converter.Unity
 
     public List<ApplicationPlaceholderObject> ContextObjects { get; set; } = new List<ApplicationPlaceholderObject>();
 
-    public void SetContextObjects(List<ApplicationPlaceholderObject> objects) => ContextObjects = objects;
+    public virtual void SetContextObjects(List<ApplicationPlaceholderObject> objects) => ContextObjects = objects;
 
-    public void SetContextDocument(object doc)
+    public virtual void SetContextDocument(object doc)
     {
       Debug.Log("Empty call from SetContextDocument");
     }
 
-    public void SetPreviousContextObjects(List<ApplicationPlaceholderObject> objects)
+    public virtual void SetPreviousContextObjects(List<ApplicationPlaceholderObject> objects)
     {
       Debug.Log("Empty call from SetPreviousContextObjects");
     }
 
-    public void SetConverterSettings(object settings)
+    public virtual void SetConverterSettings(object settings)
     {
       Debug.Log($"Converter Settings being set with {settings}");
     }
 
-    public void OnEnable()
-    {
-      defaultMaterial ??= new Material(Shader.Find("Standard"));
-    }
-
-    public Base ConvertToSpeckle(object @object)
+    public virtual Base ConvertToSpeckle(object @object)
     {
       switch (@object)
       {
@@ -100,7 +95,7 @@ namespace Objects.Converter.Unity
       }
     }
 
-    public object ConvertToNative(Base @base)
+    public virtual object ConvertToNative(Base @base)
     {
       if (@base == null)
       {
@@ -155,7 +150,7 @@ namespace Objects.Converter.Unity
 
     public List<object> ConvertToNative(List<Base> objects) => objects.Select(ConvertToNative).ToList();
 
-    public bool CanConvertToSpeckle(object @object)
+    public virtual bool CanConvertToSpeckle(object @object)
     {
       switch (@object)
       {
@@ -166,7 +161,7 @@ namespace Objects.Converter.Unity
       }
     }
 
-    public bool CanConvertToNative(Base @object)
+    public virtual bool CanConvertToNative(Base @object)
     {
       switch (@object)
       {
