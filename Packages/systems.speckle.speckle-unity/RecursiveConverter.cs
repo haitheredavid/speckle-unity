@@ -13,7 +13,7 @@ namespace Speckle.ConnectorUnity
   public class RecursiveConverter : MonoBehaviour
   {
 
-    // private ConverterUnity _converter = new ConverterUnity();
+    private ConverterUnity converter;
 
     /// <summary>
     ///   Converts a Base object to a GameObject Recursively
@@ -22,15 +22,20 @@ namespace Speckle.ConnectorUnity
     /// <param name="name"></param>
     /// <param name="objectConverter"></param>
     /// <returns></returns>
-    public GameObject ConvertRecursivelyToNative(Base @base, string name, ConverterUnity converter)
+    public GameObject ConvertRecursivelyToNative(Base @base, string name, ConverterUnity objectConverter)
     {
+
       //using the ApplicationPlaceholderObject to pass materials
       //available in Assets/Materials to the converters
       var materials = Resources.LoadAll("", typeof(Material)).Cast<Material>().ToArray();
       if (materials.Length == 0) Debug.Log("To automatically assign materials to recieved meshes, materials have to be in the \'Assets/Resources\' folder!");
       var placeholderObjects = materials.Select(x => new ApplicationPlaceholderObject { NativeObject = x }).ToList();
 
+      converter = objectConverter;
       converter.SetContextObjects(placeholderObjects);
+      Debug.Log($"Converter set to {converter.Name}");
+      Debug.Log($"trying to convert {@base.speckle_type}");
+
 
       // case 1: it's an item that has a direct conversion method, eg a point
       if (converter.CanConvertToNative(@base))
@@ -38,6 +43,7 @@ namespace Speckle.ConnectorUnity
         var go = TryConvertItemToNative(@base);
         return go;
       }
+      
 
       // case 2: it's a wrapper Base
       //       2a: if there's only one member unpack it
@@ -107,7 +113,6 @@ namespace Speckle.ConnectorUnity
       if (value.GetType().IsSimpleType() || !(value is Base)) return null;
 
       var @base = (Base)value;
-      var converter = ScriptableObject.CreateInstance<ConverterUnity>();
 
       //it's an unsupported Base, go through each of its property and try convert that
       if (!converter.CanConvertToNative(@base))
@@ -140,7 +145,7 @@ namespace Speckle.ConnectorUnity
       }
       try
       {
-        var go = converter.ConvertToNative(@base) as GameObject;
+        var go = converter.ConvertToNative(@base) as Component;
         // Some revit elements have nested elements in a "elements" property
         // for instance hosted families on a wall
         if (go != null && @base["elements"] is List<Base> l && l.Any())
@@ -153,7 +158,7 @@ namespace Speckle.ConnectorUnity
           }
         }
 
-        return go;
+        return go.gameObject;
       }
       catch (Exception e)
       {
