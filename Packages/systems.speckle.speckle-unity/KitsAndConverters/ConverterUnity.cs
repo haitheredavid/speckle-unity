@@ -128,9 +128,14 @@ namespace Objects.Converter.Unity
 
           if (@base["displayValue"] is IEnumerable<Base> bs)
           {
-            // TODO: Handle lists 
-            Debug.LogWarning("Skipping display values as list as this is not handled properly");
-            return null;
+            var go = new GameObject("List");
+            foreach (var obj in bs.OfType<Mesh>())
+            {
+              var res = TryConvert(meshConverter, obj);
+              if (res != null)
+                res.transform.SetParent(go.transform);
+            }
+            return go;
           }
 
           if (@base["displayValue"] is Base b)

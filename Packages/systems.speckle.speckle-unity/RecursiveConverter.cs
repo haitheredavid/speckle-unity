@@ -19,10 +19,10 @@ namespace Speckle.ConnectorUnity
     ///   Converts a Base object to a GameObject Recursively
     /// </summary>
     /// <param name="base"></param>
-    /// <param name="name"></param>
+    /// <param name="parentName"></param>
     /// <param name="objectConverter"></param>
     /// <returns></returns>
-    public GameObject ConvertRecursivelyToNative(Base @base, string name, ConverterUnity objectConverter)
+    public GameObject ConvertRecursivelyToNative(Base @base, string parentName, ConverterUnity objectConverter)
     {
 
       //using the ApplicationPlaceholderObject to pass materials
@@ -33,9 +33,8 @@ namespace Speckle.ConnectorUnity
 
       converter = objectConverter;
       converter.SetContextObjects(placeholderObjects);
-      Debug.Log($"Converter set to {converter.Name}");
-      Debug.Log($"trying to convert {@base.speckle_type}");
 
+      Debug.Log($"Converter set to {converter.Name}");
 
       // case 1: it's an item that has a direct conversion method, eg a point
       if (converter.CanConvertToNative(@base))
@@ -43,7 +42,7 @@ namespace Speckle.ConnectorUnity
         var go = TryConvertItemToNative(@base);
         return go;
       }
-      
+
 
       // case 2: it's a wrapper Base
       //       2a: if there's only one member unpack it
@@ -52,15 +51,22 @@ namespace Speckle.ConnectorUnity
       if (members.Count() == 1)
       {
         var go = RecurseTreeToNative(@base[members.First()]);
-        go.name = members.First();
-        return go;
+        if (go != null)
+        {
+          go.name = members.First();
+          return go;
+        }
+        else
+        {
+          return null;
+        }
       }
       else
       {
         //empty game object with the commit id as name, used to contain all the rest
         var go = new GameObject
         {
-          name = name.Valid() ? name : "Base"
+          name = parentName.Valid() ? parentName : "Base"
         };
 
         foreach (var member in members)
@@ -145,27 +151,54 @@ namespace Speckle.ConnectorUnity
       }
       try
       {
-        var go = converter.ConvertToNative(@base) as Component;
-        // Some revit elements have nested elements in a "elements" property
-        // for instance hosted families on a wall
-        if (go != null && @base["elements"] is List<Base> l && l.Any())
+        var res = converter.ConvertToNative(@base);
+        
+        if (res == null)
         {
-          var goo = RecurseTreeToNative(l);
-          if (goo != null)
-          {
-            goo.name = "elements";
-            goo.transform.parent = go.transform;
-          }
+          Debug.LogWarning("Object was not converted correclty");
+          return null;
         }
+        
+        Debug.Log($"Resulted conversion to type={res.GetType()}");
 
-        return go.gameObject;
+        GameObject go = null;
+        
+        if (res is Component comp)
+          go = comp.gameObject;
+        else if (res is GameObject g)
+          go = g;
+        else
+        {
+          Debug.LogWarning("Unhandled object type being passed back from converter");
+          return null;
+        }
+        
+        CheckElements(go, @base);
+        
+        return go;
       }
       catch (Exception e)
       {
-        throw new SpeckleException(e.Message, e, true, SentryLevel.Error);
+        Debug.LogException(new SpeckleException(e.Message, e, true, SentryLevel.Error));
+        return null;
       }
     }
-
+    
+    // Some revit elements have nested elements in a "elements" property
+    // for instance hosted families on a wall
+    private void CheckElements(GameObject go, Base @base)
+    {
+      if (go != null && @base["elements"] is List<Base> l && l.Any())
+      {
+        var goo = RecurseTreeToNative(l);
+        if (goo != null)
+        {
+          goo.name = "elements";
+          goo.transform.SetParent(transform);
+        }
+      }
+    }
+    
     private static bool IsList(object @object)
     {
       if (@object == null)
