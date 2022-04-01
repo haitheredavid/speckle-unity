@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Objects.Converter.Unity;
 using Sentry;
 using Speckle.Core.Api;
@@ -23,79 +24,99 @@ namespace Speckle.ConnectorUnity
   /// </summary>
   public class Sender : MonoBehaviour
   {
+    public bool useDefaultCache = true;
+    [SerializeField] private StreamShell streamShell;
     [SerializeField] private ConverterUnity converter;
 
-    private CancellationTokenSource cancellation;
+    private bool isCanceled = false;
 
-    private void OnEnable()
-    {
-      cancellation?.Dispose();
-    }
-
-    private void OnDisable()
-    {
-      cancellation?.Cancel();
-      cancellation?.Dispose();
-    }
-    
-    // TODO: should we be sending a list of game objects?
-    /// <summary>
-    ///   Converts and sends the data of the last commit on the Stream
-    /// </summary>
-    /// <param name="shell">ID of the stream to send to</param>
-    /// <param name="gameObjects">List of gameObjects to convert and send</param>
-    /// <param name="message"></param>
+    private Client client;
+    private Action<string> onDataSent;
+    private Action<ConcurrentDictionary<string, int>> onProgressReport;
+    private Action<string, Exception> onErrorReported;
+    /// <param name="shell">stream to send data to</param>
     /// <param name="converterUnity">Converter to use for sending objects</param>
     /// <param name="account">Account to use. If not provided the default account will be used</param>
     /// <param name="onDataSentAction">Action to run after the data has been sent</param>
     /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
     /// <param name="onErrorAction">Action to run on error</param>
-    /// <exception cref="SpeckleException"></exception>
-    public async void Send(
-      StreamShell shell, List<GameObject> gameObjects, string message = null, ConverterUnity converterUnity = null, Account account = null,
+    public void Init(
+      Account account,
+      StreamShell shell = null,
+      ConverterUnity converterUnity = null,
       Action<string> onDataSentAction = null,
       Action<ConcurrentDictionary<string, int>> onProgressAction = null,
       Action<string, Exception> onErrorAction = null
     )
     {
-      if (converterUnity != null)
-        converter = converterUnity;
+      // use either the params or the data stored here
+      if (shell != null) streamShell = shell;
 
-      Debug.Log("converting data");
-      cancellation = new CancellationTokenSource();
+      if (converterUnity != null) converter = converterUnity;
 
-      var data = ConvertRecursivelyToSpeckle(gameObjects);
+      client = new Client(account);
+
+      onDataSent = onDataSentAction;
+      onProgressReport = onProgressAction;
+      onErrorReported = onErrorAction;
+    }
+    public void OnDestroy()
+    {
+      Debug.Log("On Destory called");
+    }
+
+    /// <summary>
+    ///   Converts and sends the data of the last commit on the Stream
+    /// </summary>
+    /// <param name="shell">ID of the stream to send to</param>
+    /// <param name="gameObjects">List of gameObjects to convert and send</param>
+    /// <param name="message">Message to send with the commit</param>
+    /// <param name="cancellation">Token for calling cancellation. If nothing is passed the game object will act as the source</param>
+    /// <exception cref="SpeckleException"></exception>
+    public async UniTaskVoid Send(List<GameObject> gameObjects, string message = null, CancellationTokenSource cancellation = null)
+    {
+      var @base = ConvertRecursivelyToSpeckle(gameObjects);
 
       try
       {
-        var transport = new ServerTransport(AccountManager.GetDefaultAccount(), shell.streamId);
-
         Debug.Log("Sending data");
 
-        var objectId = await Operations.Send(
-          data, cancellation.Token, new List<ITransport> { transport },
-          true,
-          onProgressAction,
-          onErrorAction);
+        var commitId = "";
+        // stream id can be the url too if we want to specify branch too 
+        (isCanceled, commitId) = await SpeckleConnector.Send(
+          streamShell.streamId,
+          @base, message,
+          client.Account,
+          onProgress: onProgressReport,
+          onError: onErrorReported).SuppressCancellationThrow();
 
-        var client = new Client(account ?? AccountManager.GetDefaultAccount());
+        // NOTE: Calling from operations is causing an issue with unity but the helper one works just fine
+        // var transport = new ServerTransport(client.Account, streamShell.streamId);
+        // (isCanceled, objectId) = await SpeckleConnector.Send(
+        //   @base,
+        //   this.GetCancellationTokenOnDestroy(),
+        //   new List<ITransport>() { transport },
+        //   true,
+        //   onProgressReport,
+        //   onErrorReported
+        // ).SuppressCancellationThrow();
 
-        Debug.Log("creating Commit");
-
-        var res = await client.CommitCreate(cancellation.Token, new CommitCreateInput
+        // checks if UniTask was cancelled
+        if (isCanceled)
         {
-          streamId = shell.streamId,
-          branchName = shell.branch,
-          objectId = objectId,
-          message = message,
-          sourceApplication = HostApplications.Unity.Name
-        });
+          Debug.LogWarning("Data sent to speckle was cancelled");
+          return;
+        }
 
-        onDataSentAction?.Invoke(res);
+        Debug.Log($"data sent! {commitId}");
+
+        onDataSent?.Invoke(commitId);
+
+        UniTask.Yield();
       }
       catch (Exception e)
       {
-        throw new SpeckleException(e.Message, e, true, SentryLevel.Error);
+        Debug.LogException(new SpeckleException(e.Message, e, true, SentryLevel.Error));
       }
     }
 
