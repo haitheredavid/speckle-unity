@@ -3,16 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using Objects.Converter.Unity;
 using Sentry;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
-using Speckle.Core.Kits;
 using Speckle.Core.Logging;
 using Speckle.Core.Models;
-using Speckle.Core.Transports;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity
@@ -59,23 +55,23 @@ namespace Speckle.ConnectorUnity
       onDataSent = onDataSentAction;
       onProgressReport = onProgressAction;
       onErrorReported = onErrorAction;
+
+      if (converter == null)
+        converter = ScriptableObject.CreateInstance<ConverterUnity>();
     }
     public void OnDestroy()
     {
       Debug.Log("On Destory called");
     }
 
-    /// <summary>
-    ///   Converts and sends the data of the last commit on the Stream
-    /// </summary>
-    /// <param name="shell">ID of the stream to send to</param>
-    /// <param name="gameObjects">List of gameObjects to convert and send</param>
-    /// <param name="message">Message to send with the commit</param>
-    /// <param name="cancellation">Token for calling cancellation. If nothing is passed the game object will act as the source</param>
-    /// <exception cref="SpeckleException"></exception>
-    public async UniTaskVoid Send(List<GameObject> gameObjects, string message = null, CancellationTokenSource cancellation = null)
+    public async UniTaskVoid Send(List<GameObject> objs, string message = null, CancellationTokenSource cancellationToken = null)
     {
-      var @base = ConvertRecursivelyToSpeckle(gameObjects);
+      var data = objs.Count > 1 ? new Base
+          {
+            ["objects"] = objs.Select(ConvertRecursively).Where(x => x != null).ToList()
+          }
+          : ConvertRecursively(objs[0])
+        ;
 
       try
       {
@@ -84,9 +80,10 @@ namespace Speckle.ConnectorUnity
         var commitId = "";
         // stream id can be the url too if we want to specify branch too 
         (isCanceled, commitId) = await SpeckleConnector.Send(
-          streamShell.streamId,
-          @base, message,
-          client.Account,
+          streamId: streamShell.streamId,
+          data,
+          message: message.Valid() ? message : $"Objects from Unity {data.totalChildrenCount}",
+          account: client.Account,
           onProgress: onProgressReport,
           onError: onErrorReported).SuppressCancellationThrow();
 
@@ -102,6 +99,7 @@ namespace Speckle.ConnectorUnity
         // ).SuppressCancellationThrow();
 
         // checks if UniTask was cancelled
+
         if (isCanceled)
         {
           Debug.LogWarning("Data sent to speckle was cancelled");
@@ -109,9 +107,7 @@ namespace Speckle.ConnectorUnity
         }
 
         Debug.Log($"data sent! {commitId}");
-
         onDataSent?.Invoke(commitId);
-
         UniTask.Yield();
       }
       catch (Exception e)
@@ -121,20 +117,8 @@ namespace Speckle.ConnectorUnity
     }
 
     #region private methods
-    private Base ConvertRecursivelyToSpeckle(List<GameObject> gos)
+    private Base ConvertRecursively(GameObject go)
     {
-      if (gos.Count == 1) return RecurseTreeToNative(gos[0]);
-
-      var @base = new Base();
-      @base["objects"] = gos.Select(x => RecurseTreeToNative(x)).Where(x => x != null).ToList();
-      return @base;
-    }
-
-    private Base RecurseTreeToNative(GameObject go)
-    {
-      if (converter == null)
-        converter = ScriptableObject.CreateInstance<ConverterUnity>();
-
       if (converter.CanConvertToSpeckle(go))
         try
         {
@@ -143,28 +127,27 @@ namespace Speckle.ConnectorUnity
         catch (Exception e)
         {
           Debug.LogException(e);
-          return null;
         }
+
+      return CheckForChildren(go, out var objs) ?
+        new Base { ["objects"] = objs } : null;
+    }
+
+    private bool CheckForChildren(GameObject go, out List<Base> objs)
+    {
+      objs = new List<Base>();
 
       if (go.transform.childCount > 0)
       {
-        var @base = new Base();
-        var objects = new List<Base>();
-        for (var i = 0; i < go.transform.childCount; i++)
+        foreach (Transform child in go.transform)
         {
-          var goo = RecurseTreeToNative(go.transform.GetChild(i).gameObject);
-          if (goo != null)
-            objects.Add(goo);
-        }
-
-        if (objects.Any())
-        {
-          @base["objects"] = objects;
-          return @base;
+          var converted = ConvertRecursively(child.gameObject);
+          if (converted != null)
+            objs.Add(converted);
         }
       }
 
-      return null;
+      return objs.Any();
     }
     #endregion
 

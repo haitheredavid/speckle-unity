@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using Objects.Geometry;
 using Objects.Other;
-using Speckle.ConnectorUnity;
 using Speckle.Core.Kits;
 using UnityEditor;
 using UnityEngine;
+using Mesh = Objects.Geometry.Mesh;
 
-namespace Objects.Converter.Unity
+namespace Speckle.ConnectorUnity
 {
   public partial class ConverterUnity
   {
@@ -47,7 +47,7 @@ namespace Objects.Converter.Unity
         }
 
         var c = renderMaterial.diffuse.ToUnityColor();
-        mat.color = new Color(c.r, c.g, c.b, Convert.ToSingle(renderMaterial.opacity));
+        mat.color = new Color(c.r, c.g, c.b, System.Convert.ToSingle(renderMaterial.opacity));
         mat.name = renderMaterial.name == null ? "material-" + Guid.NewGuid().ToString().Substring(0, 8) : renderMaterial.name;
 
 
@@ -85,7 +85,7 @@ namespace Objects.Converter.Unity
     /// </summary>
     /// <param name="speckleMesh"></param>
     /// <returns></returns>
-    public Geometry.Mesh MeshToSpeckle(GameObject go)
+    public Mesh MeshToSpeckle(GameObject go)
     {
       //TODO: support multiple filters?
       var filter = go.GetComponent<MeshFilter>();
@@ -106,7 +106,7 @@ namespace Objects.Converter.Unity
         i += 3;
       }
 
-      var mesh = new Geometry.Mesh();
+      var mesh = new Objects.Geometry.Mesh();
       // get the speckle data from the go here
       // so that if the go comes from speckle, typed props will get overridden below
       var bb = go.GetComponent<BaseBehaviour>();

@@ -1,15 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Objects;
 using Objects.BuiltElements;
 using Objects.Geometry;
-using Objects.Other;
+using Sentry;
 using Speckle.Core.Kits;
+using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using UnityEngine;
 using Mesh = Objects.Geometry.Mesh;
 
-namespace Objects.Converter.Unity
+namespace Speckle.ConnectorUnity
 {
 
   [CreateAssetMenu(fileName = "UnityConverter", menuName = "Speckle/Speckle Unity Converter", order = -1)]
@@ -29,17 +32,16 @@ namespace Objects.Converter.Unity
     #region converters
     [Space]
     [Header("Component Converters")]
-    [SerializeField] protected ComponentConverterBase baseConverter;
+    // [SerializeField] protected ComponentConverterBase defaultConverter;
     [SerializeField] protected ComponentConverterMesh meshConverter;
-
-    [SerializeField] protected ComponentConverterLine lineConverter;
-    [SerializeField] protected ComponentConverterCurve curveConverter;
     [SerializeField] protected ComponentConverterPolyline polylineConverter;
-
     [SerializeField] protected ComponentConverterPoint pointConverter;
     [SerializeField] protected ComponentConverterPointCloud cloudConverter;
     [SerializeField] protected ComponentConverterView3D view3DConverter;
     #endregion
+
+    [Space]
+    [SerializeField] private List<ComponentConverter> otherConverters;
 
     #region converter properties
     public string Name => name;
@@ -53,7 +55,7 @@ namespace Objects.Converter.Unity
     /// <summary>
     /// Default Unity units are in meters
     /// </summary>
-    public string ModelUnits => Speckle.Core.Kits.Units.Meters;
+    public string ModelUnits => Units.Meters;
     #endregion converter properties
 
     public ProgressReport Report { get; }
@@ -95,6 +97,30 @@ namespace Objects.Converter.Unity
       }
     }
 
+    private Dictionary<string, ComponentConverter> converters;
+
+    private void CompileConverters()
+    {
+      converters = new Dictionary<string, ComponentConverter>()
+      {
+        { meshConverter.speckle_type, meshConverter },
+        { polylineConverter.speckle_type, polylineConverter },
+        { cloudConverter.speckle_type, cloudConverter },
+        { pointConverter.speckle_type, pointConverter },
+        { view3DConverter.speckle_type, view3DConverter }
+      };
+
+      if (otherConverters != null && otherConverters.Any())
+        foreach (var c in otherConverters)
+          converters.Add(c.speckle_type, c);
+
+      foreach (var c in converters.Values)
+      {
+        if (c is IWantContextObj wanter)
+          wanter.contextObjects = ContextObjects;
+      }
+    }
+
     public virtual object ConvertToNative(Base @base)
     {
       if (@base == null)
@@ -103,52 +129,126 @@ namespace Objects.Converter.Unity
         return null;
       }
 
-      switch (@base)
+      foreach (var pair in converters)
       {
-        case Point o:
-          return TryConvert(pointConverter, o);
-        case Pointcloud o:
-          return TryConvert(cloudConverter, o);
-        case Line o:
-          return TryConvert(lineConverter, o);
-        case Polyline o:
-          return TryConvert(polylineConverter, o);
-        case Curve o:
-          return TryConvert(curveConverter, o);
-        case View3D o:
-          return TryConvert(view3DConverter, o);
-        case Mesh o:
-          return TryConvert(meshConverter, o);
-        // if (meshConverter != null) // TODO: address converters needing dependency from unity
-        // return meshConverter.ToComponent(o, useRenderMaterial ? GetMaterial((RenderMaterial)o["renderMaterial"]) : defaultMaterial);
-        default:
-          //capture any other object that might have a mesh representation
-          if (@base["displayValue"] is Mesh mesh)
-            return TryConvert(meshConverter, mesh);
+        if (pair.Key.Equals(@base.speckle_type))
+          return pair.Value.ToNative(@base);
+      }
 
-          if (@base["displayValue"] is IEnumerable<Base> bs)
-          {
-            var go = new GameObject("List");
-            foreach (var obj in bs.OfType<Mesh>())
-            {
-              var res = TryConvert(meshConverter, obj);
-              if (res != null)
-                res.transform.SetParent(go.transform);
-            }
-            return go;
-          }
+      Debug.Log($"No Converters were found to handle {@base.speckle_type}, trying for display value");
 
-          if (@base["displayValue"] is Base b)
-            return TryConvert(baseConverter, b);
+      if (@base["displayValue"] is Mesh mesh)
+      {
+        Debug.Log("Handling Singluar Display Value");
+        return meshConverter.ToNative(mesh);
+      }
 
-          Debug.LogWarning($"Skipping {@base.GetType()} {@base.id} - Not supported type");
+      if (@base["displayValue"] is IEnumerable<Base> bs)
+      {
+        Debug.Log("Handling List of Display Value");
+
+        var go = new GameObject(@base.speckle_type);
+        var potDisplayValues = RecurseTreeToNative(bs, "DisplayValues");
+
+        if (potDisplayValues != null)
+          potDisplayValues.transform.SetParent(go.transform);
+
+        return go;
+      }
+
+      Debug.LogWarning($"Skipping {@base.GetType()} {@base.id} - Not supported type");
+      return null;
+    }
+
+    public GameObject ConvertRecursively(object value)
+    {
+      if (value == null)
+        return null;
+
+      if (converters == null || !converters.Any())
+        CompileConverters();
+
+      //it's a simple type or not a Base
+      if (value.GetType().IsSimpleType() || !(value is Base @base)) return null;
+
+      return CanConvertToNative(@base) ?
+        TryConvertToNative(@base) : // supported object so convert that 
+        TryConvertProperties(@base); // not supported but might have props
+
+    }
+
+    private GameObject TryConvertToNative(Base @base)
+    {
+      try
+      {
+        var go = ConvertToNative(@base) as GameObject;
+
+        if (go == null)
+        {
+          Debug.LogWarning("Object was not converted correclty");
           return null;
+        }
+
+        if (HasElements(@base, out var elements))
+        {
+          var goo = RecurseTreeToNative(elements, "Elements");
+
+          if (goo != null)
+            goo.transform.SetParent(go.transform);
+        }
+        return go;
+      }
+      catch (Exception e)
+      {
+        Debug.LogException(new SpeckleException(e.Message, e, true, SentryLevel.Error));
+        return null;
       }
     }
 
-    protected Component TryConvert<TBase>(ComponentConverter<TBase> converter, TBase @base) where TBase : Base
+    private GameObject TryConvertProperties(Base @base)
     {
-      return converter != null ? converter.ToComponent(@base) : null;
+      var go = new GameObject(@base.speckle_type);
+
+      // go.AddComponent<SpeckleStream>();
+
+      var props = new List<GameObject>();
+
+      foreach (var prop in @base.GetMemberNames().ToList())
+      {
+        var goo = RecurseTreeToNative(@base[prop]);
+        if (goo != null)
+        {
+          goo.name = prop;
+          goo.transform.SetParent(go.transform);
+          props.Add(goo);
+        }
+      }
+
+      //if no children is valid, return null
+      if (!props.Any())
+      {
+        Utils.SafeDestroy(go);
+        return null;
+      }
+
+      return go;
+    }
+
+    private GameObject RecurseTreeToNative(object @object, string containerName = null)
+    {
+      if (!IsList(@object))
+        return ConvertRecursively(@object);
+
+      var list = ((IEnumerable)@object).Cast<object>();
+
+      var go = new GameObject(containerName.Valid() ? containerName : "List");
+
+      var objects = list.Select(x => RecurseTreeToNative(x)).Where(x => x != null).ToList();
+
+      if (objects.Any())
+        objects.ForEach(x => x.transform.SetParent(go.transform));
+
+      return go;
     }
 
     public List<Base> ConvertToSpeckle(List<object> objects) => objects.Select(ConvertToSpeckle).ToList();
@@ -182,14 +282,45 @@ namespace Objects.Converter.Unity
         //   return true;
         // case View2D _:
         //   return false;
-        case IDisplayValue<Geometry.Mesh> _:
+        case IDisplayValue<Mesh> _:
           return true;
-        case Geometry.Mesh _:
+        case Mesh _:
           return true;
         default:
-          return @object["displayMesh"] is Geometry.Mesh;
+          return @object["displayMesh"] is Mesh;
       }
     }
 
+    #region static methods
+    private static bool HasElements(Base @base, out List<Base> items)
+    {
+      items = null;
+
+      if (@base["elements"] is List<Base> l && l.Any())
+        items = l;
+
+      return items != null;
+    }
+
+    private static bool IsList(object @object)
+    {
+      if (@object == null)
+        return false;
+
+      var type = @object.GetType();
+      return typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type) && type != typeof(string);
+    }
+
+    private static bool IsDictionary(object @object)
+    {
+      if (@object == null)
+        return false;
+
+      var type = @object.GetType();
+      return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+    }
+    #endregion
+
   }
+
 }

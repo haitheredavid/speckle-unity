@@ -12,7 +12,7 @@ namespace Speckle.ConnectorUnity
   ///   This class gets attached to GOs and is used to store Speckle's metadata when sending / receiving
   /// </summary>
   [Serializable]
-  public class SpeckleProperties : ScriptableObject, ISerializationCallbackReceiver
+  public class SpeckleProperties : ISerializationCallbackReceiver
   {
 
     [SerializeField] [HideInInspector]

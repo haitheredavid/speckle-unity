@@ -1,25 +1,35 @@
-﻿using System.Linq;
-using Objects.Geometry;
+﻿using Objects.Geometry;
+using Speckle.Core.Models;
 using UnityEngine;
 
-namespace Objects.Converter.Unity
+namespace Speckle.ConnectorUnity
 {
-  [CreateAssetMenu(fileName = "PolylineConverter", menuName = "Speckle/Polyline Converter")]
-  public class ComponentConverterPolyline : ComponentConverter<Polyline>
+  [CreateAssetMenu(fileName = "CurveConverter", menuName = "Speckle/Curve Converter")]
+  public class ComponentConverterPolyline : ComponentConverter<Polyline, LineRenderer>
   {
-
     public float diameter;
 
     /// <summary>
-    ///   Converts a Speckle polyline to a GameObject with a line renderer
+    ///   Converts a Speckle curve to a GameObject with a line renderer
     /// </summary>
     /// <param name="base"></param>
     /// <returns></returns>
-    protected override Component Process(Polyline @base)
+    protected override GameObject ConvertBase(Polyline @base)
     {
-      var line = New<LineRenderer>(@base.speckle_type);
-      line.SetupLineRenderer(@base.GetPoints()?.Select(x => ToVector3(x)).ToArray(), diameter);
-      return line;
+      var line = BuildGo(@base.speckle_type);
+
+      line.SetupLineRenderer(@base.GetPoints().ArrayToPoints(@base.units), diameter);
+
+      return line.gameObject;
+    }
+
+    protected override Base ConvertComponent(LineRenderer component)
+    {
+      // TODO: check if this should use world or local scale
+      var points = new Vector3[component.positionCount];
+      component.GetPositions(points);
+
+      return new Polyline(points.ToSpeckle());
     }
   }
 }

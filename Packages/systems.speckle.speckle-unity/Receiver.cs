@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using Objects.Converter.Unity;
-using Sentry;
 using Speckle.Core.Api;
-using Speckle.Core.Api.SubscriptionModels;
 using Speckle.Core.Credentials;
-using Speckle.Core.Kits;
-using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using Speckle.Core.Transports;
 using UnityEngine;
@@ -20,7 +13,7 @@ namespace Speckle.ConnectorUnity
   ///   A Speckle Receiver, it's a wrapper around a basic Speckle Client
   ///   that handles conversions and subscriptions for you
   /// </summary>
-  [RequireComponent(typeof(RecursiveConverter))]
+  [RequireComponent(typeof(SpeckleStream))]
   public class Receiver : MonoBehaviour
   {
     [SerializeField] private StreamShell streamShell;
@@ -125,9 +118,7 @@ namespace Speckle.ConnectorUnity
       // This part doesn't impact the conversion process so let's forget about it
       SpeckleConnector.CommitReceived(client, streamShell.streamId, commit.id).Forget();
 
-
-      var rc = GetComponent<RecursiveConverter>();
-      var go = rc.ConvertRecursivelyToNative(@base, commit.id, converter);
+      var go = converter.ConvertRecursively(@base);
 
       if (go == null)
       {

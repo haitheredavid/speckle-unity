@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
-using Speckle.Core.Logging;
 
 namespace Speckle.ConnectorUnity
 {

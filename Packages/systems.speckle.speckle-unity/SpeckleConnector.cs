@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Objects.Converter.Unity;
 using Sentry;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
@@ -49,11 +48,11 @@ namespace Speckle.ConnectorUnity
 
     private void Start()
     {
-      onCommitReceived.AddListener(arg0 =>
-      {
-        var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        Send(new List<GameObject> { obj }, "test from unity");
-      });
+      // onCommitReceived.AddListener(arg0 =>
+      // {
+      //   var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+      //   Send(new List<GameObject> { obj }, "test from unity");
+      // });
       Receive();
 
     }

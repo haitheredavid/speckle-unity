@@ -1,55 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Objects.Other;
 using Objects.Utils;
-using Speckle.ConnectorUnity;
+using Speckle.Core.Models;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Mesh = Objects.Geometry.Mesh;
 
-namespace Objects.Converter.Unity
+namespace Speckle.ConnectorUnity
 {
   [CreateAssetMenu(fileName = "MeshComponentConverter", menuName = "Speckle/Mesh Converter Component")]
-  public class ComponentConverterMesh : ComponentConverter<Mesh>
+  public class ComponentConverterMesh : ComponentConverter<Mesh, MeshFilter>, IWantContextObj
   {
+
     public bool addMeshCollider = false;
     public bool addRender = true;
     public bool recenterTransform = true;
+    [SerializeField] private Material defaultMaterial;
 
-    /// <summary>
-    /// Converts a SpeckleMesh with a material to a Mesh Filter
-    /// </summary>
-    /// <param name="speckleMesh"></param>
-    /// <param name="material"></param>
-    /// <returns></returns>
-    public virtual Component ToComponent(Mesh speckleMesh, Material material)
+    public List<ApplicationPlaceholderObject> contextObjects { get; set; }
+
+    protected override void OnEnable()
     {
-      var mesh = base.ToComponent(speckleMesh);
+      base.OnEnable();
 
-      if (mesh != null)
-      {
-        var render = mesh.gameObject.GetComponent<MeshRenderer>();
-        if (IsRuntime)
-          render.sharedMaterial = material;
-        else
-          render.material = material;
-      }
-
-      return mesh;
+      if (defaultMaterial == null)
+        defaultMaterial = new Material(Shader.Find("Standard"));
     }
 
-    /// <summary>
-    /// Converts a SpeckleMesh to a Mesh Filter 
-    /// </summary>
-    /// <param name="speckleMesh"></param>
-    /// <returns></returns>
-    protected override Component Process(Mesh speckleMesh)
+    protected override GameObject ConvertBase(Mesh @base)
     {
       // convert the mesh data
-      MeshDataToNative(new[] { speckleMesh }, out var mesh, out var materials);
+      MeshDataToNative(new[] { @base }, out var mesh, out var materials);
 
-      var comp = New<MeshFilter>();
       // Setting mesh to filter once all mesh modifying is done
+      var comp = BuildGo();
+
       if (IsRuntime)
         comp.mesh = mesh;
       else
@@ -58,21 +45,17 @@ namespace Objects.Converter.Unity
       if (addMeshCollider)
         comp.gameObject.AddComponent<MeshCollider>().sharedMesh = IsRuntime ? comp.mesh : comp.sharedMesh;
 
-      if (storeProps)
-        comp.gameObject.AddProps(speckleMesh);
-
       if (addRender)
-        comp.gameObject.AddComponent<MeshRenderer>();
+      {
+        comp.gameObject.AddComponent<MeshRenderer>().sharedMaterials = materials;
+      }
 
-      return comp;
+
+      return comp.gameObject;
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="meshes">meshes to be converted as SubMeshes</param>
-    /// <param name="nativeMesh">The converted native mesh</param>
-    /// <param name="nativeMaterials">The converted materials (one per converted sub-mesh)</param>
+    protected override Base ConvertComponent(MeshFilter component) => throw new NotImplementedException();
+
     private void MeshDataToNative(IReadOnlyCollection<Mesh> meshes, out UnityEngine.Mesh nativeMesh, out Material[] nativeMaterials)
     {
       var verts = new List<Vector3>();
@@ -127,7 +110,7 @@ namespace Objects.Converter.Unity
       int indexOffset = verts.Count;
 
       // Convert Vertices
-      verts.AddRange(ArrayToPoints(speckleMesh.vertices, speckleMesh.units));
+      verts.AddRange(speckleMesh.vertices.ArrayToPoints(speckleMesh.units));
 
       // Convert texture coordinates
       bool hasValidUVs = speckleMesh.TextureCoordinatesCount == speckleMesh.VerticesCount;
@@ -176,8 +159,91 @@ namespace Objects.Converter.Unity
         tris.Add(speckleMesh.faces[i + 2] + indexOffset);
       }
 
+      //  center transform pivot according to the bounds of the model
+      // Bounds meshBounds = new Bounds
+      // {
+      //  center = verts[0]
+      // };
+      //
+      // foreach (var vert in verts)
+      // {
+      //  meshBounds.Encapsulate(vert);
+      // }
+      //
+      // // offset mesh vertices
+      // for (int l = 0; l < verts.Count; l++)
+      // {
+      //  verts[l] -= meshBounds.center;
+      // }
+
+
       // Convert RenderMaterial
-      // materials.Add(GetMaterial(speckleMesh["renderMaterial"] as RenderMaterial));
+      materials.Add(GetMaterial(speckleMesh["renderMaterial"] as RenderMaterial));
+    }
+
+    private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+    private static readonly int Metallic = Shader.PropertyToID("_Metallic");
+    private static readonly int Glossiness = Shader.PropertyToID("_Glossiness");
+
+    // Copied from main repo
+    public Material GetMaterial(RenderMaterial renderMaterial)
+    {
+      //if a renderMaterial is passed use that, otherwise try get it from the mesh itself
+      if (renderMaterial != null)
+      {
+        // 1. match material by name, if any
+        Material matByName = null;
+
+        foreach (var _mat in contextObjects)
+        {
+          if (((Material)_mat.NativeObject).name == renderMaterial.name)
+          {
+            if (matByName == null) matByName = (Material)_mat.NativeObject;
+            else Debug.LogWarning("There is more than one Material with the name \'" + renderMaterial.name + "\'!", (Material)_mat.NativeObject);
+          }
+        }
+        if (matByName != null) return matByName;
+
+        // 2. re-create material by setting diffuse color and transparency on standard shaders
+        Material mat;
+        if (renderMaterial.opacity < 1)
+        {
+          var shader = Shader.Find("Transparent/Diffuse");
+          mat = new Material(shader);
+        }
+        else
+        {
+          mat = defaultMaterial;
+        }
+
+        var c = renderMaterial.diffuse.ToUnityColor();
+        mat.color = new Color(c.r, c.g, c.b, (float)renderMaterial.opacity);
+        mat.name = renderMaterial.name ?? "material-" + Guid.NewGuid().ToString().Substring(0, 8);
+
+        mat.SetFloat(Metallic, (float)renderMaterial.metalness);
+        mat.SetFloat(Glossiness, 1 - (float)renderMaterial.roughness);
+
+        if (renderMaterial.emissive != System.Drawing.Color.Black.ToArgb()) mat.EnableKeyword("_EMISSION");
+        mat.SetColor(EmissionColor, renderMaterial.emissive.ToUnityColor());
+
+        return mat;
+      }
+
+      // 3. if not renderMaterial was passed, the default shader will be used 
+      return defaultMaterial;
+
+    }
+
+    private static IEnumerable<Vector2> GenerateUV(IReadOnlyList<Vector3> verts, float xSize, float ySize)
+    {
+      var uv = new Vector2[verts.Count];
+      for (var i = 0; i < verts.Count; i++)
+      {
+
+        var vert = verts[i];
+        uv[i] = new Vector2(vert.x / xSize, vert.y / ySize);
+      }
+      return uv;
     }
 
   }

@@ -322,7 +322,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1624407935}
   - component: {fileID: 1624407934}
-  - component: {fileID: 1624407936}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -342,10 +341,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 730f6d2eecf16994c918395debc877e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  streamId: 0cf1549d51
-  branch: main
-  commit: 
+  streamShell:
+    streamId: 4f5b4785b0
+    branch: main
+    commit: 18c4e05550
   converter: {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
+  senders: []
+  receivers: []
+  onCommitReceived:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1624407935
 Transform:
   m_ObjectHideFlags: 0
@@ -360,18 +365,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1624407936
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1624407933}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 446eb2de03584f959b5aaf9427734028, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2068176107
 GameObject:
   m_ObjectHideFlags: 0
