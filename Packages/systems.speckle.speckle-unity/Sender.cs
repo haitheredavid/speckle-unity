@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Sentry;
 using Speckle.Core.Api;
-using Speckle.Core.Credentials;
 using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Speckle.ConnectorUnity
 {
@@ -18,105 +17,59 @@ namespace Speckle.ConnectorUnity
   ///   A Speckle Sender, it's a wrapper around a basic Speckle Client
   ///   that handles conversions for you
   /// </summary>
-  public class Sender : MonoBehaviour
+  public class Sender : SpeckleClient
   {
-    public bool useDefaultCache = true;
-    [SerializeField] private StreamShell streamShell;
-    [SerializeField] private ConverterUnity converter;
 
-    private bool isCanceled = false;
+    public UnityAction<string> onDataSent;
 
-    private Client client;
-    private Action<string> onDataSent;
-    private Action<ConcurrentDictionary<string, int>> onProgressReport;
-    private Action<string, Exception> onErrorReported;
-    /// <param name="shell">stream to send data to</param>
-    /// <param name="converterUnity">Converter to use for sending objects</param>
-    /// <param name="account">Account to use. If not provided the default account will be used</param>
-    /// <param name="onDataSentAction">Action to run after the data has been sent</param>
-    /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
-    /// <param name="onErrorAction">Action to run on error</param>
-    public void Init(
-      Account account,
-      StreamShell shell = null,
-      ConverterUnity converterUnity = null,
-      Action<string> onDataSentAction = null,
-      Action<ConcurrentDictionary<string, int>> onProgressAction = null,
-      Action<string, Exception> onErrorAction = null
-    )
+    public async UniTask<string> Send(List<GameObject> objs, string message = null, CancellationTokenSource cancellationToken = null)
     {
-      // use either the params or the data stored here
-      if (shell != null) streamShell = shell;
 
-      if (converterUnity != null) converter = converterUnity;
+      var objectId = "";
 
-      client = new Client(account);
+      if (!IsReady())
+        return objectId;
 
-      onDataSent = onDataSentAction;
-      onProgressReport = onProgressAction;
-      onErrorReported = onErrorAction;
-
-      if (converter == null)
-        converter = ScriptableObject.CreateInstance<ConverterUnity>();
-    }
-    public void OnDestroy()
-    {
-      Debug.Log("On Destory called");
-    }
-
-    public async UniTaskVoid Send(List<GameObject> objs, string message = null, CancellationTokenSource cancellationToken = null)
-    {
-      var data = objs.Count > 1 ? new Base
-          {
-            ["objects"] = objs.Select(ConvertRecursively).Where(x => x != null).ToList()
-          }
-          : ConvertRecursively(objs[0])
-        ;
+      var data = objs.Count > 1 ? ConvertRecursively(objs) : ConvertRecursively(objs[0]);
 
       try
       {
-        Debug.Log("Sending data");
+        ConnectorConsole.Log("Sending data");
 
-        var commitId = "";
-        // stream id can be the url too if we want to specify branch too 
-        (isCanceled, commitId) = await SpeckleConnector.Send(
-          streamId: streamShell.streamId,
+        objectId = await Helpers.Send(
+          rootStream.StreamId,
           data,
-          message: message.Valid() ? message : $"Objects from Unity {data.totalChildrenCount}",
+          message.Valid() ? message : $"Objects from Unity {data.totalChildrenCount}",
+          HostApp,
           account: client.Account,
-          onProgress: onProgressReport,
-          onError: onErrorReported).SuppressCancellationThrow();
+          onProgressAction: onProgressReport,
+          onErrorAction: onErrorReport
+        );
 
-        // NOTE: Calling from operations is causing an issue with unity but the helper one works just fine
-        // var transport = new ServerTransport(client.Account, streamShell.streamId);
-        // (isCanceled, objectId) = await SpeckleConnector.Send(
-        //   @base,
-        //   this.GetCancellationTokenOnDestroy(),
-        //   new List<ITransport>() { transport },
-        //   true,
-        //   onProgressReport,
-        //   onErrorReported
-        // ).SuppressCancellationThrow();
+        Debug.Log($"data sent! {objectId}");
 
-        // checks if UniTask was cancelled
-
-        if (isCanceled)
-        {
-          Debug.LogWarning("Data sent to speckle was cancelled");
-          return;
-        }
-
-        Debug.Log($"data sent! {commitId}");
-        onDataSent?.Invoke(commitId);
+        onDataSent?.Invoke(objectId);
         UniTask.Yield();
       }
+
       catch (Exception e)
       {
         Debug.LogException(new SpeckleException(e.Message, e, true, SentryLevel.Error));
       }
+
+      return objectId;
+
     }
 
     #region private methods
+    private Base ConvertRecursively(IEnumerable<GameObject> objs)
+    {
+      return new Base()
+      {
+        ["objects"] = objs.Select(ConvertRecursively).Where(x => x != null).ToList()
+      };
+    }
+
     private Base ConvertRecursively(GameObject go)
     {
       if (converter.CanConvertToSpeckle(go))
