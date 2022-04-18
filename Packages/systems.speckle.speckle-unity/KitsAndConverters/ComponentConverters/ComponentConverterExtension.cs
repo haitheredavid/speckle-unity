@@ -24,7 +24,7 @@ namespace Speckle.ConnectorUnity
       return @base.GetMembers().Where(x => !props.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
     }
 
-    public static void AttachUnityProperties(this Base @base, SpeckleProperties props)
+    public static void AttachUnityProperties(this SpeckleProperties props, Base @base)
     {
       if (@base == null || props?.Data == null)
         return;

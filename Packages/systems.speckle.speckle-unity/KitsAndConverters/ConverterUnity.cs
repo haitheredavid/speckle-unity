@@ -27,7 +27,6 @@ namespace Speckle.ConnectorUnity
     [Space]
     [Header("Standard Unity Things")]
     [SerializeField] protected bool useRenderMaterial;
-    [SerializeField] protected Material defaultMaterial;
 
     #region converters
     [Space]
@@ -85,34 +84,71 @@ namespace Speckle.ConnectorUnity
 
     public virtual Base ConvertToSpeckle(object @object)
     {
+
+      if (converters == null || !converters.Any())
+        CompileConverters(false);
+
+      // convert for unity types
+      // we have to figure out what is being passed into there.. it could be a single component that we want to convert
+      // or it could be root game object with children we want to handle... for now we will assume this is handled in the loop checks from the client objs
+      // or it can be a game object with multiple components that we want to convert
+      List<Component> comps = new List<Component>();
       switch (@object)
       {
         case GameObject o:
-          if (o.GetComponent<MeshFilter>() != null)
-            return MeshToSpeckle(o);
-
-          throw new NotSupportedException();
+          comps = o.GetComponents(typeof(Component)).ToList();
+          break;
+        case Component o:
+          comps = new List<Component>() { o };
+          break;
+        case null:
+          Debug.LogWarning("Trying to convert null object to speckle");
+          break;
         default:
-          throw new NotSupportedException();
+          Debug.LogException(new SpeckleException($"Native unity object {@object.GetType()} is not supported"));
+          break;
       }
+
+      if (!comps.Any())
+      {
+        Debug.LogWarning("No comps were found in the object trying to be covnerted :(");
+        return null;
+      }
+
+
+      // TODO : handle when there is multiple convertable object types on game object
+      foreach (var comp in comps)
+      {
+        var type = comp.GetType().ToString();
+
+        foreach (var pair in converters)
+        {
+          if (pair.Key.Equals(type))
+            return pair.Value.ToSpeckle(comp);
+        }
+      }
+
+      Debug.LogWarning("No components found for converting to speckle");
+      return null;
+
     }
 
     private Dictionary<string, ComponentConverter> converters;
 
-    private void CompileConverters()
+    private void CompileConverters(bool toUnity = true)
     {
       converters = new Dictionary<string, ComponentConverter>()
       {
-        { meshConverter.speckle_type, meshConverter },
-        { polylineConverter.speckle_type, polylineConverter },
-        { cloudConverter.speckle_type, cloudConverter },
-        { pointConverter.speckle_type, pointConverter },
-        { view3DConverter.speckle_type, view3DConverter }
+        { meshConverter.targetType(toUnity), meshConverter },
+        { polylineConverter.targetType(toUnity), polylineConverter },
+        { cloudConverter.targetType(toUnity), cloudConverter },
+        { pointConverter.targetType(toUnity), pointConverter },
+        { view3DConverter.targetType(toUnity), view3DConverter }
       };
 
       if (otherConverters != null && otherConverters.Any())
         foreach (var c in otherConverters)
-          converters.Add(c.speckle_type, c);
+          converters.Add(c.targetType(toUnity), c);
 
       foreach (var c in converters.Values)
       {

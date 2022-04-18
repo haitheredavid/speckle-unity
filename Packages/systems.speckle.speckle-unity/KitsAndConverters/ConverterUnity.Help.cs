@@ -85,50 +85,6 @@ namespace Speckle.ConnectorUnity
     /// </summary>
     /// <param name="speckleMesh"></param>
     /// <returns></returns>
-    public Mesh MeshToSpeckle(GameObject go)
-    {
-      //TODO: support multiple filters?
-      var filter = go.GetComponent<MeshFilter>();
-      if (filter == null) return null;
-
-      //convert triangle array into speckleMesh faces     
-      var faces = new List<int>();
-      var i = 0;
-      //store them here, makes it like 1000000x faster?
-      var triangles = filter.mesh.triangles;
-      while (i < triangles.Length)
-      {
-        faces.Add(0);
-
-        faces.Add(triangles[i + 0]);
-        faces.Add(triangles[i + 2]);
-        faces.Add(triangles[i + 1]);
-        i += 3;
-      }
-
-      var mesh = new Objects.Geometry.Mesh();
-      // get the speckle data from the go here
-      // so that if the go comes from speckle, typed props will get overridden below
-      var bb = go.GetComponent<BaseBehaviour>();
-      if (bb != null)
-        mesh.AttachUnityProperties(bb.properties);
-
-      mesh.units = ModelUnits;
-
-      var vertices = filter.mesh.vertices;
-      foreach (var vertex in vertices)
-      {
-        var p = go.transform.TransformPoint(vertex);
-        var sp = PointToSpeckle(p);
-        mesh.vertices.Add(sp.x);
-        mesh.vertices.Add(sp.y);
-        mesh.vertices.Add(sp.z);
-      }
-
-      mesh.faces = faces;
-
-      return mesh;
-    }
     #endregion
 
     #region ToNative
