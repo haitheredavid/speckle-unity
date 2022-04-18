@@ -2,19 +2,34 @@
 using System.Collections.Concurrent;
 using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
+using Speckle.Core.Kits;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity
 {
   public abstract class SpeckleClient : MonoBehaviour
   {
-    [SerializeField] protected SpeckleStream rootStream;
+
+    protected const string HostApp = HostApplications.Unity.Name;
+    [SerializeField] protected GameObject root;
+    [SerializeField] protected SpeckleStream stream;
     [SerializeField] protected ConverterUnity converter;
 
-    private Client client;
-    private Action<string, Exception> onErrorReported;
+    [Space]
+    [SerializeField] private bool expired;
 
-    private Action<ConcurrentDictionary<string, int>> onProgressReport;
+    protected Client client;
+
+    protected bool isCanceled;
+
+    protected Action<string, Exception> onErrorReport;
+    protected Action<ConcurrentDictionary<string, int>> onProgressReport;
+
+    private void OnEnable()
+    {
+      if (converter == null)
+        converter = ScriptableObject.CreateInstance<ConverterUnity>();
+    }
 
     private void OnDisable()
     {
@@ -36,32 +51,32 @@ namespace Speckle.ConnectorUnity
       Action<string, Exception> onErrorAction = null
     )
     {
-      if (rootStream == null)
-        rootStream = ScriptableObject.CreateInstance<SpeckleStream>();
+      if (stream == null)
+        stream = ScriptableObject.CreateInstance<SpeckleStream>();
 
-      rootStream.Init(streamUrl);
+      stream.Init(streamUrl);
 
-      return await Init(rootStream, converterUnity, onProgressAction, onErrorAction);
+      return await Init(stream, converterUnity, onProgressAction, onErrorAction);
     }
 
-    /// <param name="stream">root stream object to use, will default to editor field</param>
+    /// <param name="rootStream">root stream object to use, will default to editor field</param>
     /// <param name="converterUnity">Converter to use for sending objects, will default to editor field</param>
     /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
     /// <param name="onErrorAction">Action to run on error</param>
     public async UniTask<bool> Init(
-      SpeckleStream stream = null,
+      SpeckleStream rootStream = null,
       ConverterUnity converterUnity = null,
       Action<ConcurrentDictionary<string, int>> onProgressAction = null,
       Action<string, Exception> onErrorAction = null
     )
     {
-      if (stream != null)
-        rootStream = stream;
+      if (rootStream != null)
+        stream = rootStream;
 
       if (converterUnity != null)
         converter = converterUnity;
 
-      if (rootStream == null || !rootStream.IsValid())
+      if (this.stream == null || !stream.IsValid())
       {
         ConnectorConsole.Log("Speckle stream object is not setup correctly");
         return false;
@@ -73,7 +88,10 @@ namespace Speckle.ConnectorUnity
         return false;
       }
 
-      client = new Client(await rootStream.GetAccount());
+      ConnectorConsole.Log("Getting account");
+
+      var account = await this.stream.GetAccount();
+      client = new Client(account);
       SetSubscriptions();
 
       return client != null;
@@ -86,6 +104,25 @@ namespace Speckle.ConnectorUnity
         ConnectorConsole.Log($"No active client on {name} to read from");
         return;
       }
+    }
+
+    protected bool IsReady()
+    {
+      var res = true;
+
+      if (stream == null || !stream.IsValid())
+      {
+        ConnectorConsole.Log($"No active stream ready for {name} to use");
+        res = false;
+      }
+
+      if (client == null)
+      {
+        ConnectorConsole.Log($"No active client for {name} to use");
+        res = false;
+      }
+
+      return res;
     }
 
     protected virtual void CleanUp()

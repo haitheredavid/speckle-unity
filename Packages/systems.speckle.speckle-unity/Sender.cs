@@ -22,13 +22,17 @@ namespace Speckle.ConnectorUnity
 
     public UnityAction<string> onDataSent;
 
-    public async UniTask<string> Send(List<GameObject> objs, string message = null, CancellationTokenSource cancellationToken = null)
+    public async UniTask<string> Send(List<GameObject> objs = null, string message = null, CancellationTokenSource cancellationToken = null)
     {
 
       var objectId = "";
 
       if (!IsReady())
         return objectId;
+
+      // if no objects were passed in we'll try converting from the assigned root object 
+      if (objs == null || !objs.Any())
+        objs = new List<GameObject>() { root };
 
       var data = objs.Count > 1 ? ConvertRecursively(objs) : ConvertRecursively(objs[0]);
 
@@ -37,7 +41,7 @@ namespace Speckle.ConnectorUnity
         ConnectorConsole.Log("Sending data");
 
         objectId = await Helpers.Send(
-          rootStream.StreamId,
+          stream.StreamId,
           data,
           message.Valid() ? message : $"Objects from Unity {data.totalChildrenCount}",
           HostApp,

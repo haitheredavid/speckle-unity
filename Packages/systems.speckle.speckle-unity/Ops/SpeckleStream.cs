@@ -15,10 +15,9 @@ namespace Speckle.ConnectorUnity
     [SerializeField] private string objectId;
     [SerializeField] private string userId;
 
-    [Space]
-    [SerializeField] private bool expired;
+    [SerializeField] private string originalInput;
 
-    private bool isCanceled;
+    private StreamWrapper wrapper;
 
     public string UserId
     {
@@ -50,11 +49,21 @@ namespace Speckle.ConnectorUnity
       get => objectId;
     }
 
+    public string OriginalInput
+    {
+      get => originalInput;
+    }
+
+    public StreamWrapperType Type
+    {
+      get => new StreamWrapper(originalInput).Type;
+    }
+
     public bool Init(string streamUrlOrId)
     {
       ConnectorConsole.Log("Setting new Stream");
 
-      var wrapper = new StreamWrapper(streamUrlOrId);
+      wrapper = new StreamWrapper(streamUrlOrId);
 
       if (!wrapper.IsValid)
       {
@@ -68,23 +77,27 @@ namespace Speckle.ConnectorUnity
       commitId = wrapper.CommitId;
       objectId = wrapper.ObjectId;
       userId = wrapper.UserId;
+      originalInput = wrapper.OriginalInput;
 
       return true;
     }
 
     public async UniTask<Account> GetAccount()
     {
-      return await new StreamWrapper(streamId, userId, objectId).GetAccount();
+      wrapper ??= new StreamWrapper(originalInput);
+      return await wrapper.GetAccount();
     }
 
     public bool IsValid()
     {
-      return new StreamWrapper(streamId, userId, serverUrl).IsValid;
+      wrapper ??= new StreamWrapper(originalInput);
+      return wrapper.IsValid;
     }
 
     public override string ToString()
     {
-      return new StreamWrapper(streamId, userId, serverUrl).ToString();
+      wrapper ??= new StreamWrapper(originalInput);
+      return wrapper.ToString();
     }
 
     // public async UniTask<Commit> GetCommit()
