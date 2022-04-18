@@ -1,6 +1,4 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
-using Speckle.Core.Api;
+﻿using Cysharp.Threading.Tasks;
 using Speckle.Core.Credentials;
 using UnityEngine;
 
@@ -16,7 +14,9 @@ namespace Speckle.ConnectorUnity
     [SerializeField] private string objectId;
     [SerializeField] private string userId;
 
-    private Client client;
+    [Space]
+    [SerializeField] private bool expired;
+
     private bool isCanceled;
 
     public string UserId
@@ -49,7 +49,7 @@ namespace Speckle.ConnectorUnity
       get => objectId;
     }
 
-    public async UniTask<bool> Init(string streamUrlOrId)
+    public bool Init(string streamUrlOrId)
     {
       ConnectorConsole.Log("Setting new Stream");
 
@@ -61,27 +61,24 @@ namespace Speckle.ConnectorUnity
         return false;
       }
 
-      try
-      {
-        var account = await wrapper.GetAccount();
+      serverUrl = wrapper.ServerUrl;
+      streamId = wrapper.StreamId;
+      branchName = wrapper.BranchName;
+      commitId = wrapper.CommitId;
+      objectId = wrapper.ObjectId;
+      userId = wrapper.UserId;
 
-        if (account != null)
-        {
-          client = new Client(account);
-          serverUrl = wrapper.ServerUrl;
-          streamId = wrapper.StreamId;
-          branchName = wrapper.BranchName;
-          commitId = wrapper.CommitId;
-          objectId = wrapper.ObjectId;
-          userId = wrapper.UserId;
-        }
-      }
-      catch (Exception e)
-      {
-        ConnectorConsole.Exception(e);
-      }
+      return true;
+    }
 
-      return client != null;
+    public async UniTask<Account> GetAccount()
+    {
+      return await new StreamWrapper(streamId, userId, objectId).GetAccount();
+    }
+
+    public bool IsValid()
+    {
+      return new StreamWrapper(streamId, userId, serverUrl).IsValid;
     }
 
     public override string ToString()
