@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f23499785840496bb30bad7653784716, type: 3}
-  m_Name: PolylineConverter
+  m_Script: {fileID: 11500000, guid: 17d465eda9a144f7a0d4e1ebac347f70, type: 3}
+  m_Name: PolyLineConverter
   m_EditorClassIdentifier: 
   storeProps: 1
   diameter: 0
