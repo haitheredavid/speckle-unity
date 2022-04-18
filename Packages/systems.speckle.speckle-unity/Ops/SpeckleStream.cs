@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Speckle.ConnectorUnity
 {
+  [CreateAssetMenu(menuName = "Speckle/Create Speckle Stream Object", fileName = "SpeckleStream", order = 0)]
   public class SpeckleStream : ScriptableObject
   {
 
