@@ -8,8 +8,8 @@ namespace Speckle.ConnectorUnity
 {
   public abstract class SpeckleClient : MonoBehaviour
   {
-    [SerializeField] private SpeckleStream rootStream;
-    [SerializeField] private ConverterUnity converter;
+    [SerializeField] protected SpeckleStream rootStream;
+    [SerializeField] protected ConverterUnity converter;
 
     private Client client;
     private Action<string, Exception> onErrorReported;
@@ -26,6 +26,10 @@ namespace Speckle.ConnectorUnity
       CleanUp();
     }
 
+    /// <param name="streamUrl">A speckle stream url that will be parsed by the stream wrapper</param>
+    /// <param name="converterUnity">Converter to use for sending objects</param>
+    /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
+    /// <param name="onErrorAction">Action to run on error</param>
     public async UniTask<bool> Init(
       string streamUrl, ConverterUnity converterUnity = null,
       Action<ConcurrentDictionary<string, int>> onProgressAction = null,
@@ -40,6 +44,10 @@ namespace Speckle.ConnectorUnity
       return await Init(rootStream, converterUnity, onProgressAction, onErrorAction);
     }
 
+    /// <param name="stream">root stream object to use, will default to editor field</param>
+    /// <param name="converterUnity">Converter to use for sending objects, will default to editor field</param>
+    /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
+    /// <param name="onErrorAction">Action to run on error</param>
     public async UniTask<bool> Init(
       SpeckleStream stream = null,
       ConverterUnity converterUnity = null,
