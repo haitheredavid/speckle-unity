@@ -16,5 +16,9 @@ namespace Speckle.ConnectorUnity
     {
       Debug.LogException(exception);
     }
+    public static void Warn(string message)
+    {
+      Debug.LogWarning(title + message);
+    }
   }
 }

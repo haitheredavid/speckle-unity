@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Objects;
-using Objects.BuiltElements;
-using Objects.Geometry;
 using Sentry;
 using Speckle.Core.Kits;
 using Speckle.Core.Logging;
@@ -14,56 +12,35 @@ using Mesh = Objects.Geometry.Mesh;
 
 namespace Speckle.ConnectorUnity
 {
-
   [CreateAssetMenu(fileName = "UnityConverter", menuName = "Speckle/Speckle Unity Converter", order = -1)]
-  public partial class ConverterUnity : ScriptableObject, ISpeckleConverter
+  public class ConverterUnity : ScriptableObject, ISpeckleConverter
   {
-
     [Header("Speckle Converter Informations")]
     [SerializeField] protected string description;
     [SerializeField] protected string author;
     [SerializeField] protected string websiteOrEmail;
 
     [Space]
-    [Header("Standard Unity Things")]
-    [SerializeField] protected bool useRenderMaterial;
-
-    #region converters
-    [Space]
-    [Header("Component Converters")]
-    // [SerializeField] protected ComponentConverterBase defaultConverter;
-    [SerializeField] protected ComponentConverterMesh meshConverter;
-    [SerializeField] protected ComponentConverterPolyline polylineConverter;
-    [SerializeField] protected ComponentConverterPoint pointConverter;
-    [SerializeField] protected ComponentConverterPointCloud cloudConverter;
-    [SerializeField] protected ComponentConverterView3D view3DConverter;
-    #endregion
-
-    [Space]
     [SerializeField] private List<ComponentConverter> otherConverters;
 
-    #region converter properties
-    public string Name => name;
-
-    public string Description => description;
-
-    public string Author => author;
-
-    public string WebsiteOrEmail => websiteOrEmail;
-
-    /// <summary>
-    /// Default Unity units are in meters
-    /// </summary>
-    public string ModelUnits => Units.Meters;
-    #endregion converter properties
-
-    public ProgressReport Report { get; }
-
-    public IEnumerable<string> GetServicedApplications() => new[] { HostApplications.Unity.Name };
+    private Dictionary<string, ComponentConverter> converters;
 
     public HashSet<Exception> ConversionErrors { get; } = new HashSet<Exception>();
 
     public List<ApplicationPlaceholderObject> ContextObjects { get; set; } = new List<ApplicationPlaceholderObject>();
+
+    private void OnEnable()
+    {
+      if (meshConverter == null) meshConverter = CreateInstance<ComponentConverterMesh>();
+      if (polylineConverter == null) polylineConverter = CreateInstance<ComponentConverterPolyline>();
+      if (pointConverter == null) pointConverter = CreateInstance<ComponentConverterPoint>();
+      if (cloudConverter == null) cloudConverter = CreateInstance<ComponentConverterPointCloud>();
+      if (view3DConverter == null) view3DConverter = CreateInstance<ComponentConverterView3D>();
+    }
+
+    public ProgressReport Report { get; }
+
+    public IEnumerable<string> GetServicedApplications() => new[] { HostApplications.Unity.Name };
 
     public virtual void SetContextObjects(List<ApplicationPlaceholderObject> objects) => ContextObjects = objects;
 
@@ -133,30 +110,6 @@ namespace Speckle.ConnectorUnity
 
     }
 
-    private Dictionary<string, ComponentConverter> converters;
-
-    private void CompileConverters(bool toUnity = true)
-    {
-      converters = new Dictionary<string, ComponentConverter>()
-      {
-        { meshConverter.targetType(toUnity), meshConverter },
-        { polylineConverter.targetType(toUnity), polylineConverter },
-        { cloudConverter.targetType(toUnity), cloudConverter },
-        { pointConverter.targetType(toUnity), pointConverter },
-        { view3DConverter.targetType(toUnity), view3DConverter }
-      };
-
-      if (otherConverters != null && otherConverters.Any())
-        foreach (var c in otherConverters)
-          converters.Add(c.targetType(toUnity), c);
-
-      foreach (var c in converters.Values)
-      {
-        if (c is IWantContextObj wanter)
-          wanter.contextObjects = ContextObjects;
-      }
-    }
-
     public virtual object ConvertToNative(Base @base)
     {
       if (@base == null)
@@ -194,6 +147,68 @@ namespace Speckle.ConnectorUnity
 
       Debug.LogWarning($"Skipping {@base.GetType()} {@base.id} - Not supported type");
       return null;
+    }
+
+    public List<Base> ConvertToSpeckle(List<object> objects) => objects.Select(ConvertToSpeckle).ToList();
+
+    public List<object> ConvertToNative(List<Base> objects) => objects.Select(ConvertToNative).ToList();
+
+    public virtual bool CanConvertToSpeckle(object @object)
+    {
+      switch (@object)
+      {
+        case GameObject o:
+          return o.GetComponent<MeshFilter>() != null;
+        default:
+          return false;
+      }
+    }
+
+    public virtual bool CanConvertToNative(Base @object)
+    {
+      switch (@object)
+      {
+        // case Point _:
+        //   return true;
+        // case Line _:
+        //   return true;
+        // case Polyline _:
+        //   return true;
+        // case Curve _:
+        //   return true;
+        // case View3D _:
+        //   return true;
+        // case View2D _:
+        //   return false;
+        case IDisplayValue<Mesh> _:
+          return true;
+        case Mesh _:
+          return true;
+        default:
+          return @object["displayMesh"] is Mesh;
+      }
+    }
+
+    private void CompileConverters(bool toUnity = true)
+    {
+      converters = new Dictionary<string, ComponentConverter>()
+      {
+        { meshConverter.targetType(toUnity), meshConverter },
+        { polylineConverter.targetType(toUnity), polylineConverter },
+        { cloudConverter.targetType(toUnity), cloudConverter },
+        { pointConverter.targetType(toUnity), pointConverter },
+        { view3DConverter.targetType(toUnity), view3DConverter }
+      };
+
+      if (otherConverters != null && otherConverters.Any())
+        foreach (var c in otherConverters)
+          converters.Add(c.targetType(toUnity), c);
+
+      foreach (var c in converters.Values)
+      {
+        if (c is IWantContextObj wanter)
+          wanter.contextObjects = ContextObjects;
+      }
     }
 
     public GameObject ConvertRecursively(object value)
@@ -287,45 +302,31 @@ namespace Speckle.ConnectorUnity
       return go;
     }
 
-    public List<Base> ConvertToSpeckle(List<object> objects) => objects.Select(ConvertToSpeckle).ToList();
+    #region converters
+    [Space]
+    [Header("Component Converters")]
+    // [SerializeField] protected ComponentConverterBase defaultConverter;
+    [SerializeField] protected ComponentConverterMesh meshConverter;
+    [SerializeField] protected ComponentConverterPolyline polylineConverter;
+    [SerializeField] protected ComponentConverterPoint pointConverter;
+    [SerializeField] protected ComponentConverterPointCloud cloudConverter;
+    [SerializeField] protected ComponentConverterView3D view3DConverter;
+    #endregion
 
-    public List<object> ConvertToNative(List<Base> objects) => objects.Select(ConvertToNative).ToList();
+    #region converter properties
+    public string Name => name;
 
-    public virtual bool CanConvertToSpeckle(object @object)
-    {
-      switch (@object)
-      {
-        case GameObject o:
-          return o.GetComponent<MeshFilter>() != null;
-        default:
-          return false;
-      }
-    }
+    public string Description => description;
 
-    public virtual bool CanConvertToNative(Base @object)
-    {
-      switch (@object)
-      {
-        // case Point _:
-        //   return true;
-        // case Line _:
-        //   return true;
-        // case Polyline _:
-        //   return true;
-        // case Curve _:
-        //   return true;
-        // case View3D _:
-        //   return true;
-        // case View2D _:
-        //   return false;
-        case IDisplayValue<Mesh> _:
-          return true;
-        case Mesh _:
-          return true;
-        default:
-          return @object["displayMesh"] is Mesh;
-      }
-    }
+    public string Author => author;
+
+    public string WebsiteOrEmail => websiteOrEmail;
+
+    /// <summary>
+    /// Default Unity units are in meters
+    /// </summary>
+    public string ModelUnits => Units.Meters;
+    #endregion converter properties
 
     #region static methods
     private static bool HasElements(Base @base, out List<Base> items)

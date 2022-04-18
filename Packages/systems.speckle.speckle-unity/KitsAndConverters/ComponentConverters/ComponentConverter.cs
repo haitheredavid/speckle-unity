@@ -1,5 +1,4 @@
 ﻿using System;
-using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using UnityEngine;
 
@@ -8,6 +7,8 @@ namespace Speckle.ConnectorUnity
 
   public abstract class ComponentConverter : ScriptableObject, IComponentConverter
   {
+
+    public const string ModelUnits = Speckle.Core.Kits.Units.Meters;
     public bool storeProps = true;
     public bool convertProps = true;
 
@@ -21,8 +22,6 @@ namespace Speckle.ConnectorUnity
     public abstract string unity_type { get; }
 
     public abstract string targetType(bool toUnity);
-
-    public const string ModelUnits = Speckle.Core.Kits.Units.Meters;
   }
 
   public abstract class ComponentConverter<TBase, TComponent> : ComponentConverter
@@ -32,6 +31,15 @@ namespace Speckle.ConnectorUnity
 
     [SerializeField, HideInInspector] private string unityTypeName;
     [SerializeField, HideInInspector] private string speckleTypeName;
+
+    public override string speckle_type => speckleTypeName;
+
+    public override string unity_type => unityTypeName;
+
+    protected bool IsRuntime
+    {
+      get => Application.isPlaying;
+    }
 
     protected virtual void OnEnable()
     {
@@ -83,10 +91,6 @@ namespace Speckle.ConnectorUnity
       return CanConvertToSpeckle(component) ? ConvertComponent((TComponent)component) : null;
     }
 
-    public override string speckle_type => speckleTypeName;
-
-    public override string unity_type => unityTypeName;
-
     /// <summary>
     /// helper function for getting the type associated with speckle or unity
     /// </summary>
@@ -95,12 +99,9 @@ namespace Speckle.ConnectorUnity
     /// <exception cref="NotImplementedException"></exception>
     public override string targetType(bool toUnity)
     {
-      return toUnity ? speckle_type : unity_type;
-    }
-
-    protected bool IsRuntime
-    {
-      get => Application.isPlaying;
+      var res = toUnity ? speckle_type : unity_type;
+      ConnectorConsole.Log($"Using {res} for {name} ");
+      return res;
     }
 
     protected TComponent BuildGo(string goName = null)

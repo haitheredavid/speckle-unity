@@ -14,13 +14,15 @@ namespace Speckle.ConnectorUnity
   public class ComponentConverterMesh : ComponentConverter<Mesh, MeshFilter>, IWantContextObj
   {
 
+    private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+    private static readonly int Metallic = Shader.PropertyToID("_Metallic");
+    private static readonly int Glossiness = Shader.PropertyToID("_Glossiness");
+
     public bool addMeshCollider = false;
     public bool addRender = true;
     public bool recenterTransform = true;
     public bool useRenderMaterial;
     public Material defaultMaterial;
-
-    public List<ApplicationPlaceholderObject> contextObjects { get; set; }
 
     protected override void OnEnable()
     {
@@ -30,6 +32,8 @@ namespace Speckle.ConnectorUnity
         defaultMaterial = new Material(Shader.Find("Standard"));
     }
 
+    public List<ApplicationPlaceholderObject> contextObjects { get; set; }
+
     protected override GameObject ConvertBase(Mesh @base)
     {
       // convert the mesh data
@@ -37,6 +41,27 @@ namespace Speckle.ConnectorUnity
 
       // Setting mesh to filter once all mesh modifying is done
       var comp = BuildGo();
+
+      // TODO: The mesh is already offset, so this is doubling the offset... 
+      // if (recenterTransform)
+      // {
+      //   var verts = mesh.vertices;
+      //   //  center transform pivot according to the bounds of the model
+      //   Bounds meshBounds = new Bounds { center = verts[0] };
+      //
+      //   foreach (var vert in verts)
+      //   {
+      //     meshBounds.Encapsulate(vert);
+      //   }
+      //
+      //   // offset mesh vertices
+      //   for (int l = 0; l < verts.Length; l++)
+      //   {
+      //     verts[l] -= meshBounds.center;
+      //   }
+      //   
+      //   comp.transform.position = meshBounds.center;
+      // }
 
       if (IsRuntime)
         comp.mesh = mesh;
@@ -100,15 +125,15 @@ namespace Speckle.ConnectorUnity
       // get the speckle data from the go here
       // so that if the go comes from speckle, typed props will get overridden below
       // TODO: Maybe handle a better way of overriding props? Or maybe this is just the typical logic for connectors 
-      if (convertProps)
-      {
-        // Base behaviour is the standard unity mono type that stores the speckle props data
-        var baseBehaviour = component.GetComponent(typeof(BaseBehaviour)) as BaseBehaviour;
-        if (baseBehaviour != null && baseBehaviour.properties != null)
-        {
-          baseBehaviour.properties.AttachUnityProperties(mesh);
-        }
-      }
+      // if (convertProps)
+      // {
+      //   // Base behaviour is the standard unity mono type that stores the speckle props data
+      //   var baseBehaviour = component.GetComponent(typeof(BaseBehaviour)) as BaseBehaviour;
+      //   if (baseBehaviour != null && baseBehaviour.properties != null)
+      //   {
+      //     baseBehaviour.properties.AttachUnityProperties(mesh);
+      //   }
+      // }
 
       mesh.vertices = sVertices;
       mesh.faces = sFaces;
@@ -225,31 +250,10 @@ namespace Speckle.ConnectorUnity
         tris.Add(speckleMesh.faces[i + 2] + indexOffset);
       }
 
-      if (recenterTransform)
-      {
-        //  center transform pivot according to the bounds of the model
-        Bounds meshBounds = new Bounds { center = verts[0] };
-
-        foreach (var vert in verts)
-        {
-          meshBounds.Encapsulate(vert);
-        }
-
-        // offset mesh vertices
-        for (int l = 0; l < verts.Count; l++)
-        {
-          verts[l] -= meshBounds.center;
-        }
-
-      }
 
       // Convert RenderMaterial
       materials.Add(GetMaterial(speckleMesh["renderMaterial"] as RenderMaterial));
     }
-
-    private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
-    private static readonly int Metallic = Shader.PropertyToID("_Metallic");
-    private static readonly int Glossiness = Shader.PropertyToID("_Glossiness");
 
     // Copied from main repo
     public Material GetMaterial(RenderMaterial renderMaterial)
@@ -314,6 +318,5 @@ namespace Speckle.ConnectorUnity
       }
       return uv;
     }
-
   }
 }

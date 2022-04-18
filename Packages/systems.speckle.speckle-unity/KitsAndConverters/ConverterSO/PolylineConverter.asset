@@ -10,7 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17d465eda9a144f7a0d4e1ebac347f70, type: 3}
-  m_Name: PolyLineConverter
+  m_Name: PolylineConverter
   m_EditorClassIdentifier: 
   storeProps: 1
+  convertProps: 1
+  unityTypeName: UnityEngine.LineRenderer
+  speckleTypeName: Objects.Geometry.Polyline
   diameter: 0

@@ -323,7 +323,7 @@ GameObject:
   - component: {fileID: 1624407935}
   - component: {fileID: 1624407934}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Speckle Connector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -341,13 +341,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 730f6d2eecf16994c918395debc877e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  streamShell:
-    streamId: 4f5b4785b0
-    branch: main
-    commit: 18c4e05550
   converter: {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
   senders: []
-  receivers: []
+  receivers:
+  - {fileID: 1864518983}
   onCommitReceived:
     m_PersistentCalls:
       m_Calls: []
@@ -364,6 +361,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1864518982
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1864518984}
+  - component: {fileID: 1864518983}
+  m_Layer: 0
+  m_Name: Receiver
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1864518983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1864518982}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5578b344ae57415c912729d411df2a5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  root: {fileID: 0}
+  stream: {fileID: 11400000, guid: 84337e16c7ff0244bacc00b3c7963f59, type: 2}
+  converter: {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
+  expired: 0
+  autoReceive: 0
+  deleteOld: 1
+--- !u!4 &1864518984
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1864518982}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2068176107
 GameObject:
