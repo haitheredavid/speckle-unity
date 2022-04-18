@@ -263,7 +263,7 @@ namespace Speckle.ConnectorUnity
       //if no children is valid, return null
       if (!props.Any())
       {
-        Utils.SafeDestroy(go);
+        ConverterUtils.SafeDestroy(go);
         return null;
       }
 

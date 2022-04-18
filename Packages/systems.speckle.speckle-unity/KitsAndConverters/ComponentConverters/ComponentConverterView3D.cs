@@ -18,13 +18,13 @@ namespace Speckle.ConnectorUnity
     {
       var comp = BuildGo(@base.name);
 
-      comp.transform.position = ConverterHelper.VectorByCoordinates(
+      comp.transform.position = ConverterUtils.VectorByCoordinates(
         @base.origin.x, @base.origin.y, @base.origin.z, @base.origin.units);
 
-      comp.transform.forward = ConverterHelper.VectorByCoordinates(
+      comp.transform.forward = ConverterUtils.VectorByCoordinates(
         @base.forwardDirection.x, @base.forwardDirection.y, @base.forwardDirection.z, @base.forwardDirection.units);
 
-      comp.transform.up = ConverterHelper.VectorByCoordinates(
+      comp.transform.up = ConverterUtils.VectorByCoordinates(
         @base.upDirection.x, @base.upDirection.y, @base.upDirection.z, @base.upDirection.units);
 
       return comp.gameObject;

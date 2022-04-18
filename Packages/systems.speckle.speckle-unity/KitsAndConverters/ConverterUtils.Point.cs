@@ -4,21 +4,14 @@ using System.Linq;
 using Objects.Geometry;
 using Speckle.Core.Kits;
 using UnityEngine;
+using Mesh = UnityEngine.Mesh;
+using Object = UnityEngine.Object;
 
 namespace Speckle.ConnectorUnity
 {
-  public static class ConverterHelper
+  public static partial class ConverterUtils
+
   {
-    /// <summary>
-    ///   the default Unity units are meters
-    /// </summary>
-    public static string ModelUnits = Units.Meters;
-
-    public static double ScaleToNative(double value, string units)
-    {
-      return value * Units.GetConversionFactor(units, ModelUnits);
-    }
-
     /// <summary>
     /// switch y and z
     /// </summary>
@@ -35,11 +28,6 @@ namespace Speckle.ConnectorUnity
     public static Vector ToSpeckle(this Vector3 pos, bool flipYZ = true)
     {
       return flipYZ ? new Vector(pos.x, pos.z, pos.y) : new Vector(pos.x, pos.y, pos.z);
-    }
-
-    public static Point ToPoint(this Vector3 pos, bool flipYZ = true)
-    {
-      return flipYZ ? new Point(pos.x, pos.z, pos.y) : new Point(pos.x, pos.y, pos.z);
     }
 
     public static List<double> ToSpeckle(this IEnumerable<Vector3> points)
@@ -60,6 +48,11 @@ namespace Speckle.ConnectorUnity
       }
 
       return res;
+    }
+
+    public static Point ToPoint(this Vector3 pos, bool flipYZ = true)
+    {
+      return flipYZ ? new Point(pos.x, pos.z, pos.y) : new Point(pos.x, pos.y, pos.z);
     }
 
     public static Vector3[] ArrayToPoints(this IEnumerable<double> arr, string units)
@@ -92,7 +85,6 @@ namespace Speckle.ConnectorUnity
 
       return points;
     }
-
     /// <summary>
     /// </summary>
     /// <param name="x"></param>
