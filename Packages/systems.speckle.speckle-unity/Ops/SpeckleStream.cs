@@ -1,44 +1,103 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Cysharp.Threading.Tasks;
-using Sentry;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
-using Speckle.Core.Logging;
-using Speckle.Core.Models;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity
 {
-  public class SpeckleStream : MonoBehaviour
+  public class SpeckleStream : ScriptableObject
   {
 
-    [SerializeField] protected StreamShell shell;
+    [SerializeField] private string serverUrl;
+    [SerializeField] private string streamId;
+    [SerializeField] private string branchName;
+    [SerializeField] private string commitId;
+    [SerializeField] private string objectId;
+    [SerializeField] private string userId;
 
-    protected Client client;
+    private Client client;
     private bool isCanceled;
 
-    public void Init(Account account, StreamShell streamShell)
+    public string UserId
     {
-      client = new Client(account);
-
-      // use either the params or the data stored here
-      if (streamShell != null)
-        shell = streamShell;
+      get => userId;
     }
 
-    public async UniTask<Commit> GetCommit()
+    public string ServerUrl
     {
-      Commit commit = null;
-      (isCanceled, commit) = await SpeckleConnector.GetCommit(client, shell).SuppressCancellationThrow();
-
-      if (isCanceled || commit == null)
-        Debug.LogWarning("The commit being asked for was not recieved correctly");
-
-      return commit;
+      get => serverUrl;
     }
 
+    public string StreamId
+    {
+      get => streamId;
+    }
+
+    public string CommitId
+    {
+      get => commitId;
+    }
+
+    public string BranchName
+    {
+      get => branchName;
+    }
+
+    public string ObjectId
+    {
+      get => objectId;
+    }
+
+    public async UniTask<bool> Init(string streamUrlOrId)
+    {
+      ConnectorConsole.Log("Setting new Stream");
+
+      var wrapper = new StreamWrapper(streamUrlOrId);
+
+      if (!wrapper.IsValid)
+      {
+        ConnectorConsole.Log("Invalid input for stream");
+        return false;
+      }
+
+      try
+      {
+        var account = await wrapper.GetAccount();
+
+        if (account != null)
+        {
+          client = new Client(account);
+          serverUrl = wrapper.ServerUrl;
+          streamId = wrapper.StreamId;
+          branchName = wrapper.BranchName;
+          commitId = wrapper.CommitId;
+          objectId = wrapper.ObjectId;
+          userId = wrapper.UserId;
+        }
+      }
+      catch (Exception e)
+      {
+        ConnectorConsole.Exception(e);
+      }
+
+      return client != null;
+    }
+
+    public override string ToString()
+    {
+      return new StreamWrapper(streamId, userId, serverUrl).ToString();
+    }
+
+    // public async UniTask<Commit> GetCommit()
+    // {
+    //   Commit commit = null;
+    //   (isCanceled, commit) = await SpeckleConnector.GetCommit(client, shell).SuppressCancellationThrow();
+    //
+    //   if (isCanceled || commit == null)
+    //     Debug.LogWarning("The commit being asked for was not recieved correctly");
+    //
+    //   return commit;
+    // }
   }
 }
