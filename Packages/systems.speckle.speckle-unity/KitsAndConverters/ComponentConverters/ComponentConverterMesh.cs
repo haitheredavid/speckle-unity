@@ -17,7 +17,8 @@ namespace Speckle.ConnectorUnity
     public bool addMeshCollider = false;
     public bool addRender = true;
     public bool recenterTransform = true;
-    [SerializeField] private Material defaultMaterial;
+    public bool useRenderMaterial;
+    public Material defaultMaterial;
 
     public List<ApplicationPlaceholderObject> contextObjects { get; set; }
 
@@ -46,15 +47,80 @@ namespace Speckle.ConnectorUnity
         comp.gameObject.AddComponent<MeshCollider>().sharedMesh = IsRuntime ? comp.mesh : comp.sharedMesh;
 
       if (addRender)
-      {
         comp.gameObject.AddComponent<MeshRenderer>().sharedMaterials = materials;
-      }
 
 
       return comp.gameObject;
     }
 
-    protected override Base ConvertComponent(MeshFilter component) => throw new NotImplementedException();
+    // copied from repo
+    //TODO: support multiple filters?
+    protected override Base ConvertComponent(MeshFilter component)
+    {
+
+      var nativeMesh = IsRuntime ? component.mesh : component.sharedMesh;
+
+      var nTriangles = nativeMesh.triangles;
+      List<int> sFaces = new List<int>(nTriangles.Length * 4);
+      for (int i = 2; i < nTriangles.Length; i += 3)
+      {
+        sFaces.Add(0); //Triangle cardinality indicator
+
+        sFaces.Add(nTriangles[i]);
+        sFaces.Add(nTriangles[i - 1]);
+        sFaces.Add(nTriangles[i - 2]);
+      }
+
+
+      var nVertices = nativeMesh.vertices;
+      List<double> sVertices = new List<double>(nVertices.Length * 3);
+
+      foreach (var vertex in nVertices)
+      {
+        var p = component.gameObject.transform.TransformPoint(vertex);
+        sVertices.Add(p.x);
+        sVertices.Add(p.z); //z and y swapped
+        sVertices.Add(p.y);
+      }
+
+      var nColors = nativeMesh.colors;
+      List<int> sColors = new List<int>(nColors.Length);
+      sColors.AddRange(nColors.Select(c => c.ToIntColor()));
+
+      var nTexCoords = nativeMesh.uv;
+      List<double> sTexCoords = new List<double>(nTexCoords.Length * 2);
+      foreach (var uv in nTexCoords)
+      {
+        sTexCoords.Add(uv.x);
+        sTexCoords.Add(uv.y);
+      }
+
+      var mesh = new Mesh();
+
+      // get the speckle data from the go here
+      // so that if the go comes from speckle, typed props will get overridden below
+      // TODO: Maybe handle a better way of overriding props? Or maybe this is just the typical logic for connectors 
+      if (convertProps)
+      {
+        // Base behaviour is the standard unity mono type that stores the speckle props data
+        var baseBehaviour = component.GetComponent(typeof(BaseBehaviour)) as BaseBehaviour;
+        if (baseBehaviour != null && baseBehaviour.properties != null)
+        {
+          baseBehaviour.properties.AttachUnityProperties(mesh);
+        }
+      }
+
+      mesh.vertices = sVertices;
+      mesh.faces = sFaces;
+      mesh.colors = sColors;
+      mesh.textureCoordinates = sTexCoords;
+      mesh.units = ModelUnits;
+
+
+      return mesh;
+
+      throw new NotImplementedException();
+    }
 
     private void MeshDataToNative(IReadOnlyCollection<Mesh> meshes, out UnityEngine.Mesh nativeMesh, out Material[] nativeMaterials)
     {
@@ -159,23 +225,23 @@ namespace Speckle.ConnectorUnity
         tris.Add(speckleMesh.faces[i + 2] + indexOffset);
       }
 
-      //  center transform pivot according to the bounds of the model
-      // Bounds meshBounds = new Bounds
-      // {
-      //  center = verts[0]
-      // };
-      //
-      // foreach (var vert in verts)
-      // {
-      //  meshBounds.Encapsulate(vert);
-      // }
-      //
-      // // offset mesh vertices
-      // for (int l = 0; l < verts.Count; l++)
-      // {
-      //  verts[l] -= meshBounds.center;
-      // }
+      if (recenterTransform)
+      {
+        //  center transform pivot according to the bounds of the model
+        Bounds meshBounds = new Bounds { center = verts[0] };
 
+        foreach (var vert in verts)
+        {
+          meshBounds.Encapsulate(vert);
+        }
+
+        // offset mesh vertices
+        for (int l = 0; l < verts.Count; l++)
+        {
+          verts[l] -= meshBounds.center;
+        }
+
+      }
 
       // Convert RenderMaterial
       materials.Add(GetMaterial(speckleMesh["renderMaterial"] as RenderMaterial));
@@ -188,6 +254,9 @@ namespace Speckle.ConnectorUnity
     // Copied from main repo
     public Material GetMaterial(RenderMaterial renderMaterial)
     {
+      if (!useRenderMaterial)
+        return defaultMaterial;
+
       //if a renderMaterial is passed use that, otherwise try get it from the mesh itself
       if (renderMaterial != null)
       {
