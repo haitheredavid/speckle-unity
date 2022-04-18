@@ -9,14 +9,20 @@ namespace Speckle.ConnectorUnity
   public abstract class ComponentConverter : ScriptableObject, IComponentConverter
   {
     public bool storeProps = true;
+    public bool convertProps = true;
 
     public abstract bool CanConvertToNative(Base type);
     public abstract bool CanConvertToSpeckle(Component type);
 
     public abstract GameObject ToNative(Base @base);
     public abstract Base ToSpeckle(Component component);
-    public abstract string speckle_type { get; }
 
+    public abstract string speckle_type { get; }
+    public abstract string unity_type { get; }
+
+    public abstract string targetType(bool toUnity);
+
+    public const string ModelUnits = Speckle.Core.Kits.Units.Meters;
   }
 
   public abstract class ComponentConverter<TBase, TComponent> : ComponentConverter
@@ -24,14 +30,16 @@ namespace Speckle.ConnectorUnity
     where TBase : Base
   {
 
-    [SerializeField] private string typeName;
+    [SerializeField, HideInInspector] private string unityTypeName;
+    [SerializeField, HideInInspector] private string speckleTypeName;
 
     protected virtual void OnEnable()
     {
-      typeName = Activator.CreateInstance<TBase>().speckle_type;
+      speckleTypeName = Activator.CreateInstance<TBase>().speckle_type;
+      unityTypeName = typeof(TComponent).ToString();
     }
 
-    // TODO: this is silly
+    // TODO: this is silly, probably a much smarter way of handling this 
     public override bool CanConvertToNative(Base type)
     {
       return type != null && type.GetType() == typeof(TBase);
@@ -40,7 +48,6 @@ namespace Speckle.ConnectorUnity
     public override bool CanConvertToSpeckle(Component type)
     {
       return type != null && type.GetType() == typeof(TComponent);
-
     }
 
     protected abstract GameObject ConvertBase(TBase @base);
@@ -70,15 +77,25 @@ namespace Speckle.ConnectorUnity
 
       return root;
     }
-
     public override Base ToSpeckle(Component component)
     {
+
       return CanConvertToSpeckle(component) ? ConvertComponent((TComponent)component) : null;
     }
 
-    public override string speckle_type
+    public override string speckle_type => speckleTypeName;
+
+    public override string unity_type => unityTypeName;
+
+    /// <summary>
+    /// helper function for getting the type associated with speckle or unity
+    /// </summary>
+    /// <param name="toUnity"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public override string targetType(bool toUnity)
     {
-      get => typeName;
+      return toUnity ? speckle_type : unity_type;
     }
 
     protected bool IsRuntime
@@ -88,7 +105,7 @@ namespace Speckle.ConnectorUnity
 
     protected TComponent BuildGo(string goName = null)
     {
-      return new GameObject(goName.Valid() ? goName : typeName).AddComponent<TComponent>();
+      return new GameObject(goName.Valid() ? goName : speckleTypeName).AddComponent<TComponent>();
     }
   }
 

@@ -19,5 +19,6 @@ namespace Speckle.ConnectorUnity
     public Base ToSpeckle(Component component);
 
     public string speckle_type { get; }
+    public string unity_type { get; }
   }
 }
