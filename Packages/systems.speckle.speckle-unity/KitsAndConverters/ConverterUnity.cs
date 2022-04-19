@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Objects;
-using Sentry;
 using Speckle.Core.Kits;
 using Speckle.Core.Logging;
 using Speckle.Core.Models;
@@ -118,35 +116,19 @@ namespace Speckle.ConnectorUnity
         return null;
       }
 
+      if (converters == null || !converters.Any())
+        CompileConverters();
+
+
       foreach (var pair in converters)
       {
         if (pair.Key.Equals(@base.speckle_type))
           return pair.Value.ToNative(@base);
       }
 
-      Debug.Log($"No Converters were found to handle {@base.speckle_type}, trying for display value");
+      Debug.Log($"No Converters were found to handle {@base.speckle_type} trying for display value");
 
-      if (@base["displayValue"] is Mesh mesh)
-      {
-        Debug.Log("Handling Singluar Display Value");
-        return meshConverter.ToNative(mesh);
-      }
-
-      if (@base["displayValue"] is IEnumerable<Base> bs)
-      {
-        Debug.Log("Handling List of Display Value");
-
-        var go = new GameObject(@base.speckle_type);
-        var potDisplayValues = RecurseTreeToNative(bs, "DisplayValues");
-
-        if (potDisplayValues != null)
-          potDisplayValues.transform.SetParent(go.transform);
-
-        return go;
-      }
-
-      Debug.LogWarning($"Skipping {@base.GetType()} {@base.id} - Not supported type");
-      return null;
+      return TryConvertDefault(@base);
     }
 
     public List<Base> ConvertToSpeckle(List<object> objects) => objects.Select(ConvertToSpeckle).ToList();
@@ -189,6 +171,46 @@ namespace Speckle.ConnectorUnity
       }
     }
 
+    private GameObject TryConvertDefault(Base @base)
+    {
+      if (@base["displayValue"] is Mesh mesh)
+      {
+        Debug.Log("Handling Singluar Display Value");
+
+        var go = new GameObject(@base.speckle_type);
+        go.AddComponent<BaseBehaviour>().properties = new SpeckleProperties
+          { Data = @base.FetchProps() };
+
+        return meshConverter.ToNative(mesh);
+      }
+
+      if (@base["displayValue"] is IEnumerable<Base> bs)
+      {
+        Debug.Log("Handling List of Display Value");
+
+        var go = new GameObject(@base.speckle_type);
+        go.AddComponent<BaseBehaviour>().properties = new SpeckleProperties
+          { Data = @base.FetchProps() };
+
+        var displayValues = new GameObject("DisplayValues");
+        displayValues.transform.SetParent(go.transform);
+
+        foreach (var b in bs)
+        {
+          if (b is Mesh displayMesh)
+          {
+            var obj = ConvertToNative(displayMesh) as GameObject;
+            if (obj != null)
+              obj.transform.SetParent(displayValues.transform);
+          }
+        }
+        return go;
+      }
+
+      Debug.LogWarning($"Skipping {@base.GetType()} {@base.id} - Not supported type");
+      return null;
+    }
+
     private void CompileConverters(bool toUnity = true)
     {
       converters = new Dictionary<string, ComponentConverter>()
@@ -211,97 +233,6 @@ namespace Speckle.ConnectorUnity
       }
     }
 
-    public GameObject ConvertRecursively(object value)
-    {
-      if (value == null)
-        return null;
-
-      if (converters == null || !converters.Any())
-        CompileConverters();
-
-      //it's a simple type or not a Base
-      if (value.GetType().IsSimpleType() || !(value is Base @base)) return null;
-
-      return CanConvertToNative(@base) ?
-        TryConvertToNative(@base) : // supported object so convert that 
-        TryConvertProperties(@base); // not supported but might have props
-
-    }
-
-    private GameObject TryConvertToNative(Base @base)
-    {
-      try
-      {
-        var go = ConvertToNative(@base) as GameObject;
-
-        if (go == null)
-        {
-          Debug.LogWarning("Object was not converted correclty");
-          return null;
-        }
-
-        if (HasElements(@base, out var elements))
-        {
-          var goo = RecurseTreeToNative(elements, "Elements");
-
-          if (goo != null)
-            goo.transform.SetParent(go.transform);
-        }
-        return go;
-      }
-      catch (Exception e)
-      {
-        Debug.LogException(new SpeckleException(e.Message, e, true, SentryLevel.Error));
-        return null;
-      }
-    }
-
-    private GameObject TryConvertProperties(Base @base)
-    {
-      var go = new GameObject(@base.speckle_type);
-
-      // go.AddComponent<SpeckleStream>();
-
-      var props = new List<GameObject>();
-
-      foreach (var prop in @base.GetMemberNames().ToList())
-      {
-        var goo = RecurseTreeToNative(@base[prop]);
-        if (goo != null)
-        {
-          goo.name = prop;
-          goo.transform.SetParent(go.transform);
-          props.Add(goo);
-        }
-      }
-
-      //if no children is valid, return null
-      if (!props.Any())
-      {
-        ConverterUtils.SafeDestroy(go);
-        return null;
-      }
-
-      return go;
-    }
-
-    private GameObject RecurseTreeToNative(object @object, string containerName = null)
-    {
-      if (!IsList(@object))
-        return ConvertRecursively(@object);
-
-      var list = ((IEnumerable)@object).Cast<object>();
-
-      var go = new GameObject(containerName.Valid() ? containerName : "List");
-
-      var objects = list.Select(x => RecurseTreeToNative(x)).Where(x => x != null).ToList();
-
-      if (objects.Any())
-        objects.ForEach(x => x.transform.SetParent(go.transform));
-
-      return go;
-    }
-
     #region converters
     [Space]
     [Header("Component Converters")]
@@ -321,42 +252,7 @@ namespace Speckle.ConnectorUnity
     public string Author => author;
 
     public string WebsiteOrEmail => websiteOrEmail;
-
-    /// <summary>
-    /// Default Unity units are in meters
-    /// </summary>
-    public string ModelUnits => Units.Meters;
     #endregion converter properties
-
-    #region static methods
-    private static bool HasElements(Base @base, out List<Base> items)
-    {
-      items = null;
-
-      if (@base["elements"] is List<Base> l && l.Any())
-        items = l;
-
-      return items != null;
-    }
-
-    private static bool IsList(object @object)
-    {
-      if (@object == null)
-        return false;
-
-      var type = @object.GetType();
-      return typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type) && type != typeof(string);
-    }
-
-    private static bool IsDictionary(object @object)
-    {
-      if (@object == null)
-        return false;
-
-      var type = @object.GetType();
-      return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
-    }
-    #endregion
 
   }
 

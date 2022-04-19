@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
+using Sentry;
 using Speckle.Core.Api;
 using Speckle.Core.Api.SubscriptionModels;
 using Speckle.Core.Logging;
@@ -14,6 +18,7 @@ namespace Speckle.ConnectorUnity
   ///   A Speckle Receiver, it's a wrapper around a basic Speckle Client
   ///   that handles conversions and subscriptions for you
   /// </summary>
+  [AddComponentMenu("Speckle/Receiver")]
   public class Receiver : SpeckleClient
   {
     public bool autoReceive = false;
@@ -88,8 +93,8 @@ namespace Speckle.ConnectorUnity
           ConverterUtils.SafeDestroy(root);
 
         ConnectorConsole.Log("Converting Started");
-        //TODO: check if this still converts correctly
-        root = converter.ConvertRecursively(@base);
+
+        root = ConvertRecursively(@base);
 
         OnDataReceivedAction?.Invoke(root);
       }
@@ -98,6 +103,111 @@ namespace Speckle.ConnectorUnity
         ConnectorConsole.Exception(new SpeckleException(e.Message));
         return;
       }
+    }
+
+    private GameObject ConvertRecursively(object value)
+    {
+      if (value == null)
+        return null;
+
+      //it's a simple type or not a Base
+      if (value.GetType().IsSimpleType() || !(value is Base @base)) return null;
+
+      return converter.CanConvertToNative(@base) ?
+        TryConvertToNative(@base) : // supported object so convert that 
+        TryConvertProperties(@base); // not supported but might have props
+
+    }
+
+    private GameObject RecurseTreeToNative(object @object, string containerName = null)
+    {
+      if (!IsList(@object))
+        return ConvertRecursively(@object);
+
+      var list = ((IEnumerable)@object).Cast<object>();
+
+      var go = new GameObject(containerName.Valid() ? containerName : "List");
+
+      var objects = list.Select(x => RecurseTreeToNative(x)).Where(x => x != null).ToList();
+
+      if (objects.Any())
+        objects.ForEach(x => x.transform.SetParent(go.transform));
+
+      return go;
+    }
+
+    private GameObject TryConvertProperties(Base @base)
+    {
+      var go = new GameObject(@base.speckle_type);
+
+      var props = new List<GameObject>();
+
+      foreach (var prop in @base.GetMemberNames().ToList())
+      {
+        var goo = RecurseTreeToNative(@base[prop]);
+        if (goo != null)
+        {
+          goo.name = prop;
+          goo.transform.SetParent(go.transform);
+          props.Add(goo);
+        }
+      }
+
+      //if no children is valid, return null
+      if (!props.Any())
+      {
+        ConverterUtils.SafeDestroy(go);
+        return null;
+      }
+
+      return go;
+    }
+
+    private GameObject TryConvertToNative(Base @base)
+    {
+      try
+      {
+        var go = converter.ConvertToNative(@base) as GameObject;
+
+        if (go == null)
+        {
+          Debug.LogWarning("Object was not converted correclty");
+          return null;
+        }
+
+        if (HasElements(@base, out var elements))
+        {
+          var goo = RecurseTreeToNative(elements, "Elements");
+
+          if (goo != null)
+            goo.transform.SetParent(go.transform);
+        }
+        return go;
+      }
+      catch (Exception e)
+      {
+        ConnectorConsole.Exception(new SpeckleException(e.Message, e, true, SentryLevel.Error));
+        return null;
+      }
+    }
+
+    private static bool IsList(object @object)
+    {
+      if (@object == null)
+        return false;
+
+      var type = @object.GetType();
+      return typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type) && type != typeof(string);
+    }
+
+    private static bool HasElements(Base @base, out List<Base> items)
+    {
+      items = null;
+
+      if (@base["elements"] is List<Base> l && l.Any())
+        items = l;
+
+      return items != null;
     }
 
     #region Subscriptions
