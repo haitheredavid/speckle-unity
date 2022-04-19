@@ -17,6 +17,7 @@ namespace Speckle.ConnectorUnity
   ///   A Speckle Sender, it's a wrapper around a basic Speckle Client
   ///   that handles conversions for you
   /// </summary>
+  [AddComponentMenu("Speckle/Sender")]
   public class Sender : SpeckleClient
   {
 
@@ -94,7 +95,7 @@ namespace Speckle.ConnectorUnity
     {
       objs = new List<Base>();
 
-      if (go.transform.childCount > 0)
+      if (go != null && go.transform.childCount > 0)
       {
         foreach (Transform child in go.transform)
         {

@@ -99,16 +99,5 @@ namespace Speckle.ConnectorUnity
       wrapper ??= new StreamWrapper(originalInput);
       return wrapper.ToString();
     }
-
-    // public async UniTask<Commit> GetCommit()
-    // {
-    //   Commit commit = null;
-    //   (isCanceled, commit) = await SpeckleConnector.GetCommit(client, shell).SuppressCancellationThrow();
-    //
-    //   if (isCanceled || commit == null)
-    //     Debug.LogWarning("The commit being asked for was not recieved correctly");
-    //
-    //   return commit;
-    // }
   }
 }
