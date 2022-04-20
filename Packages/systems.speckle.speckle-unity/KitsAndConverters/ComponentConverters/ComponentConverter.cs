@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Speckle.Core.Models;
 using UnityEngine;
 
@@ -9,6 +12,7 @@ namespace Speckle.ConnectorUnity
   {
 
     public const string ModelUnits = Speckle.Core.Kits.Units.Meters;
+
     public bool storeProps = true;
     public bool convertProps = true;
 
@@ -35,6 +39,17 @@ namespace Speckle.ConnectorUnity
     public override string speckle_type => speckleTypeName;
 
     public override string unity_type => unityTypeName;
+
+    protected virtual HashSet<string> excludedProps
+    {
+      get
+      {
+        return new HashSet<string>(
+          typeof(Base).GetProperties(
+            BindingFlags.Instance |  BindingFlags.Public | BindingFlags.IgnoreCase
+          ).Select(x => x.Name));
+      }
+    }
 
     protected bool IsRuntime
     {
@@ -78,13 +93,15 @@ namespace Speckle.ConnectorUnity
         if (comp == null)
           comp = root.AddComponent<BaseBehaviour>();
 
-        comp.properties = new SpeckleProperties
-          { Data = @base.FetchProps() };
-      }
+        // var props = @base.GetMembers().Where(x => !excludedProps.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
+        comp.properties = new SpeckleProperties();
+        comp.properties.Store(@base, excludedProps);
 
+      }
 
       return root;
     }
+
     public override Base ToSpeckle(Component component)
     {
 

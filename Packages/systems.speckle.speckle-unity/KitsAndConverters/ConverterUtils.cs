@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Objects.Geometry;
 using Speckle.Core.Kits;
+using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using UnityEngine;
 using Mesh = UnityEngine.Mesh;
@@ -20,17 +21,38 @@ namespace Speckle.ConnectorUnity
 
     public static Dictionary<string, object> FetchProps<TBase>(this TBase @base) where TBase : Base
     {
-      var props = typeof(TBase).GetProperties(BindingFlags.Instance | BindingFlags.Public).Select(x => x.Name).ToList();
+      var props = typeof(TBase).GetProperties(
+        BindingFlags.Instance | BindingFlags.SetField | BindingFlags.SetProperty | BindingFlags.Public).Select(x => x.Name).ToList();
       return @base.GetMembers().Where(x => !props.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
     }
 
-    public static void AttachUnityProperties(this SpeckleProperties props, Base @base)
+    public static void AttachUnityProperties(this SpeckleProperties props, Base @base, HashSet<string> excludedProps)
     {
       if (@base == null || props?.Data == null)
         return;
 
       foreach (var key in props.Data.Keys)
-        @base[key] = props.Data[key];
+        try
+        {
+          var toggle = false;
+          foreach (var prop in excludedProps)
+          {
+            if (prop.Contains(key))
+            {
+              ConnectorConsole.Log($"Skipping prop {prop}");
+              toggle = true;
+              break;
+            }
+          }
+
+          if (!toggle)
+            @base[key] = props.Data[key];
+
+        }
+        catch (SpeckleException e)
+        {
+          ConnectorConsole.Warn(e.Message);
+        }
     }
 
     public static double ScaleToNative(double value, string units)
