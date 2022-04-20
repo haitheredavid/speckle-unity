@@ -181,7 +181,9 @@ namespace Speckle.ConnectorUnity
         go.AddComponent<BaseBehaviour>().properties = new SpeckleProperties
           { Data = @base.FetchProps() };
 
-        return meshConverter.ToNative(mesh);
+        var res =  meshConverter.ToNative(mesh);
+        res.transform.SetParent(go.transform);
+        return res;
       }
 
       if (@base["displayValue"] is IEnumerable<Base> bs)

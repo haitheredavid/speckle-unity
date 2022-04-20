@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Objects.Other;
 using Objects.Utils;
+using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -24,6 +25,19 @@ namespace Speckle.ConnectorUnity
     public bool useRenderMaterial;
     public Material defaultMaterial;
 
+    public List<ApplicationPlaceholderObject> contextObjects { get; set; }
+
+    protected override HashSet<string> excludedProps
+    {
+      get
+      {
+        var res = base.excludedProps;
+        res.Add("displayValue");
+        res.Add("displayMesh");
+        return res;
+      }
+    }
+
     protected override void OnEnable()
     {
       base.OnEnable();
@@ -31,8 +45,6 @@ namespace Speckle.ConnectorUnity
       if (defaultMaterial == null)
         defaultMaterial = new Material(Shader.Find("Standard"));
     }
-
-    public List<ApplicationPlaceholderObject> contextObjects { get; set; }
 
     protected override GameObject ConvertBase(Mesh @base)
     {
@@ -120,31 +132,31 @@ namespace Speckle.ConnectorUnity
         sTexCoords.Add(uv.y);
       }
 
-      var mesh = new Mesh();
-
-      // get the speckle data from the go here
-      // so that if the go comes from speckle, typed props will get overridden below
-      // TODO: Maybe handle a better way of overriding props? Or maybe this is just the typical logic for connectors 
+      // NOTE: this throws some exceptions with trying to set a method that isn't settable.
+      // Looking at other converters it seems like the conversion code should be handling all the prop settings..
+      
+      //
+      // // get the speckle data from the go here
+      // // so that if the go comes from speckle, typed props will get overridden below
+      // // TODO: Maybe handle a better way of overriding props? Or maybe this is just the typical logic for connectors 
       // if (convertProps)
       // {
       //   // Base behaviour is the standard unity mono type that stores the speckle props data
       //   var baseBehaviour = component.GetComponent(typeof(BaseBehaviour)) as BaseBehaviour;
       //   if (baseBehaviour != null && baseBehaviour.properties != null)
       //   {
-      //     baseBehaviour.properties.AttachUnityProperties(mesh);
+      //     baseBehaviour.properties.AttachUnityProperties(mesh, excludedProps);
       //   }
       // }
-
+      
+      var mesh = new Mesh();
       mesh.vertices = sVertices;
       mesh.faces = sFaces;
       mesh.colors = sColors;
       mesh.textureCoordinates = sTexCoords;
       mesh.units = ModelUnits;
 
-
       return mesh;
-
-      throw new NotImplementedException();
     }
 
     private void MeshDataToNative(IReadOnlyCollection<Mesh> meshes, out UnityEngine.Mesh nativeMesh, out Material[] nativeMaterials)
@@ -319,4 +331,5 @@ namespace Speckle.ConnectorUnity
       return uv;
     }
   }
+
 }

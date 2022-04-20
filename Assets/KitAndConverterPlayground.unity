@@ -345,9 +345,6 @@ MonoBehaviour:
   senders: []
   receivers:
   - {fileID: 1864518983}
-  onCommitReceived:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &1624407935
 Transform:
   m_ObjectHideFlags: 0
@@ -421,8 +418,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2068176110}
   - component: {fileID: 2068176109}
-  - component: {fileID: 2068176108}
-  - component: {fileID: 2068176111}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -430,14 +425,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &2068176108
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2068176107}
-  m_Enabled: 1
 --- !u!20 &2068176109
 Camera:
   m_ObjectHideFlags: 0
@@ -495,22 +482,3 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2068176111
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2068176107}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c972b8c7391a8243869747abd85964f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scrollSpeed: 10
-  rotateXSpeed: 1
-  rotateYSpeed: 1
-  moveSpeed: 1
-  keyMoveSpeed: 1
-  operate: 1
-  isKeyOperate: 1
