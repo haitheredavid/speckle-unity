@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using Speckle.Core.Api;
 using Speckle.Core.Models;
 using UnityEngine;
@@ -26,6 +27,12 @@ namespace Speckle.ConnectorUnity
       _data = new ObservableConcurrentDictionary<string, object>();
       _data.CollectionChanged += CollectionChangeHandler;
       _hasChanged = true;
+    }
+
+    public void Store(Base @base, HashSet<string> excludedProps = null)
+    {
+      _serializedData = Operations.Serialize(@base);
+      Data = @base.GetMembers().Where(x => !excludedProps.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
     }
 
     public IDictionary<string, object> Data
