@@ -6,22 +6,42 @@
 
 
 
+
+
 ## Introduction
 
-This repo holds Speckle's Unity Connector, it's currently released as early alpha.
+This is my personal fork of the speckle-unity connector. I'm still actively developing this project, so please use with caution. 
 
-This connector is meant to be used by developers, it doesn't have an elaborated UI but it offers convenience methods to send and receive data. The connector uses our [Speckle .NET SDK](https://github.com/specklesystems/speckle-sharp).
+Sending data is pretty hacky at this point, so I would only rely on receiving data in this connector. 
 
-
+This connector uses [Speckle .NET SDK](https://github.com/specklesystems/speckle-sharp).  
 
 ![unity](https://user-images.githubusercontent.com/2679513/108543628-3a83ff00-72dd-11eb-8792-3d43ce54e6af.gif)
 
 
+## RoadMap
+
+There are some tasks I have setup to help make this connector more accessible to all types of unity-users. There is plenty to be added to this roadmap, but here are the main things I have cooking.
+
+#### Operations based
+
+- [x] Build out basic components for sending and receiving
+- [ ] Build out more convenient methods for sending and receiving from speckle  
+- [ ] Build out stream GUI 
+- [ ] Main connector manager
+- [ ] Setup up tests for all operation calls
+
+#### Object based
+- [x] Create component based converters so users can have more flexibility with how conversions work
+- [ ] Handle tree hierarchy conversion back to speckle  
+- [ ] Support Point cloud conversions
+- [ ] Support BIM conversions
+- [ ] Separate component conversion package 
+ 
 
 ## Documentation
 
 More comprehensive developer documentation can be found in the [Speckle Docs website](https://speckle.guide/dev/).
-
 
 
 ## Developing & Debugging
@@ -51,11 +71,7 @@ Following instructions on how to get started debugging and contributing to this 
 
 #### Server
 
-In order to test Speckle in all its glory you'll need a server running, you can run a local one by simply following these instructions:
-
-- https://github.com/specklesystems/Server
-
-If you're facing any errors make sure Postgress and Redis are up and running. 
+This connector relies on having the Speckle Manager installed. This will link up your accounts and servers that you want to access in the connector
 
 #### Accounts
 
