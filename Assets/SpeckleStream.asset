@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
   m_Name: SpeckleStream
   m_EditorClassIdentifier: 
-  serverUrl: speckle.xyz
+  serverUrl: https://speckle.xyz
   streamId: 4f5b4785b0
   branchName: main
-  commitId: 18c4e05550
+  commitId: 
   objectId: 
   userId: 
+  originalInput: https://speckle.xyz/streams/4f5b4785b0/branches/main

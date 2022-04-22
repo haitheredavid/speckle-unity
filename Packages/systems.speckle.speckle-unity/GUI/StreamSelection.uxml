@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="container">
+        <ui:DropdownField label="Accounts" index="-1" name="accounts" binding-path="accounts"/>
+        <ui:DropdownField label="Streams" index="-1" choices="System.Collections.Generic.List`1[System.String]"
+                          name="streams"/>
+        <ui:DropdownField label="Branches" index="-1" choices="System.Collections.Generic.List`1[System.String]"
+                          name="branches"/>
+        <ui:DropdownField label="Commits" index="-1" choices="System.Collections.Generic.List`1[System.String]"
+                          name="commits"/>
+    </ui:VisualElement>
+</ui:UXML>

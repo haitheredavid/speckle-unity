@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="container">
+        <ui:VisualElement name="setup-container">
+            <ui:DropdownField label="Branch" index="-1" choices="System.Collections.Generic.List`1[System.String]"
+                              name="branches" binding-path="branches"/>
+            <ui:DropdownField label="Commit" index="-1" choices="System.Collections.Generic.List`1[System.String]"
+                              name="commits" binding-path="commits"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="thumbnail-container" style="height: 220px;"/>
+    <ui:Button text="Receive" display-tooltip-when-elided="true" name="receive" binding-path="receive"/>
+</ui:UXML>

@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="StreamSelectionDropDowns"
+                 src="project://database/Packages/systems.speckle.speckle-unity/GUI/StreamSelection.uxml?fileID=9197481963319205126&amp;guid=1dca78ead9ad07a47849fc3b2d79d371&amp;type=3#StreamSelectionDropDowns"/>
+    <ui:VisualElement name="container">
+        <ui:VisualElement name="header-container"
+                          style="margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px;">
+            <ui:Label text="speckle connector" display-tooltip-when-elided="true" name="speckle-logo"/>
+        </ui:VisualElement>
+        <ui:Instance template="StreamSelectionDropDowns" name="StreamSelectionDropDowns"/>
+        <ui:VisualElement name="converter-container">
+            <ui:DropdownField label="Converters" index="-1" name="converters" binding-path="converters"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="input-container" style="display: flex;">
+            <ui:VisualElement name="button-container"
+                              style="flex-direction: row; justify-content: center; flex-grow: 1; flex-shrink: 1;">
+                <ui:Button text="Send" display-tooltip-when-elided="true" name="send" style="flex-grow: 1;"/>
+                <ui:Button text="Receive" display-tooltip-when-elided="true" name="receive" style="flex-grow: 1;"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
