@@ -17,7 +17,12 @@ namespace Speckle.ConnectorUnity
 
     [SerializeField] private string originalInput;
 
-    private StreamWrapper wrapper;
+    private StreamWrapper _wrapper;
+
+    public StreamWrapper Wrapper
+    {
+      get { return _wrapper ??= new StreamWrapper(originalInput); }
+    }
 
     public string UserId
     {
@@ -56,48 +61,52 @@ namespace Speckle.ConnectorUnity
 
     public StreamWrapperType Type
     {
-      get => new StreamWrapper(originalInput).Type;
+      get => Wrapper.Type;
     }
 
-    public bool Init(string streamUrlOrId)
+    public bool Init()
     {
-      ConnectorConsole.Log("Setting new Stream");
+      ConnectorConsole.Log($"Setting new Stream with {originalInput}");
 
-      wrapper = new StreamWrapper(streamUrlOrId);
+      _wrapper = new StreamWrapper(originalInput);
 
-      if (!wrapper.IsValid)
+      if (!_wrapper.IsValid)
       {
         ConnectorConsole.Log("Invalid input for stream");
         return false;
       }
 
-      serverUrl = wrapper.ServerUrl;
-      streamId = wrapper.StreamId;
-      branchName = wrapper.BranchName;
-      commitId = wrapper.CommitId;
-      objectId = wrapper.ObjectId;
-      userId = wrapper.UserId;
-      originalInput = wrapper.OriginalInput;
+      serverUrl = _wrapper.ServerUrl;
+      streamId = _wrapper.StreamId;
+      branchName = _wrapper.BranchName;
+      commitId = _wrapper.CommitId;
+      objectId = _wrapper.ObjectId;
+      userId = _wrapper.UserId;
+      originalInput = _wrapper.OriginalInput;
 
+      ConnectorConsole.Log(_wrapper.ToString());
       return true;
+    }
+
+    public bool Init(string streamUrlOrId)
+    {
+      originalInput = streamUrlOrId;
+      return Init();
     }
 
     public async UniTask<Account> GetAccount()
     {
-      wrapper ??= new StreamWrapper(originalInput);
-      return await wrapper.GetAccount();
+      return await Wrapper.GetAccount();
     }
 
     public bool IsValid()
     {
-      wrapper ??= new StreamWrapper(originalInput);
-      return wrapper.IsValid;
+      return Wrapper.IsValid;
     }
 
     public override string ToString()
     {
-      wrapper ??= new StreamWrapper(originalInput);
-      return wrapper.ToString();
+      return Wrapper.ToString();
     }
   }
 }
