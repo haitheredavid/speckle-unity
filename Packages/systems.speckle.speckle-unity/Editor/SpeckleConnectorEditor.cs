@@ -6,6 +6,7 @@ using Speckle.ConnectorUnity.GUI;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UIElements;
 
 namespace Speckle.ConnectorUnity
@@ -15,10 +16,11 @@ namespace Speckle.ConnectorUnity
   {
 
     private DropdownField accounts, streams, branches, commits;
+
+    private Image img;
     private SpeckleConnector obj;
     private VisualElement root;
     private VisualTreeAsset tree;
-
     private void OnEnable()
     {
       tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/SpeckleConnectorEditor.uxml");
@@ -40,6 +42,9 @@ namespace Speckle.ConnectorUnity
       streams = SetDropDown("streams", "streamIndex", obj.streams.Format(), e => StreamChange(e).Forget());
       branches = SetDropDown("branches", "branchIndex", obj.branches.Format(), BranchChange);
       commits = SetDropDown("commits", "commitIndex", obj.commits.Format(), CommitChange);
+
+      img = new Image();
+      root.Add(img);
 
       return root;
     }
@@ -101,6 +106,20 @@ namespace Speckle.ConnectorUnity
         return;
 
       await obj.LoadStream(index);
+
+      var www = UnityWebRequestTexture.GetTexture("https://speckle.xyz/preview/81d2f2c135");
+      await www.SendWebRequest();
+
+      if (www.result != UnityWebRequest.Result.Success)
+      {
+        Debug.Log(www.error);
+      }
+      else
+      {
+        Debug.Log("Success!");
+        var myTexture = DownloadHandlerTexture.GetContent(www);
+        img.image = myTexture;
+      }
 
       Refresh(streams, obj.streams.Format(), "streamIndex");
       Refresh(branches, obj.branches.Format(), "branchIndex");
