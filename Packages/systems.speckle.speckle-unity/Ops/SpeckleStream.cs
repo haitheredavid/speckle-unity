@@ -1,4 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using Cysharp.Threading.Tasks;
 using Speckle.Core.Credentials;
 using UnityEngine;
 
@@ -64,13 +65,34 @@ namespace Speckle.ConnectorUnity
       get => Wrapper.Type;
     }
 
-    public bool Init()
+    public bool Init(string stream, string user, string server)
     {
+      ConnectorConsole.Log($"Setting new Stream Object with {stream} to user {user} on {server}");
+
+      _wrapper = new StreamWrapper(stream, user, server);
+
+      return Setup();
+    }
+
+    /// <summary>
+    /// Initialize a simple stream object that connects the stream wrapper data to the editor  
+    /// </summary>
+    /// <param name="streamUrlOrId">If set to null will use the editor data</param>
+    /// <returns></returns>
+    public bool Init(string streamUrlOrId = null)
+    {
+      if (streamUrlOrId.Valid())
+        originalInput = streamUrlOrId;
+
       ConnectorConsole.Log($"Setting new Stream with {originalInput}");
-
       _wrapper = new StreamWrapper(originalInput);
+      
+      return Setup();
+    }
 
-      if (!_wrapper.IsValid)
+    private bool Setup()
+    {
+      if (_wrapper is not { IsValid: true })
       {
         ConnectorConsole.Log("Invalid input for stream");
         return false;
@@ -86,12 +108,6 @@ namespace Speckle.ConnectorUnity
 
       ConnectorConsole.Log(_wrapper.ToString());
       return true;
-    }
-
-    public bool Init(string streamUrlOrId)
-    {
-      originalInput = streamUrlOrId;
-      return Init();
     }
 
     public async UniTask<Account> GetAccount()
