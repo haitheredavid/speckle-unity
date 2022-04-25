@@ -11,7 +11,14 @@ namespace Speckle.ConnectorUnity.GUI
     private const char SEP = ':';
     private const string DEFAULT = "empty";
 
-    #region account
+    #region Converters
+    public static IEnumerable<string> Format(this IEnumerable<ConverterUnity> items)
+    {
+      return items != null ? items.Select(x => x.Name) : new[] { DEFAULT };
+    }
+    #endregion
+
+    #region Account
     public static string Format(this Account item)
     {
       return item != null ? item.userInfo.email + SEP + item.serverInfo.name : string.Empty;
