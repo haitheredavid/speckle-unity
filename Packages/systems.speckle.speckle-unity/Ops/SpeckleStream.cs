@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Speckle.Core.Credentials;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Speckle.ConnectorUnity
 {
@@ -123,6 +124,50 @@ namespace Speckle.ConnectorUnity
     public override string ToString()
     {
       return Wrapper.ToString();
+    }
+
+    private const string PREV = "preview";
+
+    public async UniTask<Texture2D> GetPreview()
+    {
+      string url;
+      switch (Type)
+      {
+        case StreamWrapperType.Undefined:
+          ConnectorConsole.Warn($"{name} is not a valid stream, bailing on the preview thing");
+          url = null;
+          break;
+        case StreamWrapperType.Stream:
+          url = $"{Wrapper.ServerUrl}/{PREV}/{Wrapper.StreamId}";
+          break;
+        case StreamWrapperType.Commit:
+          url = $"{Wrapper.ServerUrl}/{PREV}/{Wrapper.StreamId}/commits/{Wrapper.CommitId}";
+          break;
+        case StreamWrapperType.Branch:
+          url = $"{Wrapper.ServerUrl}/{PREV}/{Wrapper.StreamId}/branches/{Wrapper.BranchName}";
+          break;
+        case StreamWrapperType.Object:
+          url = $"{Wrapper.ServerUrl}/{PREV}/{Wrapper.StreamId}/objects/{Wrapper.ObjectId}";
+          break;
+        default:
+          url = null;
+          throw new ArgumentOutOfRangeException();
+      }
+
+      if (!url.Valid())
+        return null;
+
+      var www = await UnityWebRequestTexture.GetTexture(url).SendWebRequest();
+
+      if (www.result != UnityWebRequest.Result.Success)
+      {
+        ConnectorConsole.Warn(www.error);
+        return null;
+      }
+      Debug.Log("Success!");
+
+      Debug.Log("Success!");
+      return DownloadHandlerTexture.GetContent(www);
     }
   }
 }
