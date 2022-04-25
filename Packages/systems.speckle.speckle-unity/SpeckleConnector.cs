@@ -186,25 +186,6 @@ namespace Speckle.ConnectorUnity
         cachedStream.Init(activeStream.id, activeAccount.userInfo.id, activeAccount.serverInfo.url);
     }
 
-    public async UniTaskVoid Receive()
-    {
-      if (receivers != null)
-        foreach (var r in receivers)
-        {
-          await r.Init("https://speckle.xyz/streams/4f5b4785b0/commits/18c4e05550");
-          r.OnDataReceivedAction += obj => Send(obj).Forget();
-          r.Receive().Forget();
-        }
-
-    }
-
-    private async UniTaskVoid Send(GameObject o)
-    {
-      var sender = new GameObject().AddComponent<Sender>();
-      // await sender.Init("https://speckle.xyz/streams/4f5b4785b0/");
-      // await sender.Send(new List<GameObject>() { o });
-    }
-
     private static int Check(IList list, int index)
     {
       return list.Valid(index) ? index : 0;

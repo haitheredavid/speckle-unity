@@ -106,21 +106,7 @@ namespace Speckle.ConnectorUnity
         return;
 
       await obj.LoadStream(index);
-
-      var www = UnityWebRequestTexture.GetTexture("https://speckle.xyz/preview/81d2f2c135");
-      await www.SendWebRequest();
-
-      if (www.result != UnityWebRequest.Result.Success)
-      {
-        Debug.Log(www.error);
-      }
-      else
-      {
-        Debug.Log("Success!");
-        var myTexture = DownloadHandlerTexture.GetContent(www);
-        img.image = myTexture;
-      }
-
+      
       Refresh(streams, obj.streams.Format(), "streamIndex");
       Refresh(branches, obj.branches.Format(), "branchIndex");
       Refresh(commits, obj.commits.Format(), "commitIndex");
