@@ -6,7 +6,6 @@ using Speckle.ConnectorUnity.GUI;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UIElements;
 
 namespace Speckle.ConnectorUnity
@@ -21,10 +20,17 @@ namespace Speckle.ConnectorUnity
     private SpeckleConnector obj;
     private VisualElement root;
     private VisualTreeAsset tree;
+
     private void OnEnable()
     {
       tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/SpeckleConnectorEditor.uxml");
       obj = (SpeckleConnector)target;
+      obj.onRepaint += RefreshAll;
+    }
+
+    private void OnDisable()
+    {
+      obj.onRepaint -= RefreshAll;
     }
 
     public override VisualElement CreateInspectorGUI()
@@ -106,25 +112,30 @@ namespace Speckle.ConnectorUnity
         return;
 
       await obj.LoadStream(index);
-      
-      Refresh(streams, obj.streams.Format(), "streamIndex");
+
       Refresh(branches, obj.branches.Format(), "branchIndex");
       Refresh(commits, obj.commits.Format(), "commitIndex");
     }
 
     private void BranchChange(ChangeEvent<string> evt)
     {
-      Debug.Log(evt.newValue + $" from {evt.previousValue}");
       var itemA = evt.newValue;
+      var index = -1;
+
       for (var i = 0; i < obj.branches.Count; i++)
       {
         var item = obj.branches[i];
         if (item != null && item.name.Equals(itemA))
         {
-          obj.LoadBranch(i);
+          index = i;
           break;
         }
       }
+
+      if (index < 0)
+        return;
+
+      obj.LoadBranch(index);
 
       Refresh(commits, obj.commits.Format(), "commitIndex");
     }

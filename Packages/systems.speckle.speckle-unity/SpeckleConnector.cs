@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,17 +56,6 @@ namespace Speckle.ConnectorUnity
       get => commits.Valid(commitIndex) ? commits[commitIndex] : null;
     }
 
-    public async UniTask<Texture2D> GetPreview()
-    {
-      if (cachedStream == null)
-      {
-        ConnectorConsole.Warn("Connector is not ready to load a stream! Try setting the stream parameters first");
-        return null;
-      }
-      
-      return await cachedStream.GetPreview();
-    }
-
     private void OnEnable()
     {
       senders ??= new List<Sender>();
@@ -73,6 +63,19 @@ namespace Speckle.ConnectorUnity
 
       accounts = AccountManager.GetAccounts().ToList();
       LoadAccount().Forget();
+    }
+
+    public event Action onRepaint;
+
+    public async UniTask<Texture2D> GetPreview()
+    {
+      if (cachedStream == null)
+      {
+        ConnectorConsole.Warn("Connector is not ready to load a stream! Try setting the stream parameters first");
+        return null;
+      }
+
+      return await cachedStream.GetPreview();
     }
 
     //
@@ -110,15 +113,20 @@ namespace Speckle.ConnectorUnity
       finally
       {
         await LoadStream(streamIndex);
+        onRepaint?.Invoke();
       }
     }
 
     public async UniTask LoadStream(int index = -1)
     {
+      ConnectorConsole.Log($"Loading new stream at {index}");
       try
       {
         branchIndex = 0;
+        branches = new List<Branch>();
+
         commitIndex = 0;
+        commits = new List<Commit>();
 
 
         if (client == null && activeAccount != null)
@@ -127,8 +135,9 @@ namespace Speckle.ConnectorUnity
         streamIndex = Check(streams, index);
 
         if (activeStream != null)
+        {
           branches = await client.StreamGetBranches(activeStream.id, 20, 20);
-
+        }
 
         if (branches != null)
         {
@@ -149,7 +158,7 @@ namespace Speckle.ConnectorUnity
       }
     }
 
-    public void LoadBranch(int i = 0)
+    public void LoadBranch(int i = -1)
     {
       branchIndex = Check(branches, i);
 
@@ -157,7 +166,7 @@ namespace Speckle.ConnectorUnity
       LoadCommit();
     }
 
-    public void LoadCommit(int i = 0)
+    public void LoadCommit(int i = -1)
     {
       commitIndex = Check(commits, i);
 
