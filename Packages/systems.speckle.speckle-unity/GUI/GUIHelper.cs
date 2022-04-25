@@ -8,7 +8,7 @@ namespace Speckle.ConnectorUnity.GUI
   public static class GUIHelper
   {
 
-    private const char SEP = '-';
+    private const char SEP = ':';
     private const string DEFAULT = "empty";
 
     #region account
