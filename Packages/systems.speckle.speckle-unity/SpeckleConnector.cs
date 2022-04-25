@@ -20,6 +20,7 @@ namespace Speckle.ConnectorUnity
     [SerializeField] private List<Receiver> receivers = new List<Receiver>();
 
     [SerializeField] private SpeckleStream stream;
+    [SerializeField] private SpeckleStream cachedStream;
 
     [SerializeField] private int accountIndex;
     [SerializeField] private int streamIndex;
@@ -52,6 +53,17 @@ namespace Speckle.ConnectorUnity
     public Commit activeCommit
     {
       get => commits.Valid(commitIndex) ? commits[commitIndex] : null;
+    }
+
+    public async UniTask<Texture2D> GetPreview()
+    {
+      if (cachedStream == null)
+      {
+        ConnectorConsole.Warn("Connector is not ready to load a stream! Try setting the stream parameters first");
+        return null;
+      }
+      
+      return await cachedStream.GetPreview();
     }
 
     private void OnEnable()
@@ -108,6 +120,7 @@ namespace Speckle.ConnectorUnity
         branchIndex = 0;
         commitIndex = 0;
 
+
         if (client == null && activeAccount != null)
           client = new Client(activeAccount);
 
@@ -115,6 +128,7 @@ namespace Speckle.ConnectorUnity
 
         if (activeStream != null)
           branches = await client.StreamGetBranches(activeStream.id, 20, 20);
+
 
         if (branches != null)
         {
@@ -138,7 +152,6 @@ namespace Speckle.ConnectorUnity
     public void LoadBranch(int i = 0)
     {
       branchIndex = Check(branches, i);
-      Debug.Log($"Loading new branch {activeBranch}");
 
       commits = activeBranch != null ? activeBranch.commits.items : new List<Commit>();
       LoadCommit();
@@ -150,6 +163,27 @@ namespace Speckle.ConnectorUnity
 
       if (activeCommit != null)
         ConnectorConsole.Log("Active commit loaded! " + activeCommit);
+
+      SetCache();
+    }
+
+    private void SetCache()
+    {
+      if (activeAccount == null || activeStream == null)
+      {
+        ConnectorConsole.Warn("No Account or Stream active, cannot update catch");
+        return;
+      }
+
+      // build new cached stream
+      cachedStream ??= ScriptableObject.CreateInstance<SpeckleStream>();
+
+      if (activeCommit != null)
+        cachedStream.Init($"{activeAccount.serverInfo.url}/streams/{activeStream.id}/commits/{activeCommit.id}");
+      else if (activeBranch != null)
+        cachedStream.Init($"{activeAccount.serverInfo.url}/streams/{activeStream.id}/branches/{activeBranch.name}");
+      else
+        cachedStream.Init(activeStream.id, activeAccount.userInfo.id, activeAccount.serverInfo.url);
     }
 
     public async UniTaskVoid Receive()
@@ -173,9 +207,7 @@ namespace Speckle.ConnectorUnity
 
     private static int Check(IList list, int index)
     {
-      var res = list.Valid(index) ? index : 0;
-      Debug.Log($"checking for index {index} and returning {res}");
-      return res;
+      return list.Valid(index) ? index : 0;
     }
   }
 
