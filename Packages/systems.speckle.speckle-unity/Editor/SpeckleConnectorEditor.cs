@@ -14,7 +14,9 @@ namespace Speckle.ConnectorUnity
   public class SpeckleConnectorEditor : Editor
   {
 
-    private DropdownField accounts, streams, branches, commits;
+    private DropdownField accounts, streams;
+    private DropdownField branches, commits;
+    private DropdownField converters;
 
     private Image img;
     private SpeckleConnector obj;
@@ -43,14 +45,13 @@ namespace Speckle.ConnectorUnity
 
       root.Q<ObjectField>("stream").objectType = typeof(SpeckleStream);
 
-      accounts = SetDropDown("accounts", "accountIndex", obj.accounts.Format(), e => AccountChange(e).Forget());
+      accounts = SetDropDown("accounts", "accountIndex", obj.Accounts.Format(), e => AccountChange(e).Forget());
 
-      streams = SetDropDown("streams", "streamIndex", obj.streams.Format(), e => StreamChange(e).Forget());
-      branches = SetDropDown("branches", "branchIndex", obj.branches.Format(), BranchChange);
-      commits = SetDropDown("commits", "commitIndex", obj.commits.Format(), CommitChange);
+      streams = SetDropDown("streams", "streamIndex", obj.Streams.Format(), e => StreamChange(e).Forget());
+      branches = SetDropDown("branches", "branchIndex", obj.Branches.Format(), BranchChange);
+      commits = SetDropDown("commits", "commitIndex", obj.Commits.Format(), CommitChange);
 
-      img = new Image();
-      root.Add(img);
+      converters = SetDropDown("converters", "converterIndex", obj.Converters.Format(), e => Debug.Log(e.newValue));
 
       return root;
     }
@@ -73,9 +74,9 @@ namespace Speckle.ConnectorUnity
         return;
 
       var index = -1;
-      for (var i = 0; i < obj.accounts.Count; i++)
+      for (var i = 0; i < obj.Accounts.Count; i++)
       {
-        var item = obj.accounts[i];
+        var item = obj.Accounts[i];
         if (item != null && item.userInfo.email.Equals(inputA) && item.serverInfo.name.Equals(inputB))
         {
           Debug.Log($"Setting active {nameof(item)} to {inputA}-{inputB}");
@@ -97,9 +98,9 @@ namespace Speckle.ConnectorUnity
       var itemB = evt.newValue.ParseStreamId();
       var index = -1;
 
-      for (var i = 0; i < obj.streams.Count; i++)
+      for (var i = 0; i < obj.Streams.Count; i++)
       {
-        var item = obj.streams[i];
+        var item = obj.Streams[i];
         if (item != null && item.name.Equals(itemA) && item.id.Equals(itemB))
         {
           Debug.Log($"Setting active {nameof(item)} to {itemA} | {itemB}");
@@ -113,8 +114,8 @@ namespace Speckle.ConnectorUnity
 
       await obj.LoadStream(index);
 
-      Refresh(branches, obj.branches.Format(), "branchIndex");
-      Refresh(commits, obj.commits.Format(), "commitIndex");
+      Refresh(branches, obj.Branches.Format(), "branchIndex");
+      Refresh(commits, obj.Commits.Format(), "commitIndex");
     }
 
     private void BranchChange(ChangeEvent<string> evt)
@@ -122,9 +123,9 @@ namespace Speckle.ConnectorUnity
       var itemA = evt.newValue;
       var index = -1;
 
-      for (var i = 0; i < obj.branches.Count; i++)
+      for (var i = 0; i < obj.Branches.Count; i++)
       {
-        var item = obj.branches[i];
+        var item = obj.Branches[i];
         if (item != null && item.name.Equals(itemA))
         {
           index = i;
@@ -137,7 +138,7 @@ namespace Speckle.ConnectorUnity
 
       obj.LoadBranch(index);
 
-      Refresh(commits, obj.commits.Format(), "commitIndex");
+      Refresh(commits, obj.Commits.Format(), "commitIndex");
     }
 
     private void CommitChange(ChangeEvent<string> evt)
@@ -145,9 +146,9 @@ namespace Speckle.ConnectorUnity
       var itemA = evt.newValue.ParseCommitId();
       var itemB = evt.newValue.ParseCommitMsg();
 
-      for (var i = 0; i < obj.commits.Count; i++)
+      for (var i = 0; i < obj.Commits.Count; i++)
       {
-        var item = obj.commits[i];
+        var item = obj.Commits[i];
         if (item != null && item.id.Equals(itemA) && item.message.Equals(itemB))
         {
           Debug.Log($"Setting active commit to {itemA} | {itemB}");
@@ -164,10 +165,10 @@ namespace Speckle.ConnectorUnity
 
     private void RefreshAll()
     {
-      Refresh(accounts, obj.accounts.Format(), "accountIndex");
-      Refresh(streams, obj.streams.Format(), "streamIndex");
-      Refresh(branches, obj.branches.Format(), "branchIndex");
-      Refresh(commits, obj.commits.Format(), "commitIndex");
+      Refresh(accounts, obj.Accounts.Format(), "accountIndex");
+      Refresh(streams, obj.Streams.Format(), "streamIndex");
+      Refresh(branches, obj.Branches.Format(), "branchIndex");
+      Refresh(commits, obj.Commits.Format(), "commitIndex");
     }
 
     private void Refresh(DropdownField dropdown, IEnumerable<string> items, string prop)
