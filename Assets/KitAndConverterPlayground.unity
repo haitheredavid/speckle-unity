@@ -176,7 +176,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2830afbce900e634985de6a3930d9608, type: 2}
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -315,6 +315,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &1418222938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: https://speckle.xyz
+  streamId: 4f5b4785b0
+  branchName: 
+  commitId: cdb1dc5cce
+  objectId: 
+  userId: 
+  originalInput: https://speckle.xyz/streams/4f5b4785b0/commits/cdb1dc5cce
 --- !u!1 &1624407933
 GameObject:
   m_ObjectHideFlags: 0
@@ -348,12 +367,17 @@ MonoBehaviour:
   senders: []
   receivers:
   - {fileID: 1864518983}
+  converters:
+  - {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
+  - {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
+  - {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
   stream: {fileID: 11400000, guid: 84337e16c7ff0244bacc00b3c7963f59, type: 2}
-  accountIndex: -1
-  streamIndex: 4
+  cachedStream: {fileID: 1418222938}
+  accountIndex: 0
+  streamIndex: 0
   branchIndex: 0
   commitIndex: 0
-  kitIndex: 0
+  converterIndex: 0
 --- !u!4 &1624407935
 Transform:
   m_ObjectHideFlags: 0
