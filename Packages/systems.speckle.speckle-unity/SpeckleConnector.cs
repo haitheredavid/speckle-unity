@@ -62,7 +62,9 @@ namespace Speckle.ConnectorUnity
       receivers ??= new List<Receiver>();
 
       accounts = AccountManager.GetAccounts().ToList();
+
       LoadAccount().Forget();
+
     }
 
     public event Action onRepaint;
@@ -77,12 +79,6 @@ namespace Speckle.ConnectorUnity
 
       return await cachedStream.GetPreview();
     }
-
-    //
-    // private void Start()
-    // {
-    //   Receive().Forget();
-    // }
 
     public async UniTask LoadAccount(int index = -1)
     {
