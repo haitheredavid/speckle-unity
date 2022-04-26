@@ -14,243 +14,272 @@ using UnityEngine.Events;
 
 namespace Speckle.ConnectorUnity
 {
-  /// <summary>
-  ///   A Speckle Receiver, it's a wrapper around a basic Speckle Client
-  ///   that handles conversions and subscriptions for you
-  /// </summary>
-  [ExecuteAlways]
-  [AddComponentMenu("Speckle/Receiver")]
-  public class Receiver : SpeckleClient
-  {
-    public bool autoReceive;
-    public bool deleteOld = true;
+	/// <summary>
+	///   A Speckle Receiver, it's a wrapper around a basic Speckle Client
+	///   that handles conversions and subscriptions for you
+	/// </summary>
+	[ExecuteAlways]
+	[AddComponentMenu("Speckle/Receiver")]
+	public class Receiver : SpeckleClient
+	{
+		[SerializeField] private bool autoReceive;
+		[SerializeField] private bool deleteOld = true;
+		[SerializeField] private Texture preview;
+		[SerializeField] private int commitIndex;
 
-    [SerializeField] private int commitIndex;
+		public UnityAction<GameObject> onDataReceivedAction;
+		public UnityAction<int> onTotalChildrenCountKnown;
 
-    public UnityAction<GameObject> OnDataReceivedAction;
-    public UnityAction<int> OnTotalChildrenCountKnown;
+		public Texture Preview
+		{
+			get => preview;
+		}
 
-    public List<Commit> Commits { get; protected set; }
+		public List<Commit> Commits { get; protected set; }
 
-    public Commit activeCommit
-    {
-      get => Commits.Valid(commitIndex) ? Commits[commitIndex] : null;
-    }
+		public string StreamUrl
+		{
+			get => stream == null || !stream.IsValid() ? "no stream" : stream.GetUrl(false);
+		}
 
-    #region private methods
-    private void OnDestroy()
-    {
-      client?.CommitCreatedSubscription?.Dispose();
-    }
-    #endregion
+		public Commit activeCommit
+		{
+			get => Commits.Valid(commitIndex) ? Commits[commitIndex] : null;
+		}
 
-    public override void SetBranch(int i)
-    {
-      base.SetBranch(i);
-      Commits = activeBranch != null ? activeBranch.commits.items : new List<Commit>();
-      SetCommit(0);
-    }
+		private void OnDestroy()
+		{
+			client?.CommitCreatedSubscription?.Dispose();
+		}
 
-    public void SetCommit(int i)
-    {
-      commitIndex = Commits.Check(i);
+		public event Action onPreviewSet;
 
-      if (activeCommit != null)
-      {
-        stream.Init($"{client.ServerUrl}/streams/{stream.Id}/commits/{activeCommit.id}");
-        ConnectorConsole.Log("Active commit loaded! " + activeCommit);
-        Debug.Log(stream.ToString());
-      }
-    }
+		public override void SetBranch(int i)
+		{
+			base.SetBranch(i);
+			Commits = activeBranch != null ? activeBranch.commits.items : new List<Commit>();
+			SetCommit(0);
+		}
 
-    protected override void SetSubscriptions()
-    {
-      if (client != null && autoReceive)
-      {
-        client.SubscribeCommitCreated(stream.Id);
-        client.OnCommitCreated += (sender, commit) => OnCommitCreated?.Invoke(commit);
-        client.SubscribeCommitUpdated(stream.Id);
-        client.OnCommitUpdated += (sender, commit) => OnCommitUpdated?.Invoke(commit);
-      }
-    }
+		public void SetCommit(int i)
+		{
+			commitIndex = Commits.Check(i);
 
-    protected override async UniTask LoadStream()
-    {
-      await base.LoadStream();
+			if (activeCommit != null)
+			{
+				stream.Init($"{client.ServerUrl}/streams/{stream.Id}/commits/{activeCommit.id}");
 
-      if (Branches != null)
-        Commits = Branches.FirstOrDefault().commits.items;
-    }
+				ConnectorConsole.Log("Active commit loaded! " + activeCommit);
 
-    /// <summary>
-    ///   Gets and converts the data of the last commit on the Stream
-    /// </summary>
-    /// <returns></returns>
-    public async UniTask Receive()
-    {
-      ConnectorConsole.Log("Receive Started");
-      try
-      {
-        Base @base = null;
+				UpdatePreview().Forget();
+			}
+		}
 
-        var commit = await client.CommitGet(stream.Id, stream.CommitId);
+		private async UniTask UpdatePreview()
+		{
+			if (stream == null || !stream.IsValid())
+				UniTask.Yield();
 
-        var transport = new ServerTransport(client.Account, stream.Id);
+			preview = await stream.GetPreview();
 
-        ConnectorConsole.Log($"obj id={commit.referencedObject}");
+			onPreviewSet?.Invoke();
 
-        @base = await Operations.Receive(
-          commit.referencedObject,
-          this.GetCancellationTokenOnDestroy(),
-          transport,
-          onProgressAction: onProgressReport,
-          onTotalChildrenCountKnown: i => OnTotalChildrenCountKnown?.Invoke(i),
-          onErrorAction: onErrorReport);
+			UniTask.Yield();
+		}
 
-        if (@base == null)
-        {
-          ConnectorConsole.Warn("The data pulled from stream was not recieved correctly");
-          UniTask.Yield();
-        }
+		protected override void SetSubscriptions()
+		{
+			if (client != null && autoReceive)
+			{
+				client.SubscribeCommitCreated(stream.Id);
+				client.OnCommitCreated += (sender, commit) => OnCommitCreated?.Invoke(commit);
+				client.SubscribeCommitUpdated(stream.Id);
+				client.OnCommitUpdated += (sender, commit) => OnCommitUpdated?.Invoke(commit);
+			}
+		}
 
-        ConnectorConsole.Log($"Data with {@base.totalChildrenCount}");
+		protected override async UniTask LoadStream()
+		{
+			await base.LoadStream();
 
-        await client.CommitReceived(new CommitReceivedInput
-        {
-          streamId = stream.Id,
-          commitId = commit.id,
-          message = $"received commit from {HostApp} ",
-          sourceApplication = HostApp
-        });
+			if (Branches != null)
+				Commits = Branches.FirstOrDefault().commits.items;
 
+			name = nameof(Receiver) + $"-{stream.Id}";
+		}
 
-        // TODO: handle the process for update objects and not just force deleting
-        //remove previously received object
-        if (deleteOld && root != null)
-          ConverterUtils.SafeDestroy(root);
+		/// <summary>
+		///   Gets and converts the data of the last commit on the Stream
+		/// </summary>
+		/// <returns></returns>
+		public async UniTask Receive()
+		{
+			ConnectorConsole.Log("Receive Started");
+			try
+			{
+				isWorking = true;
+				Base @base = null;
 
-        ConnectorConsole.Log("Converting Started");
+				var commit = await client.CommitGet(stream.Id, stream.CommitId);
 
-        root = ConvertRecursively(@base);
+				var transport = new ServerTransport(client.Account, stream.Id);
 
-        OnDataReceivedAction?.Invoke(root);
-      }
-      catch (Exception e)
-      {
-        ConnectorConsole.Exception(new SpeckleException(e.Message));
-        UniTask.Yield();
-      }
-    }
+				ConnectorConsole.Log($"obj id={commit.referencedObject}");
 
-    private GameObject ConvertRecursively(object value)
-    {
-      if (value == null)
-        return null;
+				@base = await Operations.Receive(
+					commit.referencedObject,
+					this.GetCancellationTokenOnDestroy(),
+					transport,
+					onProgressAction: onProgressReport,
+					onTotalChildrenCountKnown: i => onTotalChildrenCountKnown?.Invoke(i),
+					onErrorAction: onErrorReport);
 
-      //it's a simple type or not a Base
-      if (value.GetType().IsSimpleType() || !(value is Base @base)) return null;
+				if (@base == null)
+				{
+					ConnectorConsole.Warn("The data pulled from stream was not recieved correctly");
+					UniTask.Yield();
+				}
 
-      return converter.CanConvertToNative(@base) ?
-        TryConvertToNative(@base) : // supported object so convert that 
-        TryConvertProperties(@base); // not supported but might have props
+				ConnectorConsole.Log($"Data with {@base.totalChildrenCount}");
 
-    }
+				await client.CommitReceived(new CommitReceivedInput
+				{
+					streamId = stream.Id,
+					commitId = commit.id,
+					message = $"received commit from {HostApp} ",
+					sourceApplication = HostApp
+				});
 
-    private GameObject RecurseTreeToNative(object @object, string containerName = null)
-    {
-      if (!IsList(@object))
-        return ConvertRecursively(@object);
+				// TODO: handle the process for update objects and not just force deleting
+				//remove previously received object
+				if (deleteOld && root != null)
+					ConverterUtils.SafeDestroy(root);
 
-      var list = ((IEnumerable)@object).Cast<object>();
+				ConnectorConsole.Log("Converting Started");
 
-      var go = new GameObject(containerName.Valid() ? containerName : "List");
+				root = ConvertRecursively(@base);
 
-      var objects = list.Select(x => RecurseTreeToNative(x)).Where(x => x != null).ToList();
+				onDataReceivedAction?.Invoke(root);
+			}
+			catch (Exception e)
+			{
+				ConnectorConsole.Exception(new SpeckleException(e.Message));
+				UniTask.Yield();
+			}
+			finally
+			{
+				isWorking = false;
+			}
+		}
 
-      if (objects.Any())
-        objects.ForEach(x => x.transform.SetParent(go.transform));
+		private GameObject ConvertRecursively(object value)
+		{
+			if (value == null)
+				return null;
 
-      return go;
-    }
+			//it's a simple type or not a Base
+			if (value.GetType().IsSimpleType() || !(value is Base @base)) return null;
 
-    private GameObject TryConvertProperties(Base @base)
-    {
-      var go = new GameObject(@base.speckle_type);
+			return converter.CanConvertToNative(@base) ?
+				TryConvertToNative(@base) : // supported object so convert that 
+				TryConvertProperties(@base); // not supported but might have props
+		}
 
-      var props = new List<GameObject>();
+		private GameObject RecurseTreeToNative(object @object, string containerName = null)
+		{
+			if (!IsList(@object))
+				return ConvertRecursively(@object);
 
-      foreach (var prop in @base.GetMemberNames().ToList())
-      {
-        var goo = RecurseTreeToNative(@base[prop]);
-        if (goo != null)
-        {
-          goo.name = prop;
-          goo.transform.SetParent(go.transform);
-          props.Add(goo);
-        }
-      }
+			var list = ((IEnumerable)@object).Cast<object>();
 
-      //if no children is valid, return null
-      if (!props.Any())
-      {
-        ConverterUtils.SafeDestroy(go);
-        return null;
-      }
+			var go = new GameObject(containerName.Valid() ? containerName : "List");
 
-      return go;
-    }
+			var objects = list.Select(x => RecurseTreeToNative(x)).Where(x => x != null).ToList();
 
-    private GameObject TryConvertToNative(Base @base)
-    {
-      try
-      {
-        var go = converter.ConvertToNative(@base) as GameObject;
+			if (objects.Any())
+				objects.ForEach(x => x.transform.SetParent(go.transform));
 
-        if (go == null)
-        {
-          Debug.LogWarning("Object was not converted correclty");
-          return null;
-        }
+			return go;
+		}
 
-        if (HasElements(@base, out var elements))
-        {
-          var goo = RecurseTreeToNative(elements, "Elements");
+		private GameObject TryConvertProperties(Base @base)
+		{
+			var go = new GameObject(@base.speckle_type);
 
-          if (goo != null)
-            goo.transform.SetParent(go.transform);
-        }
-        return go;
-      }
-      catch (Exception e)
-      {
-        ConnectorConsole.Exception(new SpeckleException(e.Message, e, true, SentryLevel.Error));
-        return null;
-      }
-    }
+			var props = new List<GameObject>();
 
-    private static bool IsList(object @object)
-    {
-      if (@object == null)
-        return false;
+			foreach (var prop in @base.GetMemberNames().ToList())
+			{
+				var goo = RecurseTreeToNative(@base[prop]);
+				if (goo != null)
+				{
+					goo.name = prop;
+					goo.transform.SetParent(go.transform);
+					props.Add(goo);
+				}
+			}
 
-      var type = @object.GetType();
-      return typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type) && type != typeof(string);
-    }
+			//if no children is valid, return null
+			if (!props.Any())
+			{
+				ConverterUtils.SafeDestroy(go);
+				return null;
+			}
 
-    private static bool HasElements(Base @base, out List<Base> items)
-    {
-      items = null;
+			return go;
+		}
 
-      if (@base["elements"] is List<Base> l && l.Any())
-        items = l;
+		private GameObject TryConvertToNative(Base @base)
+		{
+			try
+			{
+				var go = converter.ConvertToNative(@base) as GameObject;
 
-      return items != null;
-    }
+				if (go == null)
+				{
+					Debug.LogWarning("Object was not converted correclty");
+					return null;
+				}
 
-    #region Subscriptions
-    public UnityAction<CommitInfo> OnCommitCreated;
-    public UnityAction<CommitInfo> OnCommitUpdated;
-    #endregion
+				if (HasElements(@base, out var elements))
+				{
+					var goo = RecurseTreeToNative(elements, "Elements");
 
-  }
+					if (goo != null)
+						goo.transform.SetParent(go.transform);
+				}
+				return go;
+			}
+			catch (Exception e)
+			{
+				ConnectorConsole.Exception(new SpeckleException(e.Message, e, true, SentryLevel.Error));
+				return null;
+			}
+		}
+
+		private static bool IsList(object @object)
+		{
+			if (@object == null)
+				return false;
+
+			var type = @object.GetType();
+			return typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type) && type != typeof(string);
+		}
+
+		private static bool HasElements(Base @base, out List<Base> items)
+		{
+			items = null;
+
+			if (@base["elements"] is List<Base> l && l.Any())
+				items = l;
+
+			return items != null;
+		}
+
+		#region Subscriptions
+		public UnityAction<CommitInfo> OnCommitCreated;
+		public UnityAction<CommitInfo> OnCommitUpdated;
+		#endregion
+
+	}
 }
