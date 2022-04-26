@@ -1,12 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <ui:Template name="AccountSelectCard"
                  src="project://database/Packages/systems.speckle.speckle-unity/GUI/AccountSelectionCard.uxml?fileID=9197481963319205126&amp;guid=b2830fb645dd33942adca815c39831e9&amp;type=3#AccountSelectionCard"/>
-    <ui:Template name="StreamSelectionDropDowns"
-                 src="project://database/Packages/systems.speckle.speckle-unity/GUI/StreamSelection.uxml?fileID=9197481963319205126&amp;guid=1dca78ead9ad07a47849fc3b2d79d371&amp;type=3#StreamSelection"/>
-    <ui:Template name="StreamSelectionCard"
-                 src="project://database/Packages/systems.speckle.speckle-unity/GUI/StreamSelectionCard.uxml?fileID=9197481963319205126&amp;guid=52815882652e2e544b9a5152538f4033&amp;type=3#StreamSelectionCard"/>
-    <ui:Template name="ConverterSelectionCard"
-                 src="project://database/Packages/systems.speckle.speckle-unity/GUI/ConverterSelectionCard.uxml?fileID=9197481963319205126&amp;guid=a97966f562baf9f4d8ccc1728f9c4cf9&amp;type=3#ConverterSelectionCard"/>
+    <ui:Template name="StreamListCard"
+                 src="project://database/Packages/systems.speckle.speckle-unity/GUI/Elements/StreamList/StreamListCard.uxml?fileID=9197481963319205126&amp;guid=4e6ee5f3584c6994fac8a3ffb54f2a6a&amp;type=3#StreamListCard"/>
     <Style src="project://database/Packages/systems.speckle.speckle-unity/GUI/USS/speckleStyles.uss?fileID=7433441132597879392&amp;guid=3e16578a712621347bc146e6de449517&amp;type=3#speckleStyles"/>
     <ui:VisualElement name="container" class="font"
                       style="-unity-font: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/SpaceGrotesk-VariableFont_wght.ttf?fileID=12800000&amp;guid=824347c9280ff7842a402224ca2cbb43&amp;type=3#SpaceGrotesk-VariableFont_wght&apos;);">
@@ -18,8 +14,7 @@
                       style="-unity-font-style: bold; font-size: 25px; -unity-text-align: middle-center; color: rgb(5, 127, 253); flex-grow: 1;"/>
         </ui:VisualElement>
         <ui:Instance template="AccountSelectCard" name="AccountSelectCard"/>
-        <ui:Instance template="StreamSelectionCard" name="StreamSelectionCard"/>
-        <ui:Instance template="StreamSelectionDropDowns" name="StreamSelectionDropDowns"/>
-        <ui:Instance template="ConverterSelectionCard" name="ConverterSelectionCard"/>
+        <ui:Instance template="StreamListCard" name="StreamListCard"
+                     style="flex-grow: 1; flex-shrink: 0; justify-content: flex-start; align-items: auto;"/>
     </ui:VisualElement>
 </ui:UXML>
