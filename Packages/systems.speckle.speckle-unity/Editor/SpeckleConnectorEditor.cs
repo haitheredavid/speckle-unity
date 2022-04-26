@@ -27,10 +27,11 @@ namespace Speckle.ConnectorUnity
 
     private void OnEnable()
     {
-      tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/SpeckleConnectorEditor.uxml");
-      streamCard = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/Elements/StreamCard/StreamCard.uxml");
       obj = (SpeckleConnector)target;
       obj.onRepaint += RefreshAll;
+
+      tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/SpeckleConnectorEditor.uxml");
+      streamCard = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/Elements/StreamCard/StreamCard.uxml");
     }
 
     private void OnDisable()
@@ -46,7 +47,7 @@ namespace Speckle.ConnectorUnity
       root = new VisualElement();
       tree.CloneTree(root);
 
-      accounts = SetDropDown("account", obj.Accounts.Format(), e => AccountChange(e, accounts.choices).Forget());
+      accounts = SetDropDown("account", obj.Accounts.Format(), e => AccountChange(e).Forget());
 
       // streams = SetDropDown("stream", obj.Streams.Format(), e => StreamChange(e, streams.choices).Forget());
       // branches = SetDropDown("branch", obj.Branches.Format(), e => DropDownChange(e, branches.choices, i =>
@@ -65,33 +66,6 @@ namespace Speckle.ConnectorUnity
       return root;
     }
 
-    private DropdownField SetDropDown(string fieldName, IEnumerable<string> items, Action<ChangeEvent<string>> callback)
-    {
-      var dropDown = root.Q<VisualElement>(fieldName + "-container").Q<DropdownField>("items");
-      dropDown.choices = items.ToList();
-      dropDown.index = FindInt(fieldName + "Index");
-      dropDown.RegisterValueChangedCallback(callback.Invoke);
-      return dropDown;
-    }
-
-    private int DropDownChange(ChangeEvent<string> evt, IReadOnlyList<string> items, Action<int> notify = null)
-    {
-      var index = -1;
-      for (int i = 0; i < items.Count; i++)
-      {
-        if (items[i].Equals(evt.newValue))
-        {
-          index = i;
-          break;
-        }
-      }
-
-      if (index >= 0)
-        notify?.Invoke(index);
-
-      return index;
-    }
-
     private void SetupList()
     {
 
@@ -104,7 +78,6 @@ namespace Speckle.ConnectorUnity
 
       void bindItem(VisualElement e, int i)
       {
-        Debug.Log($"stream count {obj.Streams.Count}");
         var stream = obj.Streams[i];
 
         e.Q<Label>("title").text = stream.name;
@@ -153,6 +126,14 @@ namespace Speckle.ConnectorUnity
 
     }
 
+    private DropdownField SetDropDown(string fieldName, IEnumerable<string> items, Action<ChangeEvent<string>> callback)
+    {
+      var dropDown = root.Q<VisualElement>(fieldName + "-container").Q<DropdownField>("items");
+      dropDown.choices = items.ToList();
+      dropDown.index = FindInt(fieldName + "Index");
+      dropDown.RegisterValueChangedCallback(callback.Invoke);
+      return dropDown;
+    }
     private void SetAndRefreshList()
     {
       streamList.ClearSelection();
@@ -160,29 +141,15 @@ namespace Speckle.ConnectorUnity
       streamList.RefreshItems();
     }
 
-    private async UniTask AccountChange(ChangeEvent<string> evt, IReadOnlyList<string> items)
+    private async UniTask AccountChange(ChangeEvent<string> evt)
     {
-      var index = DropDownChange(evt, items);
+      var index = accounts.DropDownChange(evt);
 
       if (index < 0)
         return;
 
-      await obj.LoadAccount(index);
+      await obj.LoadAccountAndStream(index, false);
       RefreshAll();
-    }
-
-    private async UniTask StreamChange(ChangeEvent<string> evt, IReadOnlyList<string> items)
-    {
-      var index = DropDownChange(evt, items);
-
-      if (index < 0)
-        return;
-
-
-      await obj.LoadStream(index);
-
-      Refresh(branches, obj.Branches.Format(), "branchIndex");
-      Refresh(commits, obj.Commits.Format(), "commitIndex");
     }
 
     private int FindInt(string propName)
@@ -194,10 +161,6 @@ namespace Speckle.ConnectorUnity
     {
       Refresh(accounts, obj.Accounts.Format(), "accountIndex");
       SetAndRefreshList();
-
-      // Refresh(streams, obj.Streams.Format(), "streamIndex");
-      // Refresh(branches, obj.Branches.Format(), "branchIndex");
-      // Refresh(commits, obj.Commits.Format(), "commitIndex");
     }
 
     private void Refresh(DropdownField dropdown, IEnumerable<string> items, string prop)

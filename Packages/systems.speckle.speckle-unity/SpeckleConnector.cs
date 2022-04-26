@@ -75,7 +75,7 @@ namespace Speckle.ConnectorUnity
 
       Accounts = AccountManager.GetAccounts().ToList();
 
-      LoadAccount().Forget();
+      LoadAccountAndStream().Forget();
 
       // TODO: during the build process this should compile and store these objects. 
       #if UNITY_EDITOR
@@ -96,8 +96,9 @@ namespace Speckle.ConnectorUnity
       return await cachedStream.GetPreview();
     }
 
-    public async UniTask LoadAccount(int index = -1)
+    public async UniTask LoadAccountAndStream(int index = -1, bool loadActiveStream = true)
     {
+
       try
       {
         if (Accounts == null)
@@ -124,7 +125,9 @@ namespace Speckle.ConnectorUnity
       }
       finally
       {
-        await LoadStream(streamIndex);
+        if (loadActiveStream)
+          await LoadStream(streamIndex);
+
         onRepaint?.Invoke();
       }
     }
@@ -233,15 +236,15 @@ namespace Speckle.ConnectorUnity
     #endif
     public void OpenStreamInBrowser(EventBase obj)
     {
-      throw new NotImplementedException();
+      Debug.Log(obj);
     }
     public void CreateSender(EventBase obj)
     {
-      throw new NotImplementedException();
+      Debug.Log(obj);
     }
     public void CreateReceiver(EventBase obj)
     {
-      throw new NotImplementedException();
+      Debug.Log(obj);
     }
   }
 
