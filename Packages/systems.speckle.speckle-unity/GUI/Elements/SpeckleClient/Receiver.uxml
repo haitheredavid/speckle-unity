@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="StreamObjectCard"
+                 src="project://database/Packages/systems.speckle.speckle-unity/GUI/StreamObjectCard.uxml?fileID=9197481963319205126&amp;guid=1dca78ead9ad07a47849fc3b2d79d371&amp;type=3#StreamObjectCard"/>
+    <ui:Template name="ConverterSelectionCard"
+                 src="project://database/Packages/systems.speckle.speckle-unity/GUI/ConverterSelectionCard.uxml?fileID=9197481963319205126&amp;guid=a97966f562baf9f4d8ccc1728f9c4cf9&amp;type=3#ConverterSelectionCard"/>
+    <ui:VisualElement name="container">
+        <ui:Instance template="StreamObjectCard" name="StreamObjectCard"/>
+    </ui:VisualElement>
+    <Speckle.ConnectorUnity.GUI.StreamPreview
+            style="max-width: none; max-height: 200px; min-height: 100px; flex-grow: 1;"/>
+    <ui:VisualElement name="operation-container" style="flex-direction: row;">
+        <ui:Instance template="ConverterSelectionCard" name="ConverterSelectionCard" style="flex-grow: 1;"/>
+        <ui:VisualElement name="container"
+                          style="padding-left: 1px; padding-right: 1px; padding-top: 1px; padding-bottom: 1px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; width: 76px; height: 25px; justify-content: center; flex-direction: row; align-items: center;">
+            <ui:Button display-tooltip-when-elided="true" name="receive" binding-path="receive"
+                       style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/Receiver.png?fileID=2800000&amp;guid=4e2d7537a68c1a74187c439e7cad5562&amp;type=3#Receiver&apos;); -unity-background-scale-mode: scale-to-fit; width: auto; height: auto; padding-top: 3px; padding-bottom: 3px; flex-grow: 1; justify-content: space-between;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
