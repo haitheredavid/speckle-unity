@@ -22,6 +22,7 @@ namespace Speckle.ConnectorUnity
     private VisualElement root;
 
     private VisualTreeAsset streamCard;
+    private ListView streamList;
     private VisualTreeAsset tree;
 
     private void OnEnable()
@@ -47,89 +48,21 @@ namespace Speckle.ConnectorUnity
 
       accounts = SetDropDown("account", obj.Accounts.Format(), e => AccountChange(e, accounts.choices).Forget());
 
-      streams = SetDropDown("stream", obj.Streams.Format(), e => StreamChange(e, streams.choices).Forget());
-      branches = SetDropDown("branch", obj.Branches.Format(), e => DropDownChange(e, branches.choices, i =>
-      {
-        obj.LoadBranch(i);
-        Refresh(commits, obj.Commits.Format(), "commitIndex");
-      }));
-
-      commits = SetDropDown("commit", obj.Commits.Format(), e => DropDownChange(e, commits.choices, i => obj.LoadCommit(i)));
-
-
-      converters = SetDropDown("converter", obj.Converters.Format(), e => Debug.Log(e.newValue));
+      // streams = SetDropDown("stream", obj.Streams.Format(), e => StreamChange(e, streams.choices).Forget());
+      // branches = SetDropDown("branch", obj.Branches.Format(), e => DropDownChange(e, branches.choices, i =>
+      // {
+      //   obj.LoadBranch(i);
+      //   Refresh(commits, obj.Commits.Format(), "commitIndex");
+      // }));
+      //
+      // commits = SetDropDown("commit", obj.Commits.Format(), e => DropDownChange(e, commits.choices, i => obj.LoadCommit(i)));
+      //
+      //
+      // converters = SetDropDown("converter", obj.Converters.Format(), e => Debug.Log(e.newValue));
 
       SetupList();
 
       return root;
-    }
-
-    private void SetupList()
-    {
-
-      Func<VisualElement> makeItem = () =>
-      {
-        var card = new VisualElement();
-        streamCard.CloneTree(card);
-        return card;
-      };
-
-      Action<VisualElement, int> bindItem = (e, i) =>
-      {
-
-        var stream = obj.Streams[i];
-
-        e.Q<Label>("title").text = stream.name;
-        e.Q<Label>("id").text = stream.id;
-        e.Q<Label>("description").text = stream.description;
-
-        var isActive = FindInt("streamIndex") == i;
-
-        e.style.backgroundColor = isActive ? new StyleColor(Color.green) : new StyleColor(Color.black);
-
-        var ops = e.Q<VisualElement>("operation-container");
-        if (ops == null)
-        {
-          Debug.Log("No container found");
-          return;
-        }
-
-        ops.visible = isActive;
-
-        // unbind all objects first just in case
-        ops.Q<Button>("open-button").clickable.clickedWithEventInfo -= obj.OpenStreamInBrowser;
-        ops.Q<Button>("send-button").clickable.clickedWithEventInfo -= obj.CreateSender;
-        ops.Q<Button>("receive-button").clickable.clickedWithEventInfo -= obj.CreateReceiver;
-
-        if (isActive)
-        {
-          ops.Q<Button>("open-button").clickable.clickedWithEventInfo += obj.OpenStreamInBrowser;
-          ops.Q<Button>("send-button").clickable.clickedWithEventInfo += obj.CreateSender;
-          ops.Q<Button>("receive-button").clickable.clickedWithEventInfo += obj.CreateReceiver;
-        }
-      };
-
-      var listView = new ListView(obj.Streams, 50f, makeItem, bindItem)
-      {
-        selectionType = SelectionType.Single,
-        style =
-        {
-          maxHeight = 200f,
-          minHeight = 100f,
-          flexGrow = 1f,
-          backgroundColor = new StyleColor(Color.black)
-        }
-
-      };
-
-
-      // Handle updating all list view items after selection 
-      listView.RegisterCallback<ClickEvent>(evt => listView.RefreshItems());
-
-      // Pass new selection back to object
-      listView.onSelectedIndicesChange += i => obj.SetStream(i.FirstOrDefault());
-
-      root.Add(listView);
     }
 
     private DropdownField SetDropDown(string fieldName, IEnumerable<string> items, Action<ChangeEvent<string>> callback)
@@ -157,6 +90,74 @@ namespace Speckle.ConnectorUnity
         notify?.Invoke(index);
 
       return index;
+    }
+
+    private void SetupList()
+    {
+
+      VisualElement makeItem()
+      {
+        var card = new VisualElement();
+        streamCard.CloneTree(card);
+        return card;
+      }
+
+      void bindItem(VisualElement e, int i)
+      {
+        Debug.Log($"stream count {obj.Streams.Count}");
+        var stream = obj.Streams[i];
+
+        e.Q<Label>("title").text = stream.name;
+        e.Q<Label>("id").text = stream.id;
+        e.Q<Label>("description").text = stream.description;
+
+        var isActive = FindInt("streamIndex") == i;
+
+        e.style.backgroundColor = isActive ? new StyleColor(Color.white) : new StyleColor(Color.clear);
+
+        var ops = e.Q<VisualElement>("operation-container");
+        if (ops == null)
+        {
+          Debug.Log("No container found");
+          return;
+        }
+
+        ops.visible = isActive;
+
+        // unbind all objects first just in case
+        ops.Q<Button>("open-button").clickable.clickedWithEventInfo -= obj.OpenStreamInBrowser;
+        ops.Q<Button>("send-button").clickable.clickedWithEventInfo -= obj.CreateSender;
+        ops.Q<Button>("receive-button").clickable.clickedWithEventInfo -= obj.CreateReceiver;
+
+        if (isActive)
+        {
+          ops.Q<Button>("open-button").clickable.clickedWithEventInfo += obj.OpenStreamInBrowser;
+          ops.Q<Button>("send-button").clickable.clickedWithEventInfo += obj.CreateSender;
+          ops.Q<Button>("receive-button").clickable.clickedWithEventInfo += obj.CreateReceiver;
+        }
+      }
+
+      streamList = root.Q<ListView>("stream-list");
+
+      streamList.bindItem = bindItem;
+      streamList.makeItem = makeItem;
+      streamList.fixedItemHeight = 50f;
+
+      SetAndRefreshList();
+
+      // Handle updating all list view items after selection 
+      streamList.RegisterCallback<ClickEvent>(_ => streamList.RefreshItems());
+
+      // Pass new selection back to object
+      streamList.onSelectedIndicesChange += i => obj.SetStream(i.FirstOrDefault());
+
+    }
+
+    private void SetAndRefreshList()
+    {
+      streamList.ClearSelection();
+      streamList.itemsSource = obj.Streams;
+      streamList.RefreshItems();
     }
 
     private async UniTask AccountChange(ChangeEvent<string> evt, IReadOnlyList<string> items)
@@ -192,9 +193,11 @@ namespace Speckle.ConnectorUnity
     private void RefreshAll()
     {
       Refresh(accounts, obj.Accounts.Format(), "accountIndex");
-      Refresh(streams, obj.Streams.Format(), "streamIndex");
-      Refresh(branches, obj.Branches.Format(), "branchIndex");
-      Refresh(commits, obj.Commits.Format(), "commitIndex");
+      SetAndRefreshList();
+
+      // Refresh(streams, obj.Streams.Format(), "streamIndex");
+      // Refresh(branches, obj.Branches.Format(), "branchIndex");
+      // Refresh(commits, obj.Commits.Format(), "commitIndex");
     }
 
     private void Refresh(DropdownField dropdown, IEnumerable<string> items, string prop)
