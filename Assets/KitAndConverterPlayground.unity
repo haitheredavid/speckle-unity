@@ -364,12 +364,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   converter: {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
+  streams: []
   senders: []
   receivers:
   - {fileID: 1864518983}
   converters:
-  - {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
-  - {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
   - {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
   stream: {fileID: 11400000, guid: 84337e16c7ff0244bacc00b3c7963f59, type: 2}
   cachedStream: {fileID: 1418222938}
