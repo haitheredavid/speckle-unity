@@ -7,6 +7,7 @@ using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using Speckle.Core.Logging;
 using UnityEngine;
+using UnityEngine.UIElements;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -19,9 +20,11 @@ namespace Speckle.ConnectorUnity
   public class SpeckleConnector : MonoBehaviour
   {
     [SerializeField] private ConverterUnity converter;
+    [SerializeField] private List<SpeckleStream> streams = new List<SpeckleStream>();
 
     [SerializeField] private List<Sender> senders = new List<Sender>();
     [SerializeField] private List<Receiver> receivers = new List<Receiver>();
+
     [SerializeField] private List<ConverterUnity> converters = new List<ConverterUnity>();
 
     [SerializeField] private SpeckleStream stream;
@@ -126,6 +129,11 @@ namespace Speckle.ConnectorUnity
       }
     }
 
+    public void SetStream(int index)
+    {
+      streamIndex = Check(Streams, index);
+    }
+
     public async UniTask LoadStream(int index = -1)
     {
       ConnectorConsole.Log($"Loading new stream at {index}");
@@ -223,6 +231,18 @@ namespace Speckle.ConnectorUnity
     }
 
     #endif
+    public void OpenStreamInBrowser(EventBase obj)
+    {
+      throw new NotImplementedException();
+    }
+    public void CreateSender(EventBase obj)
+    {
+      throw new NotImplementedException();
+    }
+    public void CreateReceiver(EventBase obj)
+    {
+      throw new NotImplementedException();
+    }
   }
 
 }
