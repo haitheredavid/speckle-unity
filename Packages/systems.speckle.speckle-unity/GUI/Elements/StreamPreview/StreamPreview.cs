@@ -4,30 +4,36 @@ using UnityEngine.UIElements;
 namespace Speckle.ConnectorUnity.GUI
 {
 
-  public class StreamPreview : VisualElement
-  {
+	public class StreamPreview : VisualElement
+	{
 
-    public Image thumbnail;
+		public Image thumbnail;
 
-    public StreamPreview()
-    {
+		public StreamPreview()
+		{
+			thumbnail = new Image()
+			{
+				style =
+				{
+					flexGrow = 1
+				}
+			};
 
-      thumbnail = new Image();
-      Add(thumbnail);
+			Add(thumbnail);
 
-      thumbnail.AddToClassList("previewIcon");
-      AddToClassList("previewContainer");
-    }
+			thumbnail.AddToClassList("previewIcon");
+			AddToClassList("previewContainer");
+		}
 
-    #region UXML
-    [Preserve]
-    public new class UxmlFactory : UxmlFactory<StreamPreview, UxmlTraits>
-    { }
+		#region UXML
+		[Preserve]
+		public new class UxmlFactory : UxmlFactory<StreamPreview, UxmlTraits>
+		{ }
 
-    [Preserve]
-    public new class UxmlTraits : VisualElement.UxmlTraits
-    { }
-    #endregion
+		[Preserve]
+		public new class UxmlTraits : VisualElement.UxmlTraits
+		{ }
+		#endregion
 
-  }
+	}
 }
