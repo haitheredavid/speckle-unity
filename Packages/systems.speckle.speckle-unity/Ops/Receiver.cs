@@ -22,7 +22,7 @@ namespace Speckle.ConnectorUnity
   [AddComponentMenu("Speckle/Receiver")]
   public class Receiver : SpeckleClient
   {
-    public bool autoReceive = false;
+    public bool autoReceive;
     public bool deleteOld = true;
 
     [SerializeField] private int commitIndex;
@@ -44,14 +44,14 @@ namespace Speckle.ConnectorUnity
     }
     #endregion
 
-    public override void SetBranch(int i = -1)
+    public override void SetBranch(int i)
     {
       base.SetBranch(i);
       Commits = activeBranch != null ? activeBranch.commits.items : new List<Commit>();
       SetCommit(0);
     }
 
-    public void SetCommit(int i = -1)
+    public void SetCommit(int i)
     {
       commitIndex = Commits.Check(i);
 
@@ -61,23 +61,6 @@ namespace Speckle.ConnectorUnity
         ConnectorConsole.Log("Active commit loaded! " + activeCommit);
         Debug.Log(stream.ToString());
       }
-    }
-
-    private void SetCache()
-    {
-      if (client == null || stream == null)
-      {
-        ConnectorConsole.Warn("No Account or Stream active, cannot update catch");
-        return;
-      }
-
-      if (activeCommit != null)
-        stream.Init($"{client.ServerUrl}/streams/{stream.Id}/commits/{activeCommit.id}");
-      else if (activeBranch != null)
-        stream.Init($"{client.ServerUrl}/streams/{stream.Id}/branches/{activeBranch.name}");
-      else
-        stream.Init(stream.Id, client.Account.userInfo.id, client.ServerUrl);
-
     }
 
     protected override void SetSubscriptions()

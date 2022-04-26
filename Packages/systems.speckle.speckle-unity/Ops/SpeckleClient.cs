@@ -25,6 +25,7 @@ namespace Speckle.ConnectorUnity
     [SerializeField] private bool expired;
 
     [SerializeField] private int branchIndex;
+    [SerializeField] private int converterIndex;
 
     protected Client client;
     protected bool isCanceled;
@@ -33,6 +34,11 @@ namespace Speckle.ConnectorUnity
     protected Action<ConcurrentDictionary<string, int>> onProgressReport;
 
     public List<Branch> Branches { get; protected set; }
+
+    public List<ConverterUnity> Converters
+    {
+      get => converters.Valid() ? converters : new List<ConverterUnity>();
+    }
 
     public Branch activeBranch
     {
@@ -61,9 +67,14 @@ namespace Speckle.ConnectorUnity
 
     public event Action onRepaint;
 
-    public virtual void SetBranch(int i = -1)
+    public virtual void SetBranch(int i)
     {
       branchIndex = Branches.Check(i);
+    }
+
+    public void SetConverter(int i)
+    {
+      converterIndex = converters.Check(i);
     }
 
     /// <param name="rootStream">root stream object to use, will default to editor field</param>
@@ -105,11 +116,7 @@ namespace Speckle.ConnectorUnity
 
     protected virtual void SetSubscriptions()
     {
-      if (client == null)
-      {
-        ConnectorConsole.Log($"No active client on {name} to read from");
-        return;
-      }
+      if (client == null) ConnectorConsole.Log($"No active client on {name} to read from");
     }
 
     protected bool IsReady()
@@ -143,7 +150,7 @@ namespace Speckle.ConnectorUnity
       var items = new List<T>();
       foreach (var g in guids)
       {
-        string path = AssetDatabase.GUIDToAssetPath(g);
+        var path = AssetDatabase.GUIDToAssetPath(g);
         items.Add(AssetDatabase.LoadAssetAtPath<T>(path));
       }
       return items;
