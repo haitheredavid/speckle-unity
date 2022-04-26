@@ -3,12 +3,24 @@
                  src="project://database/Packages/systems.speckle.speckle-unity/GUI/StreamObjectCard.uxml?fileID=9197481963319205126&amp;guid=1dca78ead9ad07a47849fc3b2d79d371&amp;type=3#StreamObjectCard"/>
     <ui:Template name="ConverterSelectionCard"
                  src="project://database/Packages/systems.speckle.speckle-unity/GUI/ConverterSelectionCard.uxml?fileID=9197481963319205126&amp;guid=a97966f562baf9f4d8ccc1728f9c4cf9&amp;type=3#ConverterSelectionCard"/>
-    <ui:VisualElement name="container">
-        <ui:Instance template="StreamObjectCard" name="StreamObjectCard"/>
+    <ui:VisualElement name="input-container"
+                      style="flex-direction: row; width: auto; height: 24px; margin-top: 5px; margin-bottom: 5px;">
+        <ui:VisualElement name="search-icon"
+                          style="margin-left: 1px; margin-right: 1px; margin-top: 1px; margin-bottom: 1px; padding-left: 1px; padding-right: 1px; padding-top: 1px; padding-bottom: 1px;">
+            <ui:VisualElement name="icon"
+                              style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/cloud-search-outline.png?fileID=2800000&amp;guid=2904f3b23067832468b8c77951a6351e&amp;type=3#cloud-search-outline&apos;); -unity-background-scale-mode: scale-to-fit; max-height: none; height: 24px; width: 24px;"/>
+        </ui:VisualElement>
+        <ui:TextField picking-mode="Ignore" value="filler text" text="speckle.xyz" name="url"
+                      tooltip="Add a stream with a url" style="flex-grow: 1;"/>
+        <ui:Button display-tooltip-when-elided="true" name="search-button"
+                   style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/plus-circle-outline.png?fileID=2800000&amp;guid=3ff9e9073fe32eb4b929a6a99f84402a&amp;type=3#plus-circle-outline&apos;); -unity-background-scale-mode: scale-to-fit; flex-grow: 0; height: auto; width: 50px;"/>
     </ui:VisualElement>
-    <Speckle.ConnectorUnity.GUI.StreamPreview
-            style="max-width: none; max-height: 200px; min-height: 100px; flex-grow: 1;"/>
-    <ui:VisualElement name="operation-container" style="flex-direction: row;">
+    <ui:VisualElement name="container" style="flex-grow: 1; height: 243px; max-height: 250px; min-height: 100px;">
+        <ui:Instance template="StreamObjectCard" name="StreamObjectCard"/>
+        <Speckle.ConnectorUnity.GUI.StreamPreview name="preview-container"
+                                                  style="max-width: none; max-height: 200px; min-height: 100px; flex-grow: 1; flex-shrink: 1;"/>
+    </ui:VisualElement>
+    <ui:VisualElement name="operation-container" style="flex-direction: row; align-items: auto;">
         <ui:Instance template="ConverterSelectionCard" name="ConverterSelectionCard" style="flex-grow: 1;"/>
         <ui:VisualElement name="container"
                           style="padding-left: 1px; padding-right: 1px; padding-top: 1px; padding-bottom: 1px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; width: 76px; height: 25px; justify-content: center; flex-direction: row; align-items: center;">
