@@ -10,8 +10,12 @@ namespace Speckle.ConnectorUnity
   public class SpeckleStream : ScriptableObject
   {
 
+    private const string PREV = "preview";
+
+    [SerializeField] private string description;
+    [SerializeField] private string streamName;
     [SerializeField] private string serverUrl;
-    [SerializeField] private string streamId;
+    [SerializeField] private string id;
     [SerializeField] private string branchName;
     [SerializeField] private string commitId;
     [SerializeField] private string objectId;
@@ -26,6 +30,16 @@ namespace Speckle.ConnectorUnity
       get { return _wrapper ??= new StreamWrapper(originalInput); }
     }
 
+    public string Name
+    {
+      get => streamName;
+    }
+
+    public string Description
+    {
+      get => description;
+    }
+
     public string UserId
     {
       get => userId;
@@ -36,9 +50,9 @@ namespace Speckle.ConnectorUnity
       get => serverUrl;
     }
 
-    public string StreamId
+    public string Id
     {
-      get => streamId;
+      get => id;
     }
 
     public string CommitId
@@ -66,11 +80,13 @@ namespace Speckle.ConnectorUnity
       get => Wrapper.Type;
     }
 
-    public bool Init(string stream, string user, string server)
+    public bool Init(string stream, string user, string server, string title = null, string info = null)
     {
       ConnectorConsole.Log($"Setting new Stream Object with {stream} to user {user} on {server}");
 
       _wrapper = new StreamWrapper(stream, user, server);
+      streamName = title;
+      description = info;
 
       return Setup();
     }
@@ -87,7 +103,7 @@ namespace Speckle.ConnectorUnity
 
       ConnectorConsole.Log($"Setting new Stream with {originalInput}");
       _wrapper = new StreamWrapper(originalInput);
-      
+
       return Setup();
     }
 
@@ -100,7 +116,7 @@ namespace Speckle.ConnectorUnity
       }
 
       serverUrl = _wrapper.ServerUrl;
-      streamId = _wrapper.StreamId;
+      id = _wrapper.StreamId;
       branchName = _wrapper.BranchName;
       commitId = _wrapper.CommitId;
       objectId = _wrapper.ObjectId;
@@ -125,8 +141,6 @@ namespace Speckle.ConnectorUnity
     {
       return Wrapper.ToString();
     }
-
-    private const string PREV = "preview";
 
     public async UniTask<Texture2D> GetPreview()
     {
