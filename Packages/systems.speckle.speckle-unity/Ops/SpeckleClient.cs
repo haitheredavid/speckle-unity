@@ -12,149 +12,155 @@ using UnityEditor;
 
 namespace Speckle.ConnectorUnity
 {
-  public abstract class SpeckleClient : MonoBehaviour
-  {
+	// BUG: issue with refreshing object data to editor, probably something with serializing the branch or commit data  
+	public abstract class SpeckleClient : MonoBehaviour
+	{
+		protected const string HostApp = HostApplications.Unity.Name;
 
-    protected const string HostApp = HostApplications.Unity.Name;
+		[SerializeField] protected GameObject root;
+		[SerializeField] protected SpeckleStream stream;
+		[SerializeField] protected ConverterUnity converter;
+		[SerializeField] protected List<ConverterUnity> converters;
 
-    [SerializeField] protected GameObject root;
-    [SerializeField] protected SpeckleStream stream;
-    [SerializeField] protected ConverterUnity converter;
-    [SerializeField] protected List<ConverterUnity> converters;
+		[SerializeField] private bool expired;
 
-    [SerializeField] private bool expired;
+		[SerializeField] private int branchIndex;
+		[SerializeField] private int converterIndex;
 
-    [SerializeField] private int branchIndex;
-    [SerializeField] private int converterIndex;
+		protected Client client;
+		protected bool isCanceled;
 
-    protected Client client;
-    protected bool isCanceled;
+		protected Action<string, Exception> onErrorReport;
+		protected Action<ConcurrentDictionary<string, int>> onProgressReport;
 
-    protected Action<string, Exception> onErrorReport;
-    protected Action<ConcurrentDictionary<string, int>> onProgressReport;
+		public bool isWorking { get; protected set; }
 
-    public List<Branch> Branches { get; protected set; }
+		public List<Branch> Branches { get; protected set; }
 
-    public List<ConverterUnity> Converters
-    {
-      get => converters.Valid() ? converters : new List<ConverterUnity>();
-    }
+		public List<ConverterUnity> Converters
+		{
+			get => converters.Valid() ? converters : new List<ConverterUnity>();
+		}
 
-    public Branch activeBranch
-    {
-      get => Branches.Valid(branchIndex) ? Branches[branchIndex] : null;
-    }
+		public Branch activeBranch
+		{
+			get => Branches.Valid(branchIndex) ? Branches[branchIndex] : null;
+		}
 
-    private void OnEnable()
-    {
-      // TODO: during the build process this should compile and store these objects. 
-      #if UNITY_EDITOR
-      converters = GetAllInstances<ConverterUnity>();
-      #endif
+		protected virtual void OnEnable()
+		{
+			// TODO: during the build process this should compile and store these objects. 
+			#if UNITY_EDITOR
+			converters = GetAllInstances<ConverterUnity>();
+			#endif
 
-      converter = converters.FirstOrDefault();
-    }
+			converter = converters.FirstOrDefault();
+		}
 
-    private void OnDisable()
-    {
-      CleanUp();
-    }
+		private void OnDisable()
+		{
+			CleanUp();
+		}
 
-    private void OnDestroy()
-    {
-      CleanUp();
-    }
+		private void OnDestroy()
+		{
+			CleanUp();
+		}
 
-    public event Action onRepaint;
+		protected void Refresh()
+		{
+			onRepaint?.Invoke();
+		}
 
-    public virtual void SetBranch(int i)
-    {
-      branchIndex = Branches.Check(i);
-    }
+		public event Action onRepaint;
 
-    public void SetConverter(int i)
-    {
-      converterIndex = converters.Check(i);
-    }
+		public virtual void SetBranch(int i)
+		{
+			branchIndex = Branches.Check(i);
+		}
 
-    /// <param name="rootStream">root stream object to use, will default to editor field</param>
-    /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
-    /// <param name="onErrorAction">Action to run on error</param>
-    public async UniTask<bool> Init(
-      SpeckleStream rootStream,
-      Action<ConcurrentDictionary<string, int>> onProgressAction = null,
-      Action<string, Exception> onErrorAction = null
-    )
-    {
+		public void SetConverter(int i)
+		{
+			converterIndex = converters.Check(i);
+		}
 
-      onErrorReport = onErrorAction;
-      onProgressReport = onProgressAction;
+		/// <param name="rootStream">root stream object to use, will default to editor field</param>
+		/// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
+		/// <param name="onErrorAction">Action to run on error</param>
+		public async UniTask<bool> Init(
+			SpeckleStream rootStream,
+			Action<ConcurrentDictionary<string, int>> onProgressAction = null,
+			Action<string, Exception> onErrorAction = null
+		)
+		{
+			onErrorReport = onErrorAction;
+			onProgressReport = onProgressAction;
 
-      stream = rootStream;
-      if (stream == null || !stream.IsValid())
-      {
-        ConnectorConsole.Log("Speckle stream object is not setup correctly");
-        return false;
-      }
+			stream = rootStream;
+			if (stream == null || !stream.IsValid())
+			{
+				ConnectorConsole.Log("Speckle stream object is not setup correctly");
+				return false;
+			}
 
-      await LoadStream();
+			await LoadStream();
 
-      SetSubscriptions();
+			SetSubscriptions();
 
-      onRepaint?.Invoke();
+			onRepaint?.Invoke();
 
-      return client != null;
-    }
+			return client != null;
+		}
 
-    protected virtual async UniTask LoadStream()
-    {
-      var account = await stream.GetAccount();
-      client = new Client(account);
+		protected virtual async UniTask LoadStream()
+		{
+			var account = await stream.GetAccount();
+			client = new Client(account);
 
-      Branches = await client.StreamGetBranches(this.GetCancellationTokenOnDestroy(), stream.Id);
-    }
+			Branches = await client.StreamGetBranches(this.GetCancellationTokenOnDestroy(), stream.Id);
+		}
 
-    protected virtual void SetSubscriptions()
-    {
-      if (client == null) ConnectorConsole.Log($"No active client on {name} to read from");
-    }
+		protected virtual void SetSubscriptions()
+		{
+			if (client == null) ConnectorConsole.Log($"No active client on {name} to read from");
+		}
 
-    protected bool IsReady()
-    {
-      var res = true;
+		protected bool IsReady()
+		{
+			var res = true;
 
-      if (stream == null || !stream.IsValid())
-      {
-        ConnectorConsole.Log($"No active stream ready for {name} to use");
-        res = false;
-      }
+			if (stream == null || !stream.IsValid())
+			{
+				ConnectorConsole.Log($"No active stream ready for {name} to use");
+				res = false;
+			}
 
-      if (client == null)
-      {
-        ConnectorConsole.Log($"No active client for {name} to use");
-        res = false;
-      }
+			if (client == null)
+			{
+				ConnectorConsole.Log($"No active client for {name} to use");
+				res = false;
+			}
 
-      return res;
-    }
+			return res;
+		}
 
-    protected virtual void CleanUp()
-    {
-      client?.Dispose();
-    }
+		protected virtual void CleanUp()
+		{
+			client?.Dispose();
+		}
 
-    #if UNITY_EDITOR
-    public static List<T> GetAllInstances<T>() where T : ScriptableObject
-    {
-      var guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);
-      var items = new List<T>();
-      foreach (var g in guids)
-      {
-        var path = AssetDatabase.GUIDToAssetPath(g);
-        items.Add(AssetDatabase.LoadAssetAtPath<T>(path));
-      }
-      return items;
-    }
-    #endif
-  }
+		#if UNITY_EDITOR
+		public static List<T> GetAllInstances<T>() where T : ScriptableObject
+		{
+			var guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);
+			var items = new List<T>();
+			foreach (var g in guids)
+			{
+				var path = AssetDatabase.GUIDToAssetPath(g);
+				items.Add(AssetDatabase.LoadAssetAtPath<T>(path));
+			}
+			return items;
+		}
+		#endif
+	}
 }
