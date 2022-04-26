@@ -122,6 +122,13 @@ namespace Speckle.ConnectorUnity
 
     #endif
 
+    public static bool TryGetSpeckleStream(string streamUrl, out SpeckleStream stream)
+    {
+      stream = ScriptableObject.CreateInstance<SpeckleStream>();
+      stream.Init(streamUrl);
+      return stream.IsValid();
+    }
+
     public void OpenStreamInBrowser(EventBase obj)
     {
       Debug.Log(obj);
