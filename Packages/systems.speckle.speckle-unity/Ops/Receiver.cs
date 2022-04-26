@@ -18,14 +18,24 @@ namespace Speckle.ConnectorUnity
   ///   A Speckle Receiver, it's a wrapper around a basic Speckle Client
   ///   that handles conversions and subscriptions for you
   /// </summary>
+  [ExecuteAlways]
   [AddComponentMenu("Speckle/Receiver")]
   public class Receiver : SpeckleClient
   {
     public bool autoReceive = false;
     public bool deleteOld = true;
 
+    [SerializeField] private int commitIndex;
+
     public UnityAction<GameObject> OnDataReceivedAction;
     public UnityAction<int> OnTotalChildrenCountKnown;
+
+    public List<Commit> Commits { get; protected set; }
+
+    public Commit activeCommit
+    {
+      get => Commits.Valid(commitIndex) ? Commits[commitIndex] : null;
+    }
 
     #region private methods
     private void OnDestroy()
@@ -34,31 +44,75 @@ namespace Speckle.ConnectorUnity
     }
     #endregion
 
+    public override void SetBranch(int i = -1)
+    {
+      base.SetBranch(i);
+      Commits = activeBranch != null ? activeBranch.commits.items : new List<Commit>();
+      SetCommit(0);
+    }
+
+    public void SetCommit(int i = -1)
+    {
+      commitIndex = Commits.Check(i);
+
+      if (activeCommit != null)
+      {
+        stream.Init($"{client.ServerUrl}/streams/{stream.Id}/commits/{activeCommit.id}");
+        ConnectorConsole.Log("Active commit loaded! " + activeCommit);
+        Debug.Log(stream.ToString());
+      }
+    }
+
+    private void SetCache()
+    {
+      if (client == null || stream == null)
+      {
+        ConnectorConsole.Warn("No Account or Stream active, cannot update catch");
+        return;
+      }
+
+      if (activeCommit != null)
+        stream.Init($"{client.ServerUrl}/streams/{stream.Id}/commits/{activeCommit.id}");
+      else if (activeBranch != null)
+        stream.Init($"{client.ServerUrl}/streams/{stream.Id}/branches/{activeBranch.name}");
+      else
+        stream.Init(stream.Id, client.Account.userInfo.id, client.ServerUrl);
+
+    }
+
     protected override void SetSubscriptions()
     {
       if (client != null && autoReceive)
       {
-        client.SubscribeCommitCreated(stream.StreamId);
+        client.SubscribeCommitCreated(stream.Id);
         client.OnCommitCreated += (sender, commit) => OnCommitCreated?.Invoke(commit);
-        client.SubscribeCommitUpdated(stream.StreamId);
+        client.SubscribeCommitUpdated(stream.Id);
         client.OnCommitUpdated += (sender, commit) => OnCommitUpdated?.Invoke(commit);
       }
+    }
+
+    protected override async UniTask LoadStream()
+    {
+      await base.LoadStream();
+
+      if (Branches != null)
+        Commits = Branches.FirstOrDefault().commits.items;
     }
 
     /// <summary>
     ///   Gets and converts the data of the last commit on the Stream
     /// </summary>
     /// <returns></returns>
-    public async UniTaskVoid Receive()
+    public async UniTask Receive()
     {
       ConnectorConsole.Log("Receive Started");
       try
       {
         Base @base = null;
 
-        var commit = await client.CommitGet(stream.StreamId, stream.CommitId);
+        var commit = await client.CommitGet(stream.Id, stream.CommitId);
 
-        var transport = new ServerTransport(client.Account, stream.StreamId);
+        var transport = new ServerTransport(client.Account, stream.Id);
 
         ConnectorConsole.Log($"obj id={commit.referencedObject}");
 
@@ -73,14 +127,14 @@ namespace Speckle.ConnectorUnity
         if (@base == null)
         {
           ConnectorConsole.Warn("The data pulled from stream was not recieved correctly");
-          return;
+          UniTask.Yield();
         }
 
         ConnectorConsole.Log($"Data with {@base.totalChildrenCount}");
 
         await client.CommitReceived(new CommitReceivedInput
         {
-          streamId = stream.StreamId,
+          streamId = stream.Id,
           commitId = commit.id,
           message = $"received commit from {HostApp} ",
           sourceApplication = HostApp
@@ -101,7 +155,7 @@ namespace Speckle.ConnectorUnity
       catch (Exception e)
       {
         ConnectorConsole.Exception(new SpeckleException(e.Message));
-        return;
+        UniTask.Yield();
       }
     }
 

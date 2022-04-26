@@ -42,7 +42,7 @@ namespace Speckle.ConnectorUnity
         ConnectorConsole.Log("Sending data");
 
         objectId = await Helpers.Send(
-          stream.StreamId,
+          stream.Id,
           data,
           message.Valid() ? message : $"Objects from Unity {data.totalChildrenCount}",
           HostApp,
