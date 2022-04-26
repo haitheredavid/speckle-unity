@@ -41,14 +41,6 @@ namespace Speckle.ConnectorUnity
       get => streams;
     }
 
-    public List<Branch> Branches { get; private set; }
-    public List<Commit> Commits { get; private set; }
-
-    public List<ConverterUnity> Converters
-    {
-      get => converters.Valid() ? converters : new List<ConverterUnity>();
-    }
-
     public Account activeAccount
     {
       get => Accounts.Valid(accountIndex) ? Accounts[accountIndex] : null;
@@ -66,12 +58,15 @@ namespace Speckle.ConnectorUnity
 
       Accounts = AccountManager.GetAccounts().ToList();
 
-      LoadAccountAndStream().Forget();
+      SetAccount(accountIndex).Forget();
     }
 
-    public event Action onRepaint;
+    public void SetStream(int index)
+    {
+      streamIndex = Streams.Check(index);
+    }
 
-    public async UniTask LoadAccountAndStream(int index = -1)
+    public async UniTask SetAccount(int index)
     {
       try
       {
@@ -108,58 +103,9 @@ namespace Speckle.ConnectorUnity
       }
       finally
       {
-        // if (loadActiveStream)
-        // await LoadStream(streamIndex);
-
         onRepaint?.Invoke();
       }
     }
-
-    public void SetStream(int index)
-    {
-      streamIndex = Streams.Check(index);
-    }
-
-    // public async UniTask LoadStream(int index = -1)
-    // {
-    //   ConnectorConsole.Log($"Loading new stream at {index}");
-    //   try
-    //   {
-    //     branchIndex = 0;
-    //     Branches = new List<Branch>();
-    //
-    //     commitIndex = 0;
-    //     Commits = new List<Commit>();
-    //
-    //
-    //     if (client == null && activeAccount != null)
-    //       client = new Client(activeAccount);
-    //
-    //     streamIndex = Check(Streams, index);
-    //
-    //     if (activeStream != null)
-    //     {
-    //       Branches = await client.StreamGetBranches(activeStream.Id, 20, 20);
-    //     }
-    //
-    //     if (Branches != null)
-    //     {
-    //       for (int bIndex = 0; bIndex < Branches.Count; bIndex++)
-    //       {
-    //         if (Branches[bIndex].name.Equals("main"))
-    //         {
-    //           LoadBranch(bIndex);
-    //           break;
-    //         }
-    //       }
-    //     }
-    //   }
-    //   catch (SpeckleException e)
-    //   {
-    //     ConnectorConsole.Warn(e.Message);
-    //     Branches = new List<Branch>();
-    //   }
-    // }
 
     #if UNITY_EDITOR
     public static List<T> GetAllInstances<T>() where T : ScriptableObject
