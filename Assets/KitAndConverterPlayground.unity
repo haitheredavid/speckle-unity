@@ -123,7 +123,28 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!114 &141809195
+--- !u!114 &360556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: 
+  streamName: A2
+  serverUrl: https://speckle.xyz
+  id: 4c1b66b0ff
+  branchName: 
+  commitId: 
+  objectId: 
+  userId: df6157d4a6
+  originalInput: https://speckle.xyz/streams/4c1b66b0ff?u=df6157d4a6
+--- !u!114 &417442422
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -144,48 +165,6 @@ MonoBehaviour:
   objectId: 
   userId: df6157d4a6
   originalInput: https://speckle.xyz/streams/0cf1549d51?u=df6157d4a6
---- !u!114 &161682922
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: 
-  streamName: Simmons
-  serverUrl: https://speckle.xyz
-  id: 7726d409af
-  branchName: 
-  commitId: 
-  objectId: 
-  userId: df6157d4a6
-  originalInput: https://speckle.xyz/streams/7726d409af?u=df6157d4a6
---- !u!114 &312277636
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: 
-  streamName: uconn
-  serverUrl: https://speckle.xyz
-  id: b11460cabe
-  branchName: 
-  commitId: 
-  objectId: 
-  userId: df6157d4a6
-  originalInput: https://speckle.xyz/streams/b11460cabe?u=df6157d4a6
 --- !u!1 &512580998
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,6 +263,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &513738093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: 
+  streamName: uconn
+  serverUrl: https://speckle.xyz
+  id: b11460cabe
+  branchName: 
+  commitId: 
+  objectId: 
+  userId: df6157d4a6
+  originalInput: https://speckle.xyz/streams/b11460cabe?u=df6157d4a6
 --- !u!1 &869165413
 GameObject:
   m_ObjectHideFlags: 0
@@ -378,7 +378,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!114 &952366744
+--- !u!114 &1065188073
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -390,83 +390,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: A fun space for ViewTo
-  streamName: test-results
+  description: basic things
+  streamName: simple-meshes
   serverUrl: https://speckle.xyz
-  id: 316c89ac6d
+  id: 4f5b4785b0
   branchName: 
   commitId: 
   objectId: 
   userId: df6157d4a6
-  originalInput: https://speckle.xyz/streams/316c89ac6d?u=df6157d4a6
---- !u!1 &1099832309
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1099832312}
-  - component: {fileID: 1099832311}
-  - component: {fileID: 1099832310}
-  m_Layer: 0
-  m_Name: New Game Object
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1099832310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1099832309}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4afdcb1cbadf954ba8b1cf465429e17, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1099832311
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1099832309}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5578b344ae57415c912729d411df2a5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  root: {fileID: 0}
-  stream: {fileID: 2098376082}
-  converter: {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
-  converters:
-  - {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
-  expired: 0
-  branchIndex: 0
-  autoReceive: 0
-  deleteOld: 1
-  commitIndex: 0
---- !u!4 &1099832312
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1099832309}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1215639845
+  originalInput: https://speckle.xyz/streams/4f5b4785b0?u=df6157d4a6
+--- !u!114 &1205351452
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -478,36 +411,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: 'view study stream '
-  streamName: vietnam
+  description: a test stream for view studies
+  streamName: testspace
   serverUrl: https://speckle.xyz
-  id: 8107aeb72d
+  id: 1da7b18b31
   branchName: 
   commitId: 
   objectId: 
   userId: df6157d4a6
-  originalInput: https://speckle.xyz/streams/8107aeb72d?u=df6157d4a6
---- !u!114 &1356182063
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: A fun space for ViewTo
-  streamName: test-results
-  serverUrl: https://speckle.xyz
-  id: eae04e2cc0
-  branchName: 
-  commitId: 
-  objectId: 
-  userId: df6157d4a6
-  originalInput: https://speckle.xyz/streams/eae04e2cc0?u=df6157d4a6
+  originalInput: https://speckle.xyz/streams/1da7b18b31?u=df6157d4a6
 --- !u!114 &1418222938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -529,27 +441,6 @@ MonoBehaviour:
   objectId: 
   userId: 
   originalInput: https://speckle.xyz/streams/4f5b4785b0/commits/cdb1dc5cce
---- !u!114 &1500013479
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: a test stream for view studies
-  streamName: testspace
-  serverUrl: https://speckle.xyz
-  id: 1da7b18b31
-  branchName: 
-  commitId: 
-  objectId: 
-  userId: df6157d4a6
-  originalInput: https://speckle.xyz/streams/1da7b18b31?u=df6157d4a6
 --- !u!1 &1624407933
 GameObject:
   m_ObjectHideFlags: 0
@@ -581,16 +472,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   converter: {fileID: 11400000, guid: 5176c2a1c9de4ca42be8e0439089e0ff, type: 2}
   streams:
-  - {fileID: 1777213977}
-  - {fileID: 141809195}
-  - {fileID: 312277636}
-  - {fileID: 1864722821}
-  - {fileID: 1215639845}
-  - {fileID: 1500013479}
-  - {fileID: 1356182063}
-  - {fileID: 952366744}
-  - {fileID: 161682922}
-  - {fileID: 1896810365}
+  - {fileID: 1065188073}
+  - {fileID: 417442422}
+  - {fileID: 513738093}
+  - {fileID: 1668234065}
+  - {fileID: 1656270955}
+  - {fileID: 1205351452}
+  - {fileID: 1811075054}
+  - {fileID: 2086646076}
+  - {fileID: 2051797461}
+  - {fileID: 360556}
   senders: []
   receivers:
   - {fileID: 0}
@@ -615,7 +506,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1777213977
+--- !u!114 &1656270955
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -627,16 +518,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: basic things
-  streamName: simple-meshes
+  description: 'view study stream '
+  streamName: vietnam
   serverUrl: https://speckle.xyz
-  id: 4f5b4785b0
+  id: 8107aeb72d
   branchName: 
   commitId: 
   objectId: 
   userId: df6157d4a6
-  originalInput: https://speckle.xyz/streams/4f5b4785b0?u=df6157d4a6
---- !u!114 &1864722821
+  originalInput: https://speckle.xyz/streams/8107aeb72d?u=df6157d4a6
+--- !u!114 &1668234065
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -657,7 +548,28 @@ MonoBehaviour:
   objectId: 
   userId: df6157d4a6
   originalInput: https://speckle.xyz/streams/4400242016?u=df6157d4a6
---- !u!114 &1896810365
+--- !u!114 &1811075054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: A fun space for ViewTo
+  streamName: test-results
+  serverUrl: https://speckle.xyz
+  id: eae04e2cc0
+  branchName: 
+  commitId: 
+  objectId: 
+  userId: df6157d4a6
+  originalInput: https://speckle.xyz/streams/eae04e2cc0?u=df6157d4a6
+--- !u!114 &2051797461
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -670,14 +582,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   description: 
-  streamName: A2
+  streamName: Simmons
   serverUrl: https://speckle.xyz
-  id: 4c1b66b0ff
+  id: 7726d409af
   branchName: 
   commitId: 
   objectId: 
   userId: df6157d4a6
-  originalInput: https://speckle.xyz/streams/4c1b66b0ff?u=df6157d4a6
+  originalInput: https://speckle.xyz/streams/7726d409af?u=df6157d4a6
 --- !u!1 &2068176107
 GameObject:
   m_ObjectHideFlags: 0
@@ -753,7 +665,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2098376082
+--- !u!114 &2086646076
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -765,12 +677,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed6cbf9ce4dca0349997d163ec9bce7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: basic things
-  streamName: simple-meshes
+  description: A fun space for ViewTo
+  streamName: test-results
   serverUrl: https://speckle.xyz
-  id: 4f5b4785b0
+  id: 316c89ac6d
   branchName: 
-  commitId: cdb1dc5cce
+  commitId: 
   objectId: 
-  userId: 
-  originalInput: https://speckle.xyz/streams/4f5b4785b0/commits/cdb1dc5cce
+  userId: df6157d4a6
+  originalInput: https://speckle.xyz/streams/316c89ac6d?u=df6157d4a6
