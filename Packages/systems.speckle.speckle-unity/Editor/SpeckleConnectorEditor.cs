@@ -126,7 +126,7 @@ namespace Speckle.ConnectorUnity
       if (index < 0)
         return;
 
-      await obj.LoadAccountAndStream(index);
+      await obj.SetAccount(index);
       RefreshAll();
     }
 

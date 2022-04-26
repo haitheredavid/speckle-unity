@@ -61,6 +61,8 @@ namespace Speckle.ConnectorUnity
       SetAccount(accountIndex).Forget();
     }
 
+    public event Action onRepaint;
+
     public void SetStream(int index)
     {
       streamIndex = Streams.Check(index);
