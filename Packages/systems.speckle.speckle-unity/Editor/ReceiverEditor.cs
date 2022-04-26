@@ -10,9 +10,13 @@ namespace Speckle.ConnectorUnity
   public class ReceiverEditor : Editor
   {
 
-    private DropdownField branches, commits;
+    private DropdownField branches, commits, converters;
+
     private Receiver obj;
+
     private VisualElement root;
+    private Button searchButton, runButton;
+    private TextField streamUrlField;
     private VisualTreeAsset tree;
 
     private void OnEnable()
@@ -22,8 +26,8 @@ namespace Speckle.ConnectorUnity
       {
         Refresh(branches, obj.Branches.Format().ToList(), "branchIndex");
         Refresh(commits, obj.Commits.Format().ToList(), "commitIndex");
-
       };
+
       tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/Elements/SpeckleClient/Receiver.uxml");
     }
 
@@ -51,8 +55,21 @@ namespace Speckle.ConnectorUnity
         obj.Commits.Format(),
         e => commits.DropDownChange(e, i => { obj.SetCommit(i); }));
 
-      //
-      // converters = SetDropDown("converter", obj.Converters.Format(), e => Debug.Log(e.newValue));
+      converters = root.SetDropDown(
+        "converter",
+        FindInt("converterIndex"),
+        obj.Converters.Format(),
+        e => converters.DropDownChange(e, i => { obj.SetConverter(i); }));
+
+      streamUrlField = root.Q<TextField>("url");
+
+      searchButton = root.Q<Button>("search-button");
+      searchButton.clickable.clicked += () =>
+      {
+        if (SpeckleConnector.TryGetSpeckleStream(streamUrlField.value, out var speckleStream))
+          obj.Init(speckleStream);
+      };
+
 
       return root;
     }
