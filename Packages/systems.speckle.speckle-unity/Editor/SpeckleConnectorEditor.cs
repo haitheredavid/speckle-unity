@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Speckle.ConnectorUnity.GUI;
@@ -13,8 +12,7 @@ namespace Speckle.ConnectorUnity
   public class SpeckleConnectorEditor : Editor
   {
 
-    private DropdownField accounts, streams;
-    private DropdownField branches, commits;
+    private DropdownField accounts;
     private DropdownField converters;
 
     private Image img;
@@ -47,19 +45,7 @@ namespace Speckle.ConnectorUnity
       root = new VisualElement();
       tree.CloneTree(root);
 
-      accounts = SetDropDown("account", obj.Accounts.Format(), e => AccountChange(e).Forget());
-
-      // streams = SetDropDown("stream", obj.Streams.Format(), e => StreamChange(e, streams.choices).Forget());
-      // branches = SetDropDown("branch", obj.Branches.Format(), e => DropDownChange(e, branches.choices, i =>
-      // {
-      //   obj.LoadBranch(i);
-      //   Refresh(commits, obj.Commits.Format(), "commitIndex");
-      // }));
-      //
-      // commits = SetDropDown("commit", obj.Commits.Format(), e => DropDownChange(e, commits.choices, i => obj.LoadCommit(i)));
-      //
-      //
-      // converters = SetDropDown("converter", obj.Converters.Format(), e => Debug.Log(e.newValue));
+      accounts = root.SetDropDown("account", FindInt("accountIndex"), obj.Accounts.Format(), e => AccountChange(e).Forget());
 
       SetupList();
 
@@ -80,9 +66,9 @@ namespace Speckle.ConnectorUnity
       {
         var stream = obj.Streams[i];
 
-        e.Q<Label>("title").text = stream.name;
-        e.Q<Label>("id").text = stream.id;
-        e.Q<Label>("description").text = stream.description;
+        e.Q<Label>("title").text = stream.Name;
+        e.Q<Label>("id").text = stream.Id;
+        e.Q<Label>("description").text = stream.Description;
 
         var isActive = FindInt("streamIndex") == i;
 
@@ -126,14 +112,6 @@ namespace Speckle.ConnectorUnity
 
     }
 
-    private DropdownField SetDropDown(string fieldName, IEnumerable<string> items, Action<ChangeEvent<string>> callback)
-    {
-      var dropDown = root.Q<VisualElement>(fieldName + "-container").Q<DropdownField>("items");
-      dropDown.choices = items.ToList();
-      dropDown.index = FindInt(fieldName + "Index");
-      dropDown.RegisterValueChangedCallback(callback.Invoke);
-      return dropDown;
-    }
     private void SetAndRefreshList()
     {
       streamList.ClearSelection();
@@ -148,7 +126,7 @@ namespace Speckle.ConnectorUnity
       if (index < 0)
         return;
 
-      await obj.LoadAccountAndStream(index, false);
+      await obj.LoadAccountAndStream(index);
       RefreshAll();
     }
 

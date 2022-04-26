@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Kits;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Speckle.ConnectorUnity
 {
@@ -11,24 +16,37 @@ namespace Speckle.ConnectorUnity
   {
 
     protected const string HostApp = HostApplications.Unity.Name;
+
     [SerializeField] protected GameObject root;
     [SerializeField] protected SpeckleStream stream;
     [SerializeField] protected ConverterUnity converter;
+    [SerializeField] protected List<ConverterUnity> converters;
 
-    [Space]
     [SerializeField] private bool expired;
 
-    protected Client client;
+    [SerializeField] private int branchIndex;
 
+    protected Client client;
     protected bool isCanceled;
 
     protected Action<string, Exception> onErrorReport;
     protected Action<ConcurrentDictionary<string, int>> onProgressReport;
 
+    public List<Branch> Branches { get; protected set; }
+
+    public Branch activeBranch
+    {
+      get => Branches.Valid(branchIndex) ? Branches[branchIndex] : null;
+    }
+
     private void OnEnable()
     {
-      if (converter == null)
-        converter = ScriptableObject.CreateInstance<ConverterUnity>();
+      // TODO: during the build process this should compile and store these objects. 
+      #if UNITY_EDITOR
+      converters = GetAllInstances<ConverterUnity>();
+      #endif
+
+      converter = converters.FirstOrDefault();
     }
 
     private void OnDisable()
@@ -41,60 +59,48 @@ namespace Speckle.ConnectorUnity
       CleanUp();
     }
 
-    /// <param name="streamUrl">A speckle stream url that will be parsed by the stream wrapper</param>
-    /// <param name="converterUnity">Converter to use for sending objects</param>
-    /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
-    /// <param name="onErrorAction">Action to run on error</param>
-    public async UniTask<bool> Init(
-      string streamUrl, ConverterUnity converterUnity = null,
-      Action<ConcurrentDictionary<string, int>> onProgressAction = null,
-      Action<string, Exception> onErrorAction = null
-    )
+    public event Action onRepaint;
+
+    public virtual void SetBranch(int i = -1)
     {
-      if (stream == null)
-        stream = ScriptableObject.CreateInstance<SpeckleStream>();
-
-      stream.Init(streamUrl);
-
-      return await Init(stream, converterUnity, onProgressAction, onErrorAction);
+      branchIndex = Branches.Check(i);
     }
 
     /// <param name="rootStream">root stream object to use, will default to editor field</param>
-    /// <param name="converterUnity">Converter to use for sending objects, will default to editor field</param>
     /// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
     /// <param name="onErrorAction">Action to run on error</param>
     public async UniTask<bool> Init(
-      SpeckleStream rootStream = null,
-      ConverterUnity converterUnity = null,
+      SpeckleStream rootStream,
       Action<ConcurrentDictionary<string, int>> onProgressAction = null,
       Action<string, Exception> onErrorAction = null
     )
     {
-      if (rootStream != null)
-        stream = rootStream;
 
-      if (converterUnity != null)
-        converter = converterUnity;
+      onErrorReport = onErrorAction;
+      onProgressReport = onProgressAction;
 
-      if (this.stream == null || !stream.IsValid())
+      stream = rootStream;
+      if (stream == null || !stream.IsValid())
       {
         ConnectorConsole.Log("Speckle stream object is not setup correctly");
         return false;
       }
 
-      if (converter == null)
-      {
-        ConnectorConsole.Log($"No converter associated with {name}, stopping conversion");
-        return false;
-      }
+      await LoadStream();
 
-      ConnectorConsole.Log("Getting account");
-
-      var account = await this.stream.GetAccount();
-      client = new Client(account);
       SetSubscriptions();
 
+      onRepaint?.Invoke();
+
       return client != null;
+    }
+
+    protected virtual async UniTask LoadStream()
+    {
+      var account = await stream.GetAccount();
+      client = new Client(account);
+
+      Branches = await client.StreamGetBranches(this.GetCancellationTokenOnDestroy(), stream.Id);
     }
 
     protected virtual void SetSubscriptions()
@@ -129,5 +135,19 @@ namespace Speckle.ConnectorUnity
     {
       client?.Dispose();
     }
+
+    #if UNITY_EDITOR
+    public static List<T> GetAllInstances<T>() where T : ScriptableObject
+    {
+      var guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);
+      var items = new List<T>();
+      foreach (var g in guids)
+      {
+        string path = AssetDatabase.GUIDToAssetPath(g);
+        items.Add(AssetDatabase.LoadAssetAtPath<T>(path));
+      }
+      return items;
+    }
+    #endif
   }
 }
