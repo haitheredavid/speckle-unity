@@ -4,7 +4,7 @@
     <ui:Template name="ConverterSelectionCard"
                  src="project://database/Packages/systems.speckle.speckle-unity/GUI/ConverterSelectionCard.uxml?fileID=9197481963319205126&amp;guid=a97966f562baf9f4d8ccc1728f9c4cf9&amp;type=3#ConverterSelectionCard"/>
     <ui:VisualElement name="input-container"
-                      style="flex-direction: row; width: auto; height: 24px; margin-top: 5px; margin-bottom: 5px;">
+                      style="flex-direction: row; width: auto; height: 20px; margin-top: 5px; margin-bottom: 5px;">
         <ui:VisualElement name="search-icon"
                           style="margin-left: 1px; margin-right: 1px; margin-top: 1px; margin-bottom: 1px; padding-left: 1px; padding-right: 1px; padding-top: 1px; padding-bottom: 1px;">
             <ui:VisualElement name="icon"
@@ -17,15 +17,27 @@
     </ui:VisualElement>
     <ui:VisualElement name="container" style="flex-grow: 1; height: 243px; max-height: 250px; min-height: 100px;">
         <ui:Instance template="StreamObjectCard" name="StreamObjectCard"/>
-        <Speckle.ConnectorUnity.GUI.StreamPreview name="preview-container"
-                                                  style="max-width: none; max-height: 200px; min-height: 100px; flex-grow: 1; flex-shrink: 1;"/>
-    </ui:VisualElement>
-    <ui:VisualElement name="operation-container" style="flex-direction: row; align-items: auto;">
-        <ui:Instance template="ConverterSelectionCard" name="ConverterSelectionCard" style="flex-grow: 1;"/>
-        <ui:VisualElement name="container"
-                          style="padding-left: 1px; padding-right: 1px; padding-top: 1px; padding-bottom: 1px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; width: 76px; height: 25px; justify-content: center; flex-direction: row; align-items: center;">
-            <ui:Button display-tooltip-when-elided="true" name="receive" binding-path="receive"
-                       style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/Receiver.png?fileID=2800000&amp;guid=4e2d7537a68c1a74187c439e7cad5562&amp;type=3#Receiver&apos;); -unity-background-scale-mode: scale-to-fit; width: auto; height: auto; padding-top: 3px; padding-bottom: 3px; flex-grow: 1; justify-content: space-between;"/>
+        <ui:VisualElement name="operation-container" style="flex-direction: row; align-items: auto;">
+            <ui:Instance template="ConverterSelectionCard" name="ConverterSelectionCard" style="flex-grow: 1;"/>
+            <ui:VisualElement name="container"
+                              style="padding-left: 1px; padding-right: 1px; padding-top: 1px; padding-bottom: 1px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; width: 76px; height: 25px; justify-content: center; flex-direction: row; align-items: center;">
+                <ui:Button display-tooltip-when-elided="true" name="receive" binding-path="receive"
+                           style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/Receiver.png?fileID=2800000&amp;guid=4e2d7537a68c1a74187c439e7cad5562&amp;type=3#Receiver&apos;); -unity-background-scale-mode: scale-to-fit; width: auto; height: auto; padding-top: 3px; padding-bottom: 3px; flex-grow: 1; justify-content: space-between;"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="preview-container" style="flex-direction: row; flex-grow: 1; align-items: flex-start;">
+            <ui:VisualElement name="background"
+                              style="flex-grow: 1; background-color: rgba(101, 101, 101, 0); flex-direction: row; align-items: flex-start; justify-content: flex-start; margin-top: 4px; margin-left: 0; margin-right: 4px;">
+                <ui:VisualElement name="show-preview-container"
+                                  style="width: 25px; align-items: center; margin-right: 5px;">
+                    <ui:Toggle name="show-preview" binding-path="showPreview"
+                               style="align-items: stretch; margin-top: 3px; width: auto; justify-content: space-around; flex-grow: 0; flex-shrink: 1;"/>
+                    <ui:Toggle name="render-preview" tooltip="Load a preview of commit into your scene"
+                               style="align-items: stretch; margin-top: 3px; width: auto; justify-content: space-around; flex-grow: 0; flex-shrink: 1;"/>
+                </ui:VisualElement>
+                <Speckle.ConnectorUnity.GUI.StreamPreview name="preview"
+                                                          style="max-width: none; max-height: 100%; min-height: 75%; flex-grow: 1; flex-shrink: 1; background-color: rgb(166, 166, 166); margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; height: 100%; width: 100%; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;"/>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
