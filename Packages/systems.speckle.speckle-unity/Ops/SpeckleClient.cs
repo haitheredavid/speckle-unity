@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Kits;
@@ -13,13 +12,12 @@ using UnityEditor;
 namespace Speckle.ConnectorUnity
 {
 	// BUG: issue with refreshing object data to editor, probably something with serializing the branch or commit data  
-	public abstract class SpeckleClient : MonoBehaviour
+	public abstract class SpeckleClient : MonoBehaviour, IProgress<float>
 	{
 		protected const string HostApp = HostApplications.Unity.Name;
 
 		[SerializeField] protected GameObject root;
 		[SerializeField] protected SpeckleStream stream;
-		[SerializeField] protected ConverterUnity converter;
 		[SerializeField] protected List<ConverterUnity> converters;
 
 		[SerializeField] private bool expired;
@@ -27,11 +25,15 @@ namespace Speckle.ConnectorUnity
 		[SerializeField] private int branchIndex;
 		[SerializeField] private int converterIndex;
 
+		[SerializeField] protected float progressAmount;
+
 		protected Client client;
 		protected bool isCanceled;
 
 		public Action<string, Exception> onErrorReport;
 		public Action<ConcurrentDictionary<string, int>> onProgressReport;
+
+		public int totalChildCount { get; protected set; }
 
 		public bool isWorking { get; protected set; }
 
@@ -40,6 +42,12 @@ namespace Speckle.ConnectorUnity
 		public List<ConverterUnity> Converters
 		{
 			get => converters.Valid() ? converters : new List<ConverterUnity>();
+		}
+
+		protected ConverterUnity converter
+		{
+			get => converters.Valid(converterIndex) ? converters[converterIndex] : null;
+
 		}
 
 		public Branch activeBranch
@@ -53,8 +61,6 @@ namespace Speckle.ConnectorUnity
 			#if UNITY_EDITOR
 			converters = GetAllInstances<ConverterUnity>();
 			#endif
-
-			converter = converters.FirstOrDefault();
 		}
 
 		private void OnDisable()
@@ -65,6 +71,12 @@ namespace Speckle.ConnectorUnity
 		private void OnDestroy()
 		{
 			CleanUp();
+		}
+
+		public void Report(float value)
+		{
+			progressAmount = value;
+			Debug.Log(value);
 		}
 
 		protected void Refresh()
