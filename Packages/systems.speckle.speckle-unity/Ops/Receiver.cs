@@ -188,7 +188,27 @@ namespace Speckle.ConnectorUnity
 
 				ConnectorConsole.Log("Converting Started");
 
-				root = ConvertRecursively(@base);
+				if (converter == null)
+				{
+					ConnectorConsole.Warn("No active converter found!");
+					UniTask.Yield();
+					return;
+				}
+
+				try
+				{
+					await UniTask.Create(async () =>
+					{
+						Debug.Log("Starting delay");
+						await UniTask.Delay(1000);
+						Debug.Log("Thread pool call");
+						root = ConvertRecursively(@base);
+					});
+				}
+				catch (Exception e)
+				{
+					ConnectorConsole.Warn(e.Message);
+				}
 
 				Debug.Log("Step after thread pool ");
 				onDataReceivedAction?.Invoke(root);
