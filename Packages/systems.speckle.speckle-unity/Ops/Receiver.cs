@@ -27,6 +27,9 @@ namespace Speckle.ConnectorUnity
 		[SerializeField] private Texture preview;
 		[SerializeField] private int commitIndex;
 
+		[SerializeField] private bool showPreview = true;
+		[SerializeField] private bool renderPreview = true;
+
 		public UnityAction<GameObject> onDataReceivedAction;
 		public UnityAction<int> onTotalChildrenCountKnown;
 
@@ -45,6 +48,12 @@ namespace Speckle.ConnectorUnity
 		public Commit activeCommit
 		{
 			get => Commits.Valid(commitIndex) ? Commits[commitIndex] : null;
+		}
+
+		public bool ShowPreview
+		{
+			get => showPreview;
+			set => showPreview = value;
 		}
 
 		private void OnDestroy()
@@ -274,6 +283,17 @@ namespace Speckle.ConnectorUnity
 				items = l;
 
 			return items != null;
+		}
+
+		public void RenderPreview(bool render)
+		{
+			renderPreview = render;
+			RenderPreview();
+		}
+
+		public void RenderPreview()
+		{
+			Debug.Log($"Render preview? {renderPreview}");
 		}
 
 		#region Subscriptions

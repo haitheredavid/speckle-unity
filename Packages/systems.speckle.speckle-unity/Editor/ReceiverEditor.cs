@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Speckle.ConnectorUnity.GUI;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Speckle.ConnectorUnity
@@ -17,6 +18,7 @@ namespace Speckle.ConnectorUnity
 		private VisualElement root;
 
 		private Button searchButton, runButton;
+		private Toggle showPreview, renderPreview;
 		private TextField streamUrlField;
 		private VisualTreeAsset tree;
 
@@ -83,10 +85,21 @@ namespace Speckle.ConnectorUnity
 					obj.Receive();
 			};
 
-			preview = root.Q<StreamPreview>("preview-container");
-			preview.thumbnail.image = obj.Preview;
+			preview = root.Q<StreamPreview>("preview");
+			preview.thumbnail.image = GetPreview();
+
+			showPreview = root.Q<Toggle>("show-preview");
+			showPreview.RegisterCallback<ClickEvent>(_ => { preview.thumbnail.image = GetPreview(); });
+
+			renderPreview = root.Q<Toggle>("render-preview");
+			renderPreview.RegisterCallback<ClickEvent>(_ => obj.RenderPreview());
 
 			return root;
+		}
+
+		private Texture GetPreview()
+		{
+			return obj.ShowPreview ? obj.Preview : null;
 		}
 
 		private void RefreshAll()
