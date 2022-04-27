@@ -18,7 +18,8 @@
     <ui:VisualElement name="container" style="flex-grow: 1; height: 243px; max-height: 250px; min-height: 100px;">
         <ui:Instance template="StreamObjectCard" name="StreamObjectCard"/>
         <ui:VisualElement name="operation-container" style="flex-direction: row; align-items: auto;">
-            <ui:Instance template="ConverterSelectionCard" name="ConverterSelectionCard" style="flex-grow: 1;"/>
+            <ui:Instance template="ConverterSelectionCard" name="ConverterSelectionCard"
+                         tooltip="The type of converter to use for converting Speckle to Unity" style="flex-grow: 1;"/>
             <ui:VisualElement name="container"
                               style="padding-left: 1px; padding-right: 1px; padding-top: 1px; padding-bottom: 1px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; width: 76px; height: 25px; justify-content: center; flex-direction: row; align-items: center;">
                 <ui:Button display-tooltip-when-elided="true" name="receive" binding-path="receive"
@@ -31,8 +32,10 @@
                 <ui:VisualElement name="show-preview-container"
                                   style="width: 25px; align-items: center; margin-right: 5px;">
                     <ui:Toggle name="show-preview" binding-path="showPreview"
+                               tooltip="Display a thumbnail of the current commit"
                                style="align-items: stretch; margin-top: 3px; width: auto; justify-content: space-around; flex-grow: 0; flex-shrink: 1;"/>
                     <ui:Toggle name="render-preview" tooltip="Load a preview of commit into your scene"
+                               binding-path="renderPreview"
                                style="align-items: stretch; margin-top: 3px; width: auto; justify-content: space-around; flex-grow: 0; flex-shrink: 1;"/>
                 </ui:VisualElement>
                 <Speckle.ConnectorUnity.GUI.StreamPreview name="preview"
