@@ -14,6 +14,7 @@ using UnityEngine.Events;
 
 namespace Speckle.ConnectorUnity
 {
+
 	/// <summary>
 	///   A Speckle Receiver, it's a wrapper around a basic Speckle Client
 	///   that handles conversions and subscriptions for you
@@ -54,6 +55,15 @@ namespace Speckle.ConnectorUnity
 		{
 			get => showPreview;
 			set => showPreview = value;
+		}
+		protected override void OnEnable()
+		{
+			base.OnEnable();
+			onTotalChildrenCountKnown = i =>
+			{
+				Debug.Log($"Total kidds {i}");
+				totalChildCount = i;
+			};
 		}
 
 		private void OnDestroy()
@@ -127,9 +137,13 @@ namespace Speckle.ConnectorUnity
 			{
 				progressAmount = 0f;
 				isWorking = true;
+
 				Base @base = null;
 
-				var commit = await client.CommitGet(stream.Id, stream.CommitId);
+				var commit = await client.CommitGet(
+					this.GetCancellationTokenOnDestroy(),
+					stream.Id,
+					stream.CommitId).AsUniTask();
 
 				var transport = new ServerTransport(client.Account, stream.Id);
 
@@ -176,11 +190,12 @@ namespace Speckle.ConnectorUnity
 
 				root = ConvertRecursively(@base);
 
+				Debug.Log("Step after thread pool ");
 				onDataReceivedAction?.Invoke(root);
 			}
-			catch (Exception e)
+			catch (SpeckleException e)
 			{
-				ConnectorConsole.Exception(new SpeckleException(e.Message));
+				ConnectorConsole.Warn(e.Message);
 				UniTask.Yield();
 			}
 			finally
