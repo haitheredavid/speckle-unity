@@ -14,9 +14,9 @@ namespace Speckle.ConnectorUnity
 
 		private Receiver obj;
 		private StreamPreview preview;
+		private ProgressBar progress;
 
 		private VisualElement root;
-
 		private Button searchButton, runButton;
 		private Toggle showPreview, renderPreview;
 		private TextField streamUrlField;
@@ -93,6 +93,17 @@ namespace Speckle.ConnectorUnity
 
 			renderPreview = root.Q<Toggle>("render-preview");
 			renderPreview.RegisterCallback<ClickEvent>(_ => obj.RenderPreview());
+
+			progress = root.Q<ProgressBar>("receive-progress");
+			obj.onProgressReport += values =>
+			{
+				Debug.Log($"Value update with {values.Count}");
+				foreach (var v in values)
+				{
+					Debug.Log(v.Key + "-" + v.Value);
+				}
+				progress.value = values.Values.FirstOrDefault() / 100f;
+			};
 
 			return root;
 		}
