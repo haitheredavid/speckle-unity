@@ -9,7 +9,7 @@
 
 This is my personal fork of the speckle-unity connector. I'm still actively developing this project, so please use with caution. 
 
-This connector uses [Speckle .NET SDK](https://github.com/specklesystems/speckle-sharp). If you are new to Speckle I recommend looking at their developer documentation on the [Speckle Docs website](https://speckle.guide/dev/) or taking jumping over and joining their community on [discourse](https://discourse.speckle.works).
+This connector uses [Speckle .NET SDK](https://github.com/specklesystems/speckle-sharp). If you are new to Speckle I recommend looking at their developer guides on the [Speckle Docs website](https://speckle.guide/dev/) and/or jumping over and joining their community on [discourse](https://discourse.speckle.works).
 
 
 ![unity](https://user-images.githubusercontent.com/2679513/108543628-3a83ff00-72dd-11eb-8792-3d43ce54e6af.gif)
