@@ -46,7 +46,7 @@
             <ui:Button display-tooltip-when-elided="true" name="receive" binding-path="receive"
                        style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/Receiver.png?fileID=2800000&amp;guid=4e2d7537a68c1a74187c439e7cad5562&amp;type=3#Receiver&apos;); -unity-background-scale-mode: scale-to-fit; width: auto; height: auto; padding-top: 3px; padding-bottom: 3px; flex-grow: 1; justify-content: space-between; align-items: auto;"/>
         </ui:VisualElement>
-        <ui:ProgressBar title="0/100" name="receive-progress" class="fontSmallBold"
+        <ui:ProgressBar title="0/100" name="receive-progress" binding-path="progressAmount" class="fontSmallBold"
                         style="flex-grow: 1; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; justify-content: space-around; align-items: stretch; width: 95%; -unity-font-style: bold; font-size: 8px; height: auto;"/>
     </ui:VisualElement>
 </ui:UXML>
