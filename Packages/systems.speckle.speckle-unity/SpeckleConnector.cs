@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
+using Speckle.Core.Kits;
 using Speckle.Core.Logging;
+using Speckle.Core.Models;
 using UnityEngine;
 using UnityEngine.UIElements;
 #if UNITY_EDITOR
@@ -14,115 +18,118 @@ using UnityEditor;
 namespace Speckle.ConnectorUnity
 {
 
-  [AddComponentMenu("Speckle/Speckle Connector")]
-  [ExecuteAlways]
-  public class SpeckleConnector : MonoBehaviour
-  {
-    [SerializeField] private ConverterUnity converter;
-    [SerializeField] private List<SpeckleStream> streams = new List<SpeckleStream>();
+	[AddComponentMenu("Speckle/Speckle Connector")]
+	[ExecuteAlways]
+	public class SpeckleConnector : MonoBehaviour
+	{
 
-    [SerializeField] private List<Sender> senders = new List<Sender>();
-    [SerializeField] private List<Receiver> receivers = new List<Receiver>();
+		public const string HostApp = HostApplications.Unity.Name;
 
-    [SerializeField] private List<ConverterUnity> converters = new List<ConverterUnity>();
+		[SerializeField] private ConverterUnity converter;
+		[SerializeField] private List<SpeckleStream> streams = new List<SpeckleStream>();
 
-    [SerializeField] private SpeckleStream stream;
-    [SerializeField] private SpeckleStream cachedStream;
+		[SerializeField] private List<Sender> senders = new List<Sender>();
+		[SerializeField] private List<Receiver> receivers = new List<Receiver>();
 
-    [SerializeField] private int accountIndex;
-    [SerializeField] private int streamIndex;
+		[SerializeField] private List<ConverterUnity> converters = new List<ConverterUnity>();
 
-    private Client client;
+		[SerializeField] private SpeckleStream stream;
+		[SerializeField] private SpeckleStream cachedStream;
 
-    public List<Account> Accounts { get; private set; }
+		[SerializeField] private int accountIndex;
+		[SerializeField] private int streamIndex;
 
-    public List<SpeckleStream> Streams
-    {
-      get => streams;
-    }
+		private Client client;
 
-    public Account activeAccount
-    {
-      get => Accounts.Valid(accountIndex) ? Accounts[accountIndex] : null;
-    }
+		public List<Account> Accounts { get; private set; }
 
-    public SpeckleStream activeStream
-    {
-      get => streams.Valid(streamIndex) ? streams[streamIndex] : null;
-    }
+		public List<SpeckleStream> Streams
+		{
+			get => streams;
+		}
 
-    private void OnEnable()
-    {
-      senders ??= new List<Sender>();
-      receivers ??= new List<Receiver>();
+		public Account activeAccount
+		{
+			get => Accounts.Valid(accountIndex) ? Accounts[accountIndex] : null;
+		}
 
-      Accounts = AccountManager.GetAccounts().ToList();
+		public SpeckleStream activeStream
+		{
+			get => streams.Valid(streamIndex) ? streams[streamIndex] : null;
+		}
 
-      SetAccount(accountIndex).Forget();
-    }
+		private void OnEnable()
+		{
+			senders ??= new List<Sender>();
+			receivers ??= new List<Receiver>();
 
-    public event Action onRepaint;
+			Accounts = AccountManager.GetAccounts().ToList();
 
-    public void SetStream(int index)
-    {
-      streamIndex = Streams.Check(index);
-    }
+			SetAccount(accountIndex).Forget();
+		}
 
-    public async UniTask SetAccount(int index)
-    {
-      try
-      {
-        if (Accounts == null)
-        {
-          ConnectorConsole.Warn("Accounts are not set properly to this connector");
-          return;
-        }
+		public event Action onRepaint;
 
-        streams = new List<SpeckleStream>();
+		public void SetStream(int index)
+		{
+			streamIndex = Streams.Check(index);
+		}
 
-        client = null;
-        streamIndex = 0;
+		public async UniTask SetAccount(int index)
+		{
+			try
+			{
+				if (Accounts == null)
+				{
+					ConnectorConsole.Warn("Accounts are not set properly to this connector");
+					return;
+				}
 
-        accountIndex = Accounts.Check(index);
+				streams = new List<SpeckleStream>();
 
-        if (activeAccount != null)
-        {
-          client = new Client(activeAccount);
-          var res = await client.StreamsGet();
-          streams = new List<SpeckleStream>();
+				client = null;
+				streamIndex = 0;
 
-          foreach (var s in res)
-          {
-            var wrapper = ScriptableObject.CreateInstance<SpeckleStream>();
-            wrapper.Init(s.id, activeAccount.userInfo.id, client.ServerUrl, s.name, s.description);
-            streams.Add(wrapper);
-          }
-        }
-      }
-      catch (SpeckleException e)
-      {
-        ConnectorConsole.Warn(e.Message);
-      }
-      finally
-      {
-        onRepaint?.Invoke();
-      }
-    }
+				accountIndex = Accounts.Check(index);
 
-    #if UNITY_EDITOR
-    public static List<T> GetAllInstances<T>() where T : ScriptableObject
-    {
-      var guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);
-      var items = new List<T>();
-      foreach (var g in guids)
-      {
-        string path = AssetDatabase.GUIDToAssetPath(g);
-        items.Add(AssetDatabase.LoadAssetAtPath<T>(path));
-      }
-      return items;
-    }
+				if (activeAccount != null)
+				{
+					client = new Client(activeAccount);
+					var res = await client.StreamsGet();
+					streams = new List<SpeckleStream>();
 
-    #endif
+					foreach (var s in res)
+					{
+						var wrapper = ScriptableObject.CreateInstance<SpeckleStream>();
+						wrapper.Init(s.id, activeAccount.userInfo.id, client.ServerUrl, s.name, s.description);
+						streams.Add(wrapper);
+					}
+				}
+			}
+			catch (SpeckleException e)
+			{
+				ConnectorConsole.Warn(e.Message);
+			}
+			finally
+			{
+				onRepaint?.Invoke();
+			}
+		}
+
+		#if UNITY_EDITOR
+		public static List<T> GetAllInstances<T>() where T : ScriptableObject
+		{
+			var guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);
+			var items = new List<T>();
+			foreach (var g in guids)
+			{
+				string path = AssetDatabase.GUIDToAssetPath(g);
+				items.Add(AssetDatabase.LoadAssetAtPath<T>(path));
+			}
+			return items;
+		}
+
+		#endif
 
     public static bool TryGetSpeckleStream(string streamUrl, out SpeckleStream stream)
     {
@@ -131,39 +138,39 @@ namespace Speckle.ConnectorUnity
       return stream.IsValid();
     }
 
-    public void OpenStreamInBrowser(EventBase obj)
-    {
-      Debug.Log(obj);
-    }
+		public void OpenStreamInBrowser(EventBase obj)
+		{
+			Debug.Log(obj);
+		}
 
-    public void CreateSender(EventBase obj)
-    {
-      if (activeStream == null)
-      {
-        ConnectorConsole.Log("No Active stream ready to be sent to sender");
-      }
-    }
+		public void CreateSender(EventBase obj)
+		{
+			if (activeStream == null)
+			{
+				ConnectorConsole.Log("No Active stream ready to be sent to sender");
+			}
+		}
 
-    public void CreateReceiver(EventBase obj)
-    {
-      if (activeStream == null)
-      {
-        ConnectorConsole.Log("No Active stream ready to be sent to Receiver");
-        return;
-      }
+		public void CreateReceiver(EventBase obj)
+		{
+			if (activeStream == null)
+			{
+				ConnectorConsole.Log("No Active stream ready to be sent to Receiver");
+				return;
+			}
 
-      UniTask.Create(async () =>
-      {
-        var mono = new GameObject().AddComponent<Receiver>();
+			UniTask.Create(async () =>
+			{
+				var mono = new GameObject().AddComponent<Receiver>();
 
-        #if UNITY_EDITOR
-        Selection.activeObject = mono;
+				#if UNITY_EDITOR
+				Selection.activeObject = mono;
 
-        #endif
+				#endif
 
-        await mono.Init(activeStream);
-      });
-    }
-  }
+				await mono.Init(activeStream);
+			});
+		}
+	}
 
 }

@@ -82,8 +82,6 @@ namespace Speckle.ConnectorUnity
 
 		public bool Init(string stream, string user, string server, string title = null, string info = null)
 		{
-			ConnectorConsole.Log($"Setting new Stream Object with {stream} to user {user} on {server}");
-
 			_wrapper = new StreamWrapper(stream, user, server);
 			streamName = title;
 			description = info;
@@ -101,7 +99,6 @@ namespace Speckle.ConnectorUnity
 			if (streamUrlOrId.Valid())
 				originalInput = streamUrlOrId;
 
-			ConnectorConsole.Log($"Setting new Stream with {originalInput}");
 			_wrapper = new StreamWrapper(originalInput);
 
 			return Setup();
