@@ -30,8 +30,8 @@ namespace Speckle.ConnectorUnity
 		[SerializeField] private bool showPreview = true;
 		[SerializeField] private bool renderPreview = true;
 
-		public UnityAction<GameObject> onDataReceivedAction;
-		public UnityAction<int> onTotalChildrenCountKnown;
+		public Action<GameObject> onDataReceivedAction;
+		public Action<int> onTotalChildrenCountKnown;
 
 		public Texture Preview
 		{
@@ -95,7 +95,6 @@ namespace Speckle.ConnectorUnity
 
 			UniTask.Yield();
 		}
-
 		protected override void SetSubscriptions()
 		{
 			if (client != null && autoReceive)
@@ -126,6 +125,7 @@ namespace Speckle.ConnectorUnity
 			ConnectorConsole.Log("Receive Started");
 			try
 			{
+				progressAmount = 0f;
 				isWorking = true;
 				Base @base = null;
 
@@ -139,9 +139,17 @@ namespace Speckle.ConnectorUnity
 					commit.referencedObject,
 					this.GetCancellationTokenOnDestroy(),
 					transport,
-					onProgressAction: onProgressReport,
-					onTotalChildrenCountKnown: i => onTotalChildrenCountKnown?.Invoke(i),
-					onErrorAction: onErrorReport);
+					onProgressAction: dict =>
+					{
+						var total = 0f;
+						foreach (var kvp in dict)
+							total += kvp.Value;
+
+						Report(total / dict.Keys.Count);
+					},
+					onTotalChildrenCountKnown: onTotalChildrenCountKnown,
+					onErrorAction:
+					onErrorReport).AsUniTask();
 
 				if (@base == null)
 				{

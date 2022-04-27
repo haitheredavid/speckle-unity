@@ -95,14 +95,22 @@ namespace Speckle.ConnectorUnity
 			renderPreview.RegisterCallback<ClickEvent>(_ => obj.RenderPreview());
 
 			progress = root.Q<ProgressBar>("receive-progress");
+
+			obj.onTotalChildrenCountKnown += value =>
+			{
+				Debug.Log(value);
+				progress.title = $"0/{value}";
+				progress.highValue = value;
+			};
+
 			obj.onProgressReport += values =>
 			{
 				Debug.Log($"Value update with {values.Count}");
-				foreach (var v in values)
-				{
-					Debug.Log(v.Key + "-" + v.Value);
-				}
-				progress.value = values.Values.FirstOrDefault() / 100f;
+				// foreach (var v in values)
+				// {
+				// 	Debug.Log(v.Key + "-" + v.Value);
+				// }
+				// progress.value = values.Values.FirstOrDefault() / 100f;
 			};
 
 			return root;
