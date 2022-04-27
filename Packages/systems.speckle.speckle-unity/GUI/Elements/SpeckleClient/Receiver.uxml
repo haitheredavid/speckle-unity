@@ -3,6 +3,7 @@
                  src="project://database/Packages/systems.speckle.speckle-unity/GUI/StreamObjectCard.uxml?fileID=9197481963319205126&amp;guid=1dca78ead9ad07a47849fc3b2d79d371&amp;type=3#StreamObjectCard"/>
     <ui:Template name="ConverterSelectionCard"
                  src="project://database/Packages/systems.speckle.speckle-unity/GUI/ConverterSelectionCard.uxml?fileID=9197481963319205126&amp;guid=a97966f562baf9f4d8ccc1728f9c4cf9&amp;type=3#ConverterSelectionCard"/>
+    <Style src="project://database/Packages/systems.speckle.speckle-unity/GUI/USS/speckleStyles.uss?fileID=7433441132597879392&amp;guid=3e16578a712621347bc146e6de449517&amp;type=3#speckleStyles"/>
     <ui:VisualElement name="input-container"
                       style="flex-direction: row; width: auto; height: 20px; margin-top: 5px; margin-bottom: 5px;">
         <ui:VisualElement name="search-icon"
@@ -15,16 +16,11 @@
         <ui:Button display-tooltip-when-elided="true" name="search-button"
                    style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/plus-circle-outline.png?fileID=2800000&amp;guid=3ff9e9073fe32eb4b929a6a99f84402a&amp;type=3#plus-circle-outline&apos;); -unity-background-scale-mode: scale-to-fit; flex-grow: 0; height: auto; width: 50px;"/>
     </ui:VisualElement>
-    <ui:VisualElement name="container" style="flex-grow: 1; height: 243px; max-height: 250px; min-height: 100px;">
+    <ui:VisualElement name="setup-container" style="flex-grow: 1; height: 243px; max-height: 250px; min-height: 100px;">
         <ui:Instance template="StreamObjectCard" name="StreamObjectCard"/>
         <ui:VisualElement name="operation-container" style="flex-direction: row; align-items: auto;">
             <ui:Instance template="ConverterSelectionCard" name="ConverterSelectionCard"
                          tooltip="The type of converter to use for converting Speckle to Unity" style="flex-grow: 1;"/>
-            <ui:VisualElement name="container"
-                              style="padding-left: 1px; padding-right: 1px; padding-top: 1px; padding-bottom: 1px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; width: 76px; height: 25px; justify-content: center; flex-direction: row; align-items: center;">
-                <ui:Button display-tooltip-when-elided="true" name="receive" binding-path="receive"
-                           style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/Receiver.png?fileID=2800000&amp;guid=4e2d7537a68c1a74187c439e7cad5562&amp;type=3#Receiver&apos;); -unity-background-scale-mode: scale-to-fit; width: auto; height: auto; padding-top: 3px; padding-bottom: 3px; flex-grow: 1; justify-content: space-between;"/>
-            </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="preview-container" style="flex-direction: row; flex-grow: 1; align-items: flex-start;">
             <ui:VisualElement name="background"
@@ -42,5 +38,15 @@
                                                           style="max-width: none; max-height: 100%; min-height: 75%; flex-grow: 1; flex-shrink: 1; background-color: rgb(166, 166, 166); margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; height: 100%; width: 100%; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="receive-container"
+                      style="flex-direction: column; align-items: center; flex-grow: 0; height: auto; width: auto;">
+        <ui:VisualElement name="container"
+                          style="padding-left: 1px; padding-right: 1px; padding-top: 1px; padding-bottom: 1px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; width: 100px; height: 25px; justify-content: center; flex-direction: row; align-items: auto;">
+            <ui:Button display-tooltip-when-elided="true" name="receive" binding-path="receive"
+                       style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/Receiver.png?fileID=2800000&amp;guid=4e2d7537a68c1a74187c439e7cad5562&amp;type=3#Receiver&apos;); -unity-background-scale-mode: scale-to-fit; width: auto; height: auto; padding-top: 3px; padding-bottom: 3px; flex-grow: 1; justify-content: space-between; align-items: auto;"/>
+        </ui:VisualElement>
+        <ui:ProgressBar title="0/100" name="receive-progress" class="fontSmallBold"
+                        style="flex-grow: 1; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; justify-content: space-around; align-items: stretch; width: 95%; -unity-font-style: bold; font-size: 8px; height: auto;"/>
     </ui:VisualElement>
 </ui:UXML>
