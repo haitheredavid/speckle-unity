@@ -30,8 +30,8 @@ namespace Speckle.ConnectorUnity
 		protected Client client;
 		protected bool isCanceled;
 
-		protected Action<string, Exception> onErrorReport;
-		protected Action<ConcurrentDictionary<string, int>> onProgressReport;
+		public Action<string, Exception> onErrorReport;
+		public Action<ConcurrentDictionary<string, int>> onProgressReport;
 
 		public bool isWorking { get; protected set; }
 
