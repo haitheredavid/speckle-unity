@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
 using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using Speckle.Core.Kits;
 using Speckle.Core.Logging;
-using Speckle.Core.Models;
 using UnityEngine;
 using UnityEngine.UIElements;
 #if UNITY_EDITOR
@@ -131,12 +128,12 @@ namespace Speckle.ConnectorUnity
 
 		#endif
 
-    public static bool TryGetSpeckleStream(string streamUrl, out SpeckleStream stream)
-    {
-      stream = ScriptableObject.CreateInstance<SpeckleStream>();
-      stream.Init(streamUrl);
-      return stream.IsValid();
-    }
+		public static bool TryGetSpeckleStream(string streamUrl, out SpeckleStream stream)
+		{
+			stream = ScriptableObject.CreateInstance<SpeckleStream>();
+			stream.Init(streamUrl);
+			return stream.IsValid();
+		}
 
 		public void OpenStreamInBrowser(EventBase obj)
 		{
