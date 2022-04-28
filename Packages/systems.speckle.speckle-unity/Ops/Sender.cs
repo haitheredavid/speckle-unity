@@ -21,7 +21,7 @@ namespace Speckle.ConnectorUnity
   public class Sender : SpeckleClient
   {
 
-    public UnityAction<string> onDataSent;
+		private ServerTransport transport;
 
     public async UniTask<string> Send(List<GameObject> objs = null, string message = null, CancellationTokenSource cancellationToken = null)
     {
@@ -41,28 +41,45 @@ namespace Speckle.ConnectorUnity
       {
         ConnectorConsole.Log("Sending data");
 
-        objectId = await Helpers.Send(
-          stream.Id,
-          data,
-          message.Valid() ? message : $"Objects from Unity {data.totalChildrenCount}",
-          HostApp,
-          account: client.Account,
-          onProgressAction: onProgressReport,
-          onErrorAction: onErrorReport
-        );
+				transport = new ServerTransport(client.Account, stream.Id);
 
-        Debug.Log($"data sent! {objectId}");
+				objectId = await Operations.Send(
+					data,
+					this.GetCancellationTokenOnDestroy(),
+					new List<ITransport>() { transport },
+					useDefaultCache: true,
+					onProgressAction: onProgressReport,
+					onErrorAction: onErrorReport,
+					disposeTransports: false
+				).AsUniTask();
 
-        onDataSent?.Invoke(objectId);
-        UniTask.Yield();
-      }
+				var commit = await client.CommitCreate(
+					this.GetCancellationTokenOnDestroy(),
+					new CommitCreateInput()
+					{
+						objectId = objectId,
+						streamId = stream.Id,
+						branchName = stream.BranchName,
+						message = message.Valid() ? message : $"Objects from Unity {data.totalChildrenCount}",
+						sourceApplication = SpeckleConnector.HostApp,
+						totalChildrenCount = (int)data.GetTotalChildrenCount()
+					}).AsUniTask();
 
-      catch (Exception e)
-      {
-        Debug.LogException(new SpeckleException(e.Message, e, true, SentryLevel.Error));
-      }
+				Debug.Log($"data sent! {objectId}");
 
-      return objectId;
+				transport?.Dispose();
+				onDataSent?.Invoke(objectId);
+
+				UniTask.Yield();
+			}
+
+			catch (SpeckleException e)
+			{
+				ConnectorConsole.Exception(e);
+			}
+
+			return objectId;
+		}
 
     }
 
