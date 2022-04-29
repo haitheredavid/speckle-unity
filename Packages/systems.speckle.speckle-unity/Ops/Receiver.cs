@@ -56,6 +56,7 @@ namespace Speckle.ConnectorUnity
 			get => showPreview;
 			set => showPreview = value;
 		}
+
 		protected override void OnEnable()
 		{
 			base.OnEnable();
@@ -64,6 +65,8 @@ namespace Speckle.ConnectorUnity
 				Debug.Log($"Total kidds {i}");
 				totalChildCount = i;
 			};
+
+			Init(stream).Forget();
 		}
 
 		private void OnDestroy()
@@ -105,6 +108,7 @@ namespace Speckle.ConnectorUnity
 
 			UniTask.Yield();
 		}
+
 		protected override void SetSubscriptions()
 		{
 			if (client != null && autoReceive)
