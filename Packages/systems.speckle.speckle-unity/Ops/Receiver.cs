@@ -203,9 +203,6 @@ namespace Speckle.ConnectorUnity
 				{
 					await UniTask.Create(async () =>
 					{
-						Debug.Log("Starting delay");
-						await UniTask.Delay(1000);
-						Debug.Log("Thread pool call");
 						root = ConvertRecursively(@base);
 					});
 				}

@@ -29,7 +29,7 @@ namespace Speckle.ConnectorUnity
 			obj.onRepaint += RefreshAll;
 			obj.onPreviewSet += Refresh;
 
-			tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/Elements/SpeckleClient/Receiver.uxml");
+			tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/Receiver.uxml");
 		}
 
 		private void OnDisable()
