@@ -22,17 +22,13 @@ namespace Speckle.ConnectorUnity
 
 		public const string HostApp = HostApplications.Unity.Name;
 
-		[SerializeField] private ConverterUnity converter;
 		[SerializeField] private List<SpeckleStream> streams = new List<SpeckleStream>();
 
 		[SerializeField] private List<Sender> senders = new List<Sender>();
 		[SerializeField] private List<Receiver> receivers = new List<Receiver>();
 
 		[SerializeField] private List<ConverterUnity> converters = new List<ConverterUnity>();
-
-		[SerializeField] private SpeckleStream stream;
-		[SerializeField] private SpeckleStream cachedStream;
-
+		
 		[SerializeField] private int accountIndex;
 		[SerializeField] private int streamIndex;
 
