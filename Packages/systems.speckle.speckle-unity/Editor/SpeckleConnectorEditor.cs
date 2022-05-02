@@ -39,6 +39,7 @@ namespace Speckle.ConnectorUnity
 			obj.onRepaint -= RefreshAll;
 		}
 
+		// TODO: set a loading state for the gui 
 		private event Action onConnectorLoading;
 
 		public override VisualElement CreateInspectorGUI()
