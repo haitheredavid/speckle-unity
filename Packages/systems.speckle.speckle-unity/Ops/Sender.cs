@@ -18,8 +18,11 @@ namespace Speckle.ConnectorUnity
 	///   that handles conversions for you
 	/// </summary>
 	[AddComponentMenu("Speckle/Sender")]
+	[ExecuteAlways]
 	public class Sender : SpeckleClient
 	{
+		[SerializeField] private List<GameObject> objectsToSend;
+
 		public UnityAction<string> onDataSent;
 
 		private ServerTransport transport;
@@ -31,9 +34,27 @@ namespace Speckle.ConnectorUnity
 			if (!IsReady())
 				return objectId;
 
-			// if no objects were passed in we'll try converting from the assigned root object 
+			// TODO: This feels pretty silly. It should be something similar to the way selections are made in rhino or revit.
 			if (objs == null || !objs.Any())
-				objs = new List<GameObject>() { root };
+			{
+				ConnectorConsole.Log("No objects were passed to the sender - checking others");
+
+				if (objectsToSend.Valid())
+				{
+					ConnectorConsole.Log("Using objects in editor list");
+					objs = objectsToSend;
+				}
+				else if (root != null)
+				{
+					ConnectorConsole.Log($"Using the root object with {root.transform.childCount} kids");
+					objs = new List<GameObject>() { root };
+				}
+				else
+				{
+					ConnectorConsole.Warn("No objects were found to send! Stopping call");
+					return objectId;
+				}
+			}
 
 			var data = objs.Count > 1 ? ConvertRecursively(objs) : ConvertRecursively(objs[0]);
 
@@ -53,19 +74,21 @@ namespace Speckle.ConnectorUnity
 					disposeTransports: false
 				).AsUniTask();
 
+				Debug.Log($"data sent! {objectId}");
+
 				var commit = await client.CommitCreate(
 					this.GetCancellationTokenOnDestroy(),
 					new CommitCreateInput()
 					{
 						objectId = objectId,
 						streamId = stream.Id,
-						branchName = stream.BranchName,
+						branchName = activeBranch.name, // TODO: fix how the speckle stream object holds data... 
 						message = message.Valid() ? message : $"Objects from Unity {data.totalChildrenCount}",
 						sourceApplication = SpeckleConnector.HostApp,
 						totalChildrenCount = (int)data.GetTotalChildrenCount()
 					}).AsUniTask();
 
-				Debug.Log($"data sent! {objectId}");
+				Debug.Log($"commit created! {commit}");
 
 				transport?.Dispose();
 				onDataSent?.Invoke(objectId);
@@ -94,6 +117,14 @@ namespace Speckle.ConnectorUnity
 			{
 				["objects"] = objs.Select(ConvertRecursively).Where(x => x != null).ToList()
 			};
+		}
+
+		protected override async UniTask LoadStream()
+		{
+			await base.LoadStream();
+			Debug.Log(activeBranch.name);
+
+			name = nameof(Sender) + $"-{stream.Id}";
 		}
 
 		private Base ConvertRecursively(GameObject go)
