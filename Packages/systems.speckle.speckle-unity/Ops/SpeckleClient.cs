@@ -62,6 +62,10 @@ namespace Speckle.ConnectorUnity
 			#if UNITY_EDITOR
 			converters = GetAllInstances<ConverterUnity>();
 			#endif
+
+			onTotalChildrenCountKnown = i => totalChildCount = i;
+
+			Init(stream).Forget();
 		}
 
 		private void OnDisable()
@@ -114,6 +118,8 @@ namespace Speckle.ConnectorUnity
 				ConnectorConsole.Log("Speckle stream object is not setup correctly");
 				return false;
 			}
+			
+			branchIndex = 0;
 
 			await LoadStream();
 
