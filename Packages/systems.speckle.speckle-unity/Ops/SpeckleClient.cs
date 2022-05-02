@@ -95,18 +95,27 @@ namespace Speckle.ConnectorUnity
 			converterIndex = converters.Check(i);
 		}
 
+		/// <summary> Necessary setup for interacting with a speckle stream from unity</summary>
 		/// <param name="rootStream">root stream object to use, will default to editor field</param>
 		/// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
 		/// <param name="onErrorAction">Action to run on error</param>
 		public async UniTask<bool> Init(
 			SpeckleStream rootStream,
-			Action<ConcurrentDictionary<string, int>> onProgressAction = null,
-			Action<string, Exception> onErrorAction = null
+			Action<ConcurrentDictionary<string, int>> onProgressAction,
+			Action<string, Exception> onErrorAction
 		)
 		{
 			onErrorReport = onErrorAction;
 			onProgressReport = onProgressAction;
 
+			return await Init(rootStream);
+		}
+
+		/// <summary> Necessary setup for interacting with a speckle stream from unity </summary>
+		/// <param name="rootStream">root stream object to use, will default to editor field</param>
+		/// <returns></returns>
+		public async UniTask<bool> Init(SpeckleStream rootStream)
+		{
 			stream = rootStream;
 			if (stream == null || !stream.IsValid())
 			{
