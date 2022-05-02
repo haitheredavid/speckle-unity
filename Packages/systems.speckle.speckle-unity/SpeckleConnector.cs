@@ -28,9 +28,7 @@ namespace Speckle.ConnectorUnity
 		[SerializeField] private List<Receiver> receivers = new List<Receiver>();
 
 		[SerializeField] private List<ConverterUnity> converters = new List<ConverterUnity>();
-		
-		
-		
+
 		[SerializeField] private int accountIndex;
 		[SerializeField] private int streamIndex;
 
@@ -143,7 +141,19 @@ namespace Speckle.ConnectorUnity
 			if (activeStream == null)
 			{
 				ConnectorConsole.Log("No Active stream ready to be sent to sender");
+				return;
 			}
+			
+			UniTask.Create(async () =>
+			{
+				var mono = new GameObject().AddComponent<Sender>();
+
+				#if UNITY_EDITOR
+				Selection.activeObject = mono;
+				#endif
+
+				await mono.Init(activeStream);
+			});
 		}
 
 		public void CreateReceiver(EventBase obj)
@@ -160,7 +170,6 @@ namespace Speckle.ConnectorUnity
 
 				#if UNITY_EDITOR
 				Selection.activeObject = mono;
-
 				#endif
 
 				await mono.Init(activeStream);

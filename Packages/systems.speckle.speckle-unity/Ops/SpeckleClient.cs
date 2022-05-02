@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Kits;
@@ -29,9 +30,10 @@ namespace Speckle.ConnectorUnity
 
 		protected Client client;
 		protected bool isCanceled;
-
 		public Action<string, Exception> onErrorReport;
 		public Action<ConcurrentDictionary<string, int>> onProgressReport;
+
+		public Action<int> onTotalChildrenCountKnown;
 
 		public int totalChildCount { get; protected set; }
 
@@ -47,7 +49,6 @@ namespace Speckle.ConnectorUnity
 		protected ConverterUnity converter
 		{
 			get => converters.Valid(converterIndex) ? converters[converterIndex] : null;
-
 		}
 
 		public Branch activeBranch
@@ -61,6 +62,10 @@ namespace Speckle.ConnectorUnity
 			#if UNITY_EDITOR
 			converters = GetAllInstances<ConverterUnity>();
 			#endif
+
+			onTotalChildrenCountKnown = i => totalChildCount = i;
+
+			Init(stream).Forget();
 		}
 
 		private void OnDisable()
@@ -76,12 +81,6 @@ namespace Speckle.ConnectorUnity
 		public void Report(float value)
 		{
 			progressAmount = value;
-			Debug.Log(value);
-		}
-
-		protected void Refresh()
-		{
-			onRepaint?.Invoke();
 		}
 
 		public event Action onRepaint;
@@ -96,24 +95,35 @@ namespace Speckle.ConnectorUnity
 			converterIndex = converters.Check(i);
 		}
 
+		/// <summary> Necessary setup for interacting with a speckle stream from unity</summary>
 		/// <param name="rootStream">root stream object to use, will default to editor field</param>
 		/// <param name="onProgressAction">Action to run when there is download/conversion progress</param>
 		/// <param name="onErrorAction">Action to run on error</param>
 		public async UniTask<bool> Init(
 			SpeckleStream rootStream,
-			Action<ConcurrentDictionary<string, int>> onProgressAction = null,
-			Action<string, Exception> onErrorAction = null
+			Action<ConcurrentDictionary<string, int>> onProgressAction,
+			Action<string, Exception> onErrorAction
 		)
 		{
 			onErrorReport = onErrorAction;
 			onProgressReport = onProgressAction;
 
+			return await Init(rootStream);
+		}
+
+		/// <summary> Necessary setup for interacting with a speckle stream from unity </summary>
+		/// <param name="rootStream">root stream object to use, will default to editor field</param>
+		/// <returns></returns>
+		public async UniTask<bool> Init(SpeckleStream rootStream)
+		{
 			stream = rootStream;
 			if (stream == null || !stream.IsValid())
 			{
 				ConnectorConsole.Log("Speckle stream object is not setup correctly");
 				return false;
 			}
+
+			branchIndex = 0;
 
 			await LoadStream();
 

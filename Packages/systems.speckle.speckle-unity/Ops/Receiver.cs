@@ -32,7 +32,6 @@ namespace Speckle.ConnectorUnity
 		[SerializeField] private bool renderPreview = true;
 
 		public Action<GameObject> onDataReceivedAction;
-		public Action<int> onTotalChildrenCountKnown;
 
 		public Texture Preview
 		{
@@ -55,18 +54,6 @@ namespace Speckle.ConnectorUnity
 		{
 			get => showPreview;
 			set => showPreview = value;
-		}
-
-		protected override void OnEnable()
-		{
-			base.OnEnable();
-			onTotalChildrenCountKnown = i =>
-			{
-				Debug.Log($"Total kidds {i}");
-				totalChildCount = i;
-			};
-
-			Init(stream).Forget();
 		}
 
 		private void OnDestroy()
@@ -201,10 +188,7 @@ namespace Speckle.ConnectorUnity
 
 				try
 				{
-					await UniTask.Create(async () =>
-					{
-						root = ConvertRecursively(@base);
-					});
+					await UniTask.Create(async () => { root = ConvertRecursively(@base); });
 				}
 				catch (Exception e)
 				{
