@@ -32,7 +32,6 @@ namespace Speckle.ConnectorUnity
 		[SerializeField] private bool renderPreview = true;
 
 		public Action<GameObject> onDataReceivedAction;
-		public Action<int> onTotalChildrenCountKnown;
 
 		public Texture Preview
 		{
@@ -60,12 +59,9 @@ namespace Speckle.ConnectorUnity
 		protected override void OnEnable()
 		{
 			base.OnEnable();
-			onTotalChildrenCountKnown = i =>
-			{
-				Debug.Log($"Total kidds {i}");
-				totalChildCount = i;
-			};
-
+			
+			onTotalChildrenCountKnown = i => totalChildCount = i;
+			
 			Init(stream).Forget();
 		}
 
