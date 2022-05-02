@@ -76,13 +76,15 @@ namespace Speckle.ConnectorUnity
 
 				Debug.Log($"data sent! {objectId}");
 
+				Debug.Log($"Commit to {stream.BranchName}");
+
 				var commit = await client.CommitCreate(
 					this.GetCancellationTokenOnDestroy(),
 					new CommitCreateInput()
 					{
 						objectId = objectId,
 						streamId = stream.Id,
-						branchName = activeBranch.name, // TODO: fix how the speckle stream object holds data... 
+						branchName = stream.BranchName, // TODO: fix how the speckle stream object holds data... 
 						message = message.Valid() ? message : $"Objects from Unity {data.totalChildrenCount}",
 						sourceApplication = SpeckleConnector.HostApp,
 						totalChildrenCount = (int)data.GetTotalChildrenCount()
@@ -122,8 +124,6 @@ namespace Speckle.ConnectorUnity
 		protected override async UniTask LoadStream()
 		{
 			await base.LoadStream();
-			Debug.Log(activeBranch.name);
-
 			name = nameof(Sender) + $"-{stream.Id}";
 		}
 

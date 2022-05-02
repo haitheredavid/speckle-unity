@@ -27,6 +27,8 @@ namespace Speckle.ConnectorUnity
 		[SerializeField] private List<Sender> senders = new List<Sender>();
 		[SerializeField] private List<Receiver> receivers = new List<Receiver>();
 
+		[SerializeField] private bool isInit = false;
+
 		[SerializeField] private List<ConverterUnity> converters = new List<ConverterUnity>();
 
 		[SerializeField] private int accountIndex;
@@ -56,9 +58,10 @@ namespace Speckle.ConnectorUnity
 			senders ??= new List<Sender>();
 			receivers ??= new List<Receiver>();
 
-			Accounts = AccountManager.GetAccounts().ToList();
+			if (isInit)
+				return;
 
-			SetAccount(accountIndex).Forget();
+			Refresh().Forget();
 		}
 
 		public event Action onRepaint;
@@ -68,10 +71,18 @@ namespace Speckle.ConnectorUnity
 			streamIndex = Streams.Check(index);
 		}
 
+		public async UniTask Refresh()
+		{
+			Accounts = AccountManager.GetAccounts().ToList();
+			await SetAccount(accountIndex);
+		}
+
 		public async UniTask SetAccount(int index)
 		{
 			try
 			{
+				isInit = false;
+
 				if (Accounts == null)
 				{
 					ConnectorConsole.Warn("Accounts are not set properly to this connector");
@@ -88,15 +99,19 @@ namespace Speckle.ConnectorUnity
 				if (activeAccount != null)
 				{
 					client = new Client(activeAccount);
+
 					var res = await client.StreamsGet();
 					streams = new List<SpeckleStream>();
 
 					foreach (var s in res)
 					{
 						var wrapper = ScriptableObject.CreateInstance<SpeckleStream>();
-						wrapper.Init(s.id, activeAccount.userInfo.id, client.ServerUrl, s.name, s.description);
-						streams.Add(wrapper);
+
+						if (await wrapper.TrySetNew(s.id, activeAccount.userInfo.id, client.ServerUrl))
+							streams.Add(wrapper);
 					}
+
+					isInit = true;
 				}
 			}
 			catch (SpeckleException e)
@@ -143,7 +158,7 @@ namespace Speckle.ConnectorUnity
 				ConnectorConsole.Log("No Active stream ready to be sent to sender");
 				return;
 			}
-			
+
 			UniTask.Create(async () =>
 			{
 				var mono = new GameObject().AddComponent<Sender>();

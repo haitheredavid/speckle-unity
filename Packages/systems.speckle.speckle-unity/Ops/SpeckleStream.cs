@@ -1,4 +1,8 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -19,9 +23,11 @@ namespace Speckle.ConnectorUnity
 		[SerializeField] private string branchName;
 		[SerializeField] private string commitId;
 		[SerializeField] private string objectId;
-		[SerializeField] private string userId;
 
 		[SerializeField] private string originalInput;
+
+		[SerializeField] private List<BranchWrapper> _branches;
+		[SerializeField] private List<CommitWrapper> _commits;
 
 		private StreamWrapper _wrapper;
 
@@ -38,11 +44,6 @@ namespace Speckle.ConnectorUnity
 		public string Description
 		{
 			get => description;
-		}
-
-		public string UserId
-		{
-			get => userId;
 		}
 
 		public string ServerUrl
@@ -80,15 +81,6 @@ namespace Speckle.ConnectorUnity
 			get => Wrapper.Type;
 		}
 
-		public bool Init(string stream, string user, string server, string title = null, string info = null)
-		{
-			_wrapper = new StreamWrapper(stream, user, server);
-			streamName = title;
-			description = info;
-
-			return Setup();
-		}
-
 		/// <summary>
 		/// Initialize a simple stream object that connects the stream wrapper data to the editor  
 		/// </summary>
@@ -104,6 +96,43 @@ namespace Speckle.ConnectorUnity
 			return Setup();
 		}
 
+		public async UniTask<bool> TrySetNew(string streamId, string user, string server)
+		{
+			_wrapper = new StreamWrapper(streamId, user, server);
+
+			if (!Setup())
+			{
+				Debug.Log("Setup was not done correctly");
+				return false;
+			}
+
+			var client = new Client(await _wrapper.GetAccount());
+
+			var stream = await client.StreamGet(_wrapper.StreamId);
+
+			if (stream == null)
+				return false;
+
+			streamName = stream.name;
+			description = stream.description;
+
+			// TODO: probably a better way to set the most active branch... or just main
+			if (!branchName.Valid())
+			{
+				branchName = stream.branches.items.FirstOrDefault().name;
+			}
+
+			_branches = new List<BranchWrapper>();
+
+			foreach (var branch in stream.branches.items)
+			{
+				var b = new BranchWrapper(branch);
+				_branches.Add(b);
+			}
+
+			return _wrapper.IsValid;
+		}
+
 		private bool Setup()
 		{
 			if (_wrapper is not { IsValid: true })
@@ -113,7 +142,6 @@ namespace Speckle.ConnectorUnity
 			}
 
 			id = _wrapper.StreamId;
-			userId = _wrapper.UserId;
 			commitId = _wrapper.CommitId;
 			objectId = _wrapper.ObjectId;
 			serverUrl = _wrapper.ServerUrl;

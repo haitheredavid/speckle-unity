@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Speckle.ConnectorUnity.GUI;
@@ -17,6 +18,7 @@ namespace Speckle.ConnectorUnity
 
 		private Image img;
 		private SpeckleConnector obj;
+		private Button refresh;
 		private VisualElement root;
 
 		private VisualTreeAsset streamCard;
@@ -37,6 +39,9 @@ namespace Speckle.ConnectorUnity
 			obj.onRepaint -= RefreshAll;
 		}
 
+		// TODO: set a loading state for the gui 
+		private event Action onConnectorLoading;
+
 		public override VisualElement CreateInspectorGUI()
 		{
 			if (tree == null)
@@ -46,6 +51,13 @@ namespace Speckle.ConnectorUnity
 			tree.CloneTree(root);
 
 			accounts = root.SetDropDown("account", FindInt("accountIndex"), obj.Accounts.Format(), e => AccountChange(e).Forget());
+
+			refresh = root.Q<Button>("refresh");
+			refresh.clickable.clicked += () =>
+			{
+				obj.Refresh().Forget();
+				onConnectorLoading?.Invoke();
+			};
 
 			SetupList();
 
