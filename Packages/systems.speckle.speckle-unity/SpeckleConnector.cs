@@ -88,14 +88,16 @@ namespace Speckle.ConnectorUnity
 				if (activeAccount != null)
 				{
 					client = new Client(activeAccount);
+
 					var res = await client.StreamsGet();
 					streams = new List<SpeckleStream>();
 
 					foreach (var s in res)
 					{
 						var wrapper = ScriptableObject.CreateInstance<SpeckleStream>();
-						wrapper.Init(s.id, activeAccount.userInfo.id, client.ServerUrl, s.name, s.description);
-						streams.Add(wrapper);
+
+						if (await wrapper.TrySetNew(s.id, activeAccount.userInfo.id, client.ServerUrl))
+							streams.Add(wrapper);
 					}
 				}
 			}
@@ -143,7 +145,7 @@ namespace Speckle.ConnectorUnity
 				ConnectorConsole.Log("No Active stream ready to be sent to sender");
 				return;
 			}
-			
+
 			UniTask.Create(async () =>
 			{
 				var mono = new GameObject().AddComponent<Sender>();
