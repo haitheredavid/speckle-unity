@@ -124,8 +124,6 @@ namespace Speckle.ConnectorUnity
 		protected override async UniTask LoadStream()
 		{
 			await base.LoadStream();
-			Debug.Log(activeBranch.name);
-
 			name = nameof(Sender) + $"-{stream.Id}";
 		}
 
