@@ -22,8 +22,6 @@ namespace Speckle.ConnectorUnity
 
 		private int commitIndex => FindInt("commitIndex");
 
-		private int branchIndex => FindInt("branchIndex");
-
 		protected override string treePath => "Packages/systems.speckle.speckle-unity/GUI/Receiver.uxml";
 
 		protected override void OnEnable()
@@ -99,10 +97,10 @@ namespace Speckle.ConnectorUnity
 
 		protected override void RefreshAll()
 		{
-			Refresh(branches, obj.Branches.Format().ToList(), branchIndex);
+			base.RefreshAll();
+
 			Refresh(commits, obj.Commits.Format().ToList(), commitIndex);
 		}
-
 	}
 
 }

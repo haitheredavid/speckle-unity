@@ -1,32 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine.UIElements;
 using Speckle.ConnectorUnity.GUI;
-using UnityEngine.Events;
 
 namespace Speckle.ConnectorUnity
 {
 	public abstract class SpeckleClientEditor<TClient> : Editor where TClient : SpeckleClient
 	{
 
-		protected VisualElement root;
-		protected VisualTreeAsset tree;
-		protected TClient obj;
-
 		protected DropdownField branches;
 		protected DropdownField converters;
+		protected TClient obj;
 		protected ProgressBar progress;
 
-		protected Button runButton;
+		protected VisualElement root;
 
+		protected Button runButton;
+		protected VisualTreeAsset tree;
 
 		protected abstract string treePath { get; }
 
-		protected abstract void RefreshAll();
-		
-		protected abstract void OnRunClicked();
+		protected int branchIndex => FindInt("branchIndex");
+		protected int converterIndex => FindInt("converterIndex");
 
 		protected virtual void OnEnable()
 		{
@@ -41,6 +37,8 @@ namespace Speckle.ConnectorUnity
 			obj.onRepaint -= RefreshAll;
 		}
 
+		protected abstract void OnRunClicked();
+
 		protected int FindInt(string propName)
 		{
 			return serializedObject.FindProperty(propName).intValue;
@@ -50,6 +48,11 @@ namespace Speckle.ConnectorUnity
 		{
 			dropdown.choices = items.ToList();
 			dropdown.index = index;
+		}
+
+		protected virtual void RefreshAll()
+		{
+			Refresh(branches, obj.Branches.Format(), branchIndex);
 		}
 
 		protected virtual void SetBranchChange(int index)
@@ -84,7 +87,7 @@ namespace Speckle.ConnectorUnity
 
 			runButton = root.Q<Button>("run");
 			runButton.clickable.clicked += OnRunClicked;
-			
+
 			progress = root.Q<ProgressBar>("progress");
 
 			obj.onTotalChildrenCountKnown += value =>
@@ -102,7 +105,6 @@ namespace Speckle.ConnectorUnity
 				// progress.value = values.Values.FirstOrDefault() / 100f;
 			};
 
-			
 			return root;
 		}
 	}

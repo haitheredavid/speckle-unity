@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Kits;
@@ -29,10 +30,10 @@ namespace Speckle.ConnectorUnity
 
 		protected Client client;
 		protected bool isCanceled;
-
-		public Action<int> onTotalChildrenCountKnown;
 		public Action<string, Exception> onErrorReport;
 		public Action<ConcurrentDictionary<string, int>> onProgressReport;
+
+		public Action<int> onTotalChildrenCountKnown;
 
 		public int totalChildCount { get; protected set; }
 
@@ -48,7 +49,6 @@ namespace Speckle.ConnectorUnity
 		protected ConverterUnity converter
 		{
 			get => converters.Valid(converterIndex) ? converters[converterIndex] : null;
-
 		}
 
 		public Branch activeBranch
@@ -83,11 +83,6 @@ namespace Speckle.ConnectorUnity
 			progressAmount = value;
 		}
 
-		protected void Refresh()
-		{
-			onRepaint?.Invoke();
-		}
-
 		public event Action onRepaint;
 
 		public virtual void SetBranch(int i)
@@ -118,7 +113,7 @@ namespace Speckle.ConnectorUnity
 				ConnectorConsole.Log("Speckle stream object is not setup correctly");
 				return false;
 			}
-			
+
 			branchIndex = 0;
 
 			await LoadStream();

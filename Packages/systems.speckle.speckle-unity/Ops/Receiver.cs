@@ -56,15 +56,6 @@ namespace Speckle.ConnectorUnity
 			set => showPreview = value;
 		}
 
-		protected override void OnEnable()
-		{
-			base.OnEnable();
-			
-			onTotalChildrenCountKnown = i => totalChildCount = i;
-			
-			Init(stream).Forget();
-		}
-
 		private void OnDestroy()
 		{
 			client?.CommitCreatedSubscription?.Dispose();
@@ -197,10 +188,7 @@ namespace Speckle.ConnectorUnity
 
 				try
 				{
-					await UniTask.Create(async () =>
-					{
-						root = ConvertRecursively(@base);
-					});
+					await UniTask.Create(async () => { root = ConvertRecursively(@base); });
 				}
 				catch (Exception e)
 				{
