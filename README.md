@@ -19,34 +19,33 @@ This connector uses [Speckle .NET SDK](https://github.com/specklesystems/speckle
 
 There are some tasks I have setup to help make this connector more accessible to all types of unity-users. There is plenty to be added to this roadmap, but here are the main things I have cooking.
 
-#### Operations based
+#### ~Operations based~ 
 
-- [ ] Setup object for sending
+- [x] ~Setup object for sending~
 - [x] ~Setup object for receiving~
 - [x] ~Setup a Speckle Stream wrapper as scriptable obj~
-- [ ] Gather and store all active converters 
+- [x] ~Gather and store all active converters~ 
 - [x] ~Setup some sort of connector manager~
-- [ ] Setup up tests for all operation calls
 
 #### GUI Stuff
 - [ ] Speckle Stream scriptable obj
 - [x] ~Receiver~ 
-- [ ] Sender
+- [x] ~Sender~
 - [x] ~Stream preview~
 - [x] ~Speckle Connector~ 
 
 #### Object based
 - [x] Create component based converters so users can have more flexibility with how conversions work
-- [ ] Handle tree hierarchy conversion back to speckle  
+- [ ] Handle tree hierarchy for sending to speckle 
+- [ ] Handle tree hierarchy for receiving from speckle
 - [x] ~Mesh converter~
 - [x] ~Line converter~
 - [x] ~View3d converter~ 
 - [ ] Brep converter
 - [ ] Point cloud converter
 - [ ] Point converter
-- [ ] Defualt display converter
+- [ ] Default display converter
 - [ ] BIM properties properly stored
-- [ ] Separate component conversion package 
  
  #### Rando
  - [ ] Test scene 
@@ -54,6 +53,12 @@ There are some tasks I have setup to help make this connector more accessible to
  - [ ] Some crispy visuals 
  - [ ] Buffer Display Mesh load
 
+
+ #### tbd
+- [ ] Setting selection for sending
+- [ ] Compiling all converters on build
+- [ ] Setup up tests for all operation calls
+- [ ] Separate component conversion package
 
 ### Note!
 
