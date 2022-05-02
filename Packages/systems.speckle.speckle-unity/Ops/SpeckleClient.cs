@@ -30,6 +30,7 @@ namespace Speckle.ConnectorUnity
 		protected Client client;
 		protected bool isCanceled;
 
+		public Action<int> onTotalChildrenCountKnown;
 		public Action<string, Exception> onErrorReport;
 		public Action<ConcurrentDictionary<string, int>> onProgressReport;
 
@@ -76,7 +77,6 @@ namespace Speckle.ConnectorUnity
 		public void Report(float value)
 		{
 			progressAmount = value;
-			Debug.Log(value);
 		}
 
 		protected void Refresh()

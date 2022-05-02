@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Speckle.ConnectorUnity.GUI;
 using UnityEditor;
 using UnityEngine;
@@ -8,65 +9,49 @@ using UnityEngine.UIElements;
 namespace Speckle.ConnectorUnity
 {
 	[CustomEditor(typeof(Receiver))]
-	public class ReceiverEditor : Editor
+	public class ReceiverEditor : SpeckleClientEditor<Receiver>
 	{
-		private DropdownField branches, commits, converters;
 
-		private Receiver obj;
+		private DropdownField commits;
+
 		private StreamPreview preview;
-		private ProgressBar progress;
 
-		private VisualElement root;
-		private Button searchButton, runButton;
+		private Button searchButton;
 		private Toggle showPreview, renderPreview;
 		private TextField streamUrlField;
-		private VisualTreeAsset tree;
 
-		private void OnEnable()
+		private int commitIndex => FindInt("commitIndex");
+
+		private int branchIndex => FindInt("branchIndex");
+
+		protected override string treePath => "Packages/systems.speckle.speckle-unity/GUI/Receiver.uxml";
+
+		protected override void OnEnable()
 		{
-			obj = (Receiver)target;
+			base.OnEnable();
 
-			obj.onRepaint += RefreshAll;
-			obj.onPreviewSet += Refresh;
-
-			tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/Receiver.uxml");
+			obj.onPreviewSet += SetPreview;
 		}
 
-		private void OnDisable()
+		protected override void OnDisable()
 		{
-			obj.onRepaint -= RefreshAll;
-			obj.onPreviewSet -= Refresh;
+			base.OnDisable();
+
+			obj.onPreviewSet -= SetPreview;
 		}
 
 		public override VisualElement CreateInspectorGUI()
 		{
+			root = base.CreateInspectorGUI();
+
 			if (tree == null)
-				return base.CreateInspectorGUI();
-
-			root = new VisualElement();
-			tree.CloneTree(root);
-
-			branches = root.SetDropDown(
-				"branch",
-				FindInt("branchIndex"),
-				obj.Branches.Format(),
-				e => branches.DropDownChange(e, i =>
-				{
-					obj.SetBranch(i);
-					Refresh(commits, obj.Commits.Format(), "commitIndex");
-				}));
+				return root;
 
 			commits = root.SetDropDown(
 				"commit",
 				FindInt("commitIndex"),
 				obj.Commits.Format(),
 				e => commits.DropDownChange(e, i => { obj.SetCommit(i); }));
-
-			converters = root.SetDropDown(
-				"converter",
-				FindInt("converterIndex"),
-				obj.Converters.Format(),
-				e => converters.DropDownChange(e, i => { obj.SetConverter(i); }));
 
 			streamUrlField = root.Q<TextField>("url");
 			streamUrlField.value = obj.StreamUrl;
@@ -78,13 +63,6 @@ namespace Speckle.ConnectorUnity
 					obj.Init(speckleStream);
 			};
 
-			runButton = root.Q<Button>("receive");
-			runButton.clickable.clicked += () =>
-			{
-				if (!obj.isWorking)
-					obj.Receive();
-			};
-
 			preview = root.Q<StreamPreview>("preview");
 			preview.thumbnail.image = GetPreview();
 
@@ -94,26 +72,19 @@ namespace Speckle.ConnectorUnity
 			renderPreview = root.Q<Toggle>("render-preview");
 			renderPreview.RegisterCallback<ClickEvent>(_ => obj.RenderPreview());
 
-			progress = root.Q<ProgressBar>("receive-progress");
-
-			obj.onTotalChildrenCountKnown += value =>
-			{
-				Debug.Log(value);
-				progress.title = $"0/{value}";
-				progress.highValue = value;
-			};
-
-			obj.onProgressReport += values =>
-			{
-				Debug.Log($"Value update with {values.Count}");
-				// foreach (var v in values)
-				// {
-				// 	Debug.Log(v.Key + "-" + v.Value);
-				// }
-				// progress.value = values.Values.FirstOrDefault() / 100f;
-			};
-
 			return root;
+		}
+
+		protected override void OnRunClicked()
+		{
+			if (!obj.isWorking)
+				obj.Receive().Forget();
+		}
+
+		protected override void SetBranchChange(int index)
+		{
+			base.SetBranchChange(index);
+			Refresh(commits, obj.Commits.Format(), commitIndex);
 		}
 
 		private Texture GetPreview()
@@ -121,26 +92,17 @@ namespace Speckle.ConnectorUnity
 			return obj.ShowPreview ? obj.Preview : null;
 		}
 
-		private void RefreshAll()
-		{
-			Refresh(branches, obj.Branches.Format().ToList(), "branchIndex");
-			Refresh(commits, obj.Commits.Format().ToList(), "commitIndex");
-		}
-
-		private void Refresh()
+		private void SetPreview()
 		{
 			preview.thumbnail.image = obj.Preview;
 		}
 
-		private void Refresh(DropdownField dropdown, IEnumerable<string> items, string prop)
+		protected override void RefreshAll()
 		{
-			dropdown.choices = items.ToList();
-			dropdown.index = FindInt(prop);
+			Refresh(branches, obj.Branches.Format().ToList(), branchIndex);
+			Refresh(commits, obj.Commits.Format().ToList(), commitIndex);
 		}
-		private int FindInt(string propName)
-		{
-			return serializedObject.FindProperty(propName).intValue;
-		}
+
 	}
 
 }
