@@ -1,4 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:Template name="AccountSelectCard"
                  src="project://database/Packages/systems.speckle.speckle-unity/GUI/AccountSelectionCard.uxml?fileID=9197481963319205126&amp;guid=b2830fb645dd33942adca815c39831e9&amp;type=3#AccountSelectionCard"/>
     <ui:Template name="StreamListCard"
@@ -11,9 +11,13 @@
             <ui:Label display-tooltip-when-elided="true" name="icon"
                       style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/specklesbluequarecubething.png?fileID=2800000&amp;guid=4a5dbbd607bb8c549acd93fb263ef223&amp;type=3#specklesbluequarecubething&apos;); height: 52px; width: 69px; -unity-background-scale-mode: scale-and-crop;"/>
             <ui:Label text="Speckle-Unity" display-tooltip-when-elided="true" name="title"
-                      style="-unity-font-style: bold; font-size: 25px; -unity-text-align: middle-center; color: rgb(5, 127, 253); flex-grow: 1;"/>
+                      style="-unity-font-style: bold; font-size: 25px; -unity-text-align: middle-left; color: rgb(5, 127, 253); flex-grow: 1;"/>
         </ui:VisualElement>
-        <ui:Instance template="AccountSelectCard" name="AccountSelectCard"/>
+        <ui:VisualElement name="setup-container" style="flex-direction: row; flex-grow: 1;">
+            <ui:Instance template="AccountSelectCard" name="AccountSelectCard" style="flex-grow: 1;"/>
+            <ui:Button display-tooltip-when-elided="true" name="refresh"
+                       style="background-image: url(&apos;project://database/Packages/systems.speckle.speckle-unity/GUI/Assets/refresh-circle.png?fileID=2800000&amp;guid=ed62a41b0af3f524a8fbee53134808d5&amp;type=3#refresh-circle&apos;); -unity-background-scale-mode: scale-to-fit; flex-grow: 0; height: auto; width: 50px; padding-top: 3px; padding-bottom: 3px;"/>
+        </ui:VisualElement>
         <ui:Instance template="StreamListCard" name="StreamListCard"
                      style="flex-grow: 1; flex-shrink: 0; justify-content: flex-start; align-items: auto;"/>
     </ui:VisualElement>
