@@ -9,6 +9,9 @@ namespace Speckle.ConnectorUnity
 		{
 			var items = new List<CommitWrapper>();
 
+			if (commits == null || !commits.items.Valid())
+				return items;
+
 			foreach (var commit in commits.items)
 				items.Add(new CommitWrapper(commit));
 

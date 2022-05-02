@@ -9,10 +9,11 @@ namespace Speckle.ConnectorUnity
 	{
 
 		public readonly List<CommitWrapper> commits;
-		public readonly string description;
 
+		public readonly string description;
 		public readonly string id;
 		public readonly string name;
+
 		public BranchWrapper(Branch branch)
 		{
 			id = branch.id;

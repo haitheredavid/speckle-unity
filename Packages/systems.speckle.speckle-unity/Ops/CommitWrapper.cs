@@ -1,13 +1,16 @@
-﻿using Speckle.Core.Api;
+﻿using System;
+using Speckle.Core.Api;
 
 namespace Speckle.ConnectorUnity
 {
+	[Serializable]
 	public class CommitWrapper
 	{
 		public readonly string branch;
 
 		public readonly string id;
 		public readonly string message;
+
 		public CommitWrapper(Commit commit)
 		{
 			id = commit.id;
