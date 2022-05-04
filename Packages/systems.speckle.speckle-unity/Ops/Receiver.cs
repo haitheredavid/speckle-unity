@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Sentry;
@@ -55,6 +56,9 @@ namespace Speckle.ConnectorUnity
 			get => showPreview;
 			set => showPreview = value;
 		}
+
+		private void Update()
+		{ }
 
 		private void OnDestroy()
 		{
@@ -188,7 +192,15 @@ namespace Speckle.ConnectorUnity
 
 				try
 				{
+					// TODO: separate and call hierarchy setup so it doesn't block data writing 
+					// TODO: move data building to awaitable
+					// TODO: bind object with data to format. 
+					// TODO: move awaitable function 
+
+					// NOTE: can the call to format data be done from the speckle properties obj? so each object would take care of its data processing?
 					await UniTask.Create(async () => { root = ConvertRecursively(@base); });
+
+					// await UniTask.SwitchToMainThread();
 				}
 				catch (Exception e)
 				{
@@ -207,6 +219,16 @@ namespace Speckle.ConnectorUnity
 			{
 				isWorking = false;
 			}
+		}
+
+		private async UniTask<ReadOnlyCollection<DisplayMesh>> BufferDisplayMesh(Base @base)
+		{
+			var buffer = new List<DisplayMesh>();
+
+			// TODO: get display mesh data
+			// TODO: read through any properties for
+
+			return new ReadOnlyCollection<DisplayMesh>(buffer);
 		}
 
 		private GameObject ConvertRecursively(object value)
@@ -322,6 +344,19 @@ namespace Speckle.ConnectorUnity
 		public void RenderPreview()
 		{
 			Debug.Log($"Render preview? {renderPreview}");
+		}
+
+		public readonly struct DisplayMesh
+		{
+			public readonly Vector3[] verts;
+			public readonly int[] tris;
+
+			public DisplayMesh(Vector3[] verts, int[] tris)
+			{
+				this.verts = verts;
+				this.tris = tris;
+			}
+
 		}
 
 		#region Subscriptions
