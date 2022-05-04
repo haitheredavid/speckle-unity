@@ -8,6 +8,7 @@ using Speckle.Core.Kits;
 using Speckle.Core.Logging;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Application = UnityEngine.Device.Application;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -58,8 +59,8 @@ namespace Speckle.ConnectorUnity
 			senders ??= new List<Sender>();
 			receivers ??= new List<Receiver>();
 
-			if (isInit)
-				return;
+			// if (isInit)
+			// 	return;
 
 			Refresh().Forget();
 		}
@@ -148,7 +149,13 @@ namespace Speckle.ConnectorUnity
 
 		public void OpenStreamInBrowser(EventBase obj)
 		{
-			Debug.Log(obj);
+			UniTask.Create(async () =>
+			{
+				// copied from desktop ui
+				await UniTask.Delay(100);
+
+				Application.OpenURL(activeStream.GetUrl(false));
+			});
 		}
 
 		public void CreateSender(EventBase obj)
