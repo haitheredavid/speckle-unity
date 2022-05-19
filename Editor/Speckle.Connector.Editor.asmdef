@@ -1,0 +1,20 @@
+{
+  "name": "Speckle.Connector.Editor",
+  "rootNamespace": "",
+  "references": [
+    "GUID:eed1b8b83e2c0074d9e5de2348e3ff72",
+    "GUID:4129704b5a1a13841ba16f230bf24a57",
+    "GUID:f51ebe6a0ceec4240a699833d6309b23"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
