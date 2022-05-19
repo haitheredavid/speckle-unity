@@ -18,7 +18,7 @@ jobs:
         extra_plugins: |
           @semantic-release/changelog
           @semantic-release/git
-        branch: main
+        branch: dm/stage
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Create OpenUPM Pacakge
