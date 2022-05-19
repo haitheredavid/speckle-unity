@@ -3,7 +3,7 @@
   "version": "2.4.0",
   "displayName": "Speckle Unity Connector",
   "description": "AEC Interoperability for Unity through Speckle",
-  "unity": "2020.3",
+  "unity": "2018.4",
   "documentationUrl": "https://speckle.guide/user/unity.html",
   "changelogUrl": "https://speckle.notion.site/Public-Changelog-45cb90c7514642ffab2e72d0288e4071",
   "license": "Apache-2.0",
