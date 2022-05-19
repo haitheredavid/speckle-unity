@@ -5,8 +5,7 @@ namespace Speckle.ConnectorUnity
 {
   public static class ConnectorConsole
   {
-
-    public const string title = "speckle-unity:";
+    public const string title = "speckle-connector:";
 
     public static void Log(string msg)
     {
