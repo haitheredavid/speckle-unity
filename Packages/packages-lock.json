@@ -7,6 +7,14 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
+    "com.speckle.connector": {
+      "version": "file:com.speckle.connector",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.cysharp.unitask": "2.3.1"
+      }
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
@@ -103,12 +111,6 @@
         "com.unity.modules.ui": "1.0.0",
         "com.unity.modules.imgui": "1.0.0"
       }
-    },
-    "systems.speckle.speckle-unity": {
-      "version": "file:systems.speckle.speckle-unity",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",
