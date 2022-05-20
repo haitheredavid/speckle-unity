@@ -22,7 +22,7 @@ namespace Speckle.ConnectorUnity
 
 		private int commitIndex => FindInt("commitIndex");
 
-		protected override string treePath => "Packages/systems.speckle.speckle-unity/GUI/Receiver.uxml";
+		protected override string treePath => GUIHelper.Dir + "Receiver.uxml";
 
 		protected override void OnEnable()
 		{
