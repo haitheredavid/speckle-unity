@@ -1,6 +1,6 @@
 {
   "name": "com.speckle.connector",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "displayName": "Speckle Unity Connector",
   "description": "AEC Interoperability for Unity through Speckle",
   "unity": "2021.3",
