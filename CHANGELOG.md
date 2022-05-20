@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/haitheredavid/speckle-unity/compare/v1.0.0...v1.1.0) (2022-05-20)
+
+
+### Features
+
+* project setup for upm ([22ee65c](https://github.com/haitheredavid/speckle-unity/commit/22ee65cfdc404ce5d7c123521e2c2309ea05fe22))
+
 # 1.0.0 (2022-05-20)
 
 
