@@ -54,6 +54,8 @@ namespace Speckle.ConnectorUnity
 			get => streams.Valid(streamIndex) ? streams[streamIndex] : null;
 		}
 
+		public static string PackagePath => "Packages/com.speckle.connector/";
+
 		private void OnEnable()
 		{
 			senders ??= new List<Sender>();

@@ -30,8 +30,8 @@ namespace Speckle.ConnectorUnity
 			obj = (SpeckleConnector)target;
 			obj.onRepaint += RefreshAll;
 
-			tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/SpeckleConnectorEditor.uxml");
-			streamCard = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/systems.speckle.speckle-unity/GUI/Elements/StreamCard/StreamCard.uxml");
+			tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(GUIHelper.Dir + "SpeckleConnectorEditor.uxml");
+			streamCard = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(GUIHelper.Dir + "Elements/StreamCard/StreamCard.uxml");
 		}
 
 		private void OnDisable()
@@ -147,13 +147,14 @@ namespace Speckle.ConnectorUnity
 
 		private void RefreshAll()
 		{
+			Debug.Log("Refresh called on Connector");
 			Refresh(accounts, obj.Accounts.Format(), "accountIndex");
 			SetAndRefreshList();
 		}
 
 		private void Refresh(DropdownField dropdown, IEnumerable<string> items, string prop)
 		{
-			dropdown.choices = items.ToList();
+			dropdown.choices = items?.ToList();
 			dropdown.index = FindInt(prop);
 		}
 	}
