@@ -2,9 +2,14 @@
   "name": "Speckle.Connector",
   "rootNamespace": "",
   "references": [
-    "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    "UniTask"
   ],
-  "includePlatforms": [],
+  "includePlatforms": [
+    "Editor",
+    "macOSStandalone",
+    "WindowsStandalone32",
+    "WindowsStandalone64"
+  ],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,
