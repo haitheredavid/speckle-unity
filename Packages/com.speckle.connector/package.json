@@ -21,5 +21,10 @@
     "email": "hello@speckle.systems",
     "url": "https://speckle.systems"
   },
-  "dependencies": {}
+  "dependencies": {
+    "com.cysharp.unitask": "2.3.1"
+  },
+  "publishConfig": {
+    "registry": "https://package.openupm.com"
+  }
 }
