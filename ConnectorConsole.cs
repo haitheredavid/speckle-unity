@@ -4,6 +4,7 @@ using UnityEngine;
 namespace Speckle.ConnectorUnity
 {
   public static class ConnectorConsole
+  
   {
     public const string title = "speckle-connector:";
 
