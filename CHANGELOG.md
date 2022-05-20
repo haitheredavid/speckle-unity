@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/haitheredavid/speckle-unity/compare/v1.1.0...v1.1.1) (2022-05-20)
+
+
+### Bug Fixes
+
+* Set correct Unity version ([73ed21e](https://github.com/haitheredavid/speckle-unity/commit/73ed21ea8dfb4a7148bcb891df97de1badc91b45))
+
 # [1.1.0](https://github.com/haitheredavid/speckle-unity/compare/v1.0.0...v1.1.0) (2022-05-20)
 
 
