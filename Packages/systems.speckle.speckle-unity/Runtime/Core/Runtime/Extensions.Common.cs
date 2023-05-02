@@ -11,7 +11,7 @@ using UnityEngine;
 namespace Speckle.ConnectorUnity
 {
 
-  public static partial class Utils
+  public static partial class Extensions
   {
     public static int Check(this IList list, int index) => list.Valid(index) ? index : 0;
     public static bool Valid(this IList list) => list.Valid(0);
