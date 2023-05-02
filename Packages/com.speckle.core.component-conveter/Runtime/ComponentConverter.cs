@@ -3,6 +3,8 @@ using Speckle.Core.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -109,7 +111,7 @@ namespace Speckle.ConnectorUnity.Converter
     /// </summary>
     /// <param name="base">Speckle Object to convert</param>
     /// <param name="obj">Referenced scene object with component to send data to</param>
-    public abstract UniTask ToNativeConversionAsync(Base @base, Component obj);
+    public abstract Task ToNativeConversionAsync(Base @base, Component obj);
 
     /// <summary>
     /// Conversion logic to parse the unity components into a Speckle Object
@@ -124,7 +126,7 @@ namespace Speckle.ConnectorUnity.Converter
     /// Follow up method for handling all conversion data
     /// Will process speckle data at specific rate set in <see cref="ConverterSettings.queueSpeed"/>
     /// </summary>
-    public async UniTask PostWorkAsync()
+    public async Task PostWorkAsync()
     {
       SpeckleUnity.Console.Log($"{nameof(PostWorkAsync)} for {name} with {queue.Count}");
 
@@ -139,14 +141,16 @@ namespace Speckle.ConnectorUnity.Converter
 
             if(queue.Count <= 0 || chunk.Count >= Settings.queueSpeed)
             {
-              await UniTask.WhenAll(chunk.Select(x => ToNativeConversionAsync(x.speckleObj, x.unityObj)));
+                
+              await Task.WhenAll(chunk.Select(x => ToNativeConversionAsync(x.speckleObj, x.unityObj)));
 
               chunk = new List<ConvertableObjectData>();
 
               OnQueueSizeChanged?.Invoke(queue.Count);
 
+              //TODO: break into chunks for unity things
               // call for making sure the ui thread doesnt get blocked
-              await UniTask.Yield();
+              // await UniTask.Yield();
             }
           }
         }
@@ -235,13 +239,13 @@ namespace Speckle.ConnectorUnity.Converter
 
     // TODO: Not sure if a async method is really needed here
     /// <inheritdoc />
-    public override async UniTask ToNativeConversionAsync(Base @base, Component component) =>
-      await UniTask.Create(() =>
-        {
-          ToNative(@base, ref component);
-          return UniTask.CompletedTask;
-        }
-      );
+    public override async Task ToNativeConversionAsync(Base @base, Component component) => await Task.CompletedTask;
+      // await UniTask.Create(() =>
+      //   {
+      //     ToNative(@base, ref component);
+      //     return UniTask.CompletedTask;
+      //   }
+      // );
 
     /// <inheritdoc />
     protected override Component CreateComponentInstance(string n = null) =>
