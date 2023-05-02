@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using System;
@@ -10,7 +9,7 @@ using UnityEngine.Events;
 namespace Speckle.ConnectorUnity.Converter
 {
 
-  public abstract class ComponentConverter : ScriptableObject, IComponentConverter, IComponentConverterProcess
+    public abstract class ComponentConverter : ScriptableObject, IComponentConverter, IComponentConverterProcess
   {
     /// <summary>
     /// Simple data container of what the component supports
