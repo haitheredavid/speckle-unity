@@ -1,0 +1,20 @@
+{
+  "name": "com.speckle.core.scriptable-converter",
+  "version": "1.0.0",
+  "displayName": "Speckle Unity Scriptable Converter",
+  "description": "Speckle Converters modularized for Scriptable Objects",
+  "unity": "2021.3",
+  "license": "Apache-2.0",
+  "keywords": [
+    "speckle",
+    "aec",
+    "speckle-unity",
+    "version-control",
+    "interoperability",
+    "speckle systems"
+  ],
+  "author": {
+    "name": "David Morgan",
+    "email": "haitheredavid@gmail.com"
+  }
+}
