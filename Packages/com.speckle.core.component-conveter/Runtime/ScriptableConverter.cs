@@ -10,14 +10,18 @@ using UnityEngine;
 namespace Speckle.ConnectorUnity.Converter
 {
 
+    /// <summary>
+    /// A unity friendly version of <see cref="ISpeckleConverter"/> that utilizes <see cref="ScriptableObject"/> for modular converters
+    /// </summary>
     public abstract class ScriptableConverter : ScriptableObject, ISpeckleConverter
     {
+
         [SerializeField] List<ComponentConverter> converters;
 
         [SerializeField] ConverterSettings settings;
 
         /// <summary>
-        /// Returns the name of the assigned to the <see cref="ScriptableConverter"/> object in the editor 
+        /// Returns the name of the assigned to the <see cref="ScriptableObject.name"/> object in the editor 
         /// </summary>
         public string Name => name;
 
@@ -69,7 +73,10 @@ namespace Speckle.ConnectorUnity.Converter
         /// 
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<string> GetServicedApplications() => new[] {HostApplications.Unity.Name};
+        public IEnumerable<string> GetServicedApplications()
+        {
+            return new[] {HostApplications.Unity.Name};
+        }
 
         /// <summary>
         /// A backup method for assigning <see cref="Converters"/> if none were set in the editor 
@@ -81,13 +88,19 @@ namespace Speckle.ConnectorUnity.Converter
         /// 
         /// </summary>
         /// <param name="objects"></param>
-        public virtual void SetContextObjects(List<ApplicationObject> objects) => ContextObjects = objects;
+        public virtual void SetContextObjects(List<ApplicationObject> objects)
+        {
+            ContextObjects = objects;
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="objects"></param>
-        public virtual void SetPreviousContextObjects(List<ApplicationObject> objects) => ContextObjects = objects;
+        public virtual void SetPreviousContextObjects(List<ApplicationObject> objects)
+        {
+            ContextObjects = objects;
+        }
 
         /// <summary>
         /// 
@@ -116,48 +129,61 @@ namespace Speckle.ConnectorUnity.Converter
         /// </summary>
         /// <param name="object"></param>
         /// <returns></returns>
-        public virtual Base ConvertToSpeckle(object @object) =>
-            TryGetConverter(@object, true, out var comp, out var converter) ? converter.ToSpeckle(comp) : null;
+        public virtual Base ConvertToSpeckle(object @object)
+        {
+            return TryGetConverter(@object, true, out var comp, out var converter) ? converter.ToSpeckle(comp) : null;
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="objects"></param>
         /// <returns></returns>
-        public virtual List<Base> ConvertToSpeckle(List<object> objects) =>
-            objects.Valid() ? objects.Select(ConvertToSpeckle).ToList() : new List<Base>();
+        public virtual List<Base> ConvertToSpeckle(List<object> objects)
+        {
+            return objects.Valid() ? objects.Select(ConvertToSpeckle).ToList() : new List<Base>();
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="base"></param>
         /// <returns></returns>
-        public virtual object ConvertToNative(Base @base) =>
-            TryGetConverter(@base, true, out var converter) ? converter.ToNative(@base) : null;
+        public virtual object ConvertToNative(Base @base)
+        {
+            return TryGetConverter(@base, true, out var converter) ? converter.ToNative(@base) : null;
+        }
+        
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="objects"></param>
         /// <returns></returns>
-        public virtual List<object> ConvertToNative(List<Base> objects) =>
-            objects.Valid() ? objects.Select(ConvertToNative).ToList() : new List<object>();
+        public virtual List<object> ConvertToNative(List<Base> objects)
+        {
+            return objects.Valid() ? objects.Select(ConvertToNative).ToList() : new List<object>();
+        }
 
         /// <summary>
         /// Checks if any of the <see cref="Converters"/> support the <paramref name="object"/> passed in 
         /// </summary>
         /// <param name="object"></param>
         /// <returns>Returns true if a converter is found for the type</returns>
-        public virtual bool CanConvertToSpeckle(object @object) =>
-            TryGetConverter(@object, false, out _, out _);
+        public virtual bool CanConvertToSpeckle(object @object)
+        {
+            return TryGetConverter(@object, false, out _, out _);
+        }
 
         /// <summary>
         /// Checks if any of the <see cref="Converters"/> support the <paramref name="base"/> passed in 
         /// </summary>
         /// <param name="base"></param>
         /// <returns>Returns true if a converter is found for the type</returns>
-        public virtual bool CanConvertToNative(Base @base) =>
-            TryGetConverter(@base, false, out _);
+        public virtual bool CanConvertToNative(Base @base)
+        {
+            return TryGetConverter(@base, false, out _);
+        }
 
         protected virtual void OnEnable()
         {
@@ -165,14 +191,10 @@ namespace Speckle.ConnectorUnity.Converter
             ConversionErrors = new();
             Converters = converters.Valid() ? converters : GetDefaultConverters();
 
-            foreach (var cc in Converters)
-            {
-                cc.parent = this;
-            }
+            Converters.ForEach(x => x.parent = this);
 
             if (settings == null)
             {
-
                 SetConverterSettings(new ConverterSettings() {style = ConverterSettings.ConversionStyle.Queue});
             }
         }
@@ -200,6 +222,7 @@ namespace Speckle.ConnectorUnity.Converter
             }
         }
 
+        //TODO: maybe store these in a better way? 
         bool TryGetConverter(Base obj, bool init, out ComponentConverter converter)
         {
             converter = null;
@@ -290,7 +313,7 @@ namespace Speckle.ConnectorUnity.Converter
             return converter != default(object) && comp != null;
         }
 
-
+        
     }
 
 }

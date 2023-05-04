@@ -3,7 +3,7 @@
 namespace Speckle.ConnectorUnity.Converter
 {
 
-  public interface IComponentConverterProcess
+  public interface IComponentConverterEvents
   {
     public event UnityAction<int> OnQueueSizeChanged;
 
