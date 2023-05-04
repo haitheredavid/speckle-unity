@@ -1,5 +1,5 @@
 {
-    "name": "Speckle.Unity.Core.Converter.Scriptable",
+    "name": "Speckle.Core.ScriptableConverter",
     "rootNamespace": "",
     "references": [
         "GUID:eed1b8b83e2c0074d9e5de2348e3ff72"
