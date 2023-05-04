@@ -177,6 +177,17 @@ namespace Speckle.ConnectorUnity.Converter
             }
         }
 
+        public GameObject CreateInstance(Base @base, Transform parent)
+        {
+            if (TryGetConverter(@base, true, out var converter))
+            {
+                return converter.CreateComponentInstance(parent).gameObject;
+            }
+            //TODO: a bit messy to pass back data like this 
+            return null;
+        }
+
+        //TODO: Figure out where this needs to live
         public async Task PostWork()
         {
             if (!converters.Valid())

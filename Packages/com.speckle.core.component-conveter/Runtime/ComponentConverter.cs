@@ -85,12 +85,16 @@ namespace Speckle.ConnectorUnity.Converter
     /// <param name="obj">Referenced scene object with component to send data to</param>
     public abstract void ToNative(Base @base, ref Component obj);
 
-    /// <summary>
-    /// Creates a <see cref="GameObject"/> with the type component attached to it
-    /// </summary>
-    /// <param name="n"></param>
-    /// <returns></returns>
-    protected abstract Component CreateComponentInstance(string n = null);
+        /// <summary>
+        /// Creates a <see cref="GameObject"/> with the type component attached to it
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public abstract Component CreateComponentInstance(string n = null);
+
+        public abstract Component CreateComponentInstance(GameObject obj);
+
+        public abstract Component CreateComponentInstance(Transform parent);
 
     /// <summary>
     /// Simple check to see if <see cref="Base"/> is supported by the converter
@@ -205,10 +209,12 @@ namespace Speckle.ConnectorUnity.Converter
     where TBase : Base
   {
 
-    protected bool ValidObjects(Base @base, Component component, out TBase tBase, out TComponent tComp)
-    {
-      tBase = null;
-      tComp = null;
+        [SerializeField] protected TComponent prefab;
+
+        protected bool ValidObjects(Base @base, Component component, out TBase tBase, out TComponent tComp)
+        {
+            tBase = null;
+            tComp = null;
 
       if(@base is TBase b && component is TComponent c)
       {
@@ -247,9 +253,22 @@ namespace Speckle.ConnectorUnity.Converter
       //   }
       // );
 
-    /// <inheritdoc />
-    protected override Component CreateComponentInstance(string n = null) =>
-      new GameObject(n.Valid() ? n : SpeckleType).AddComponent<TComponent>();
+        /// <inheritdoc />
+        public override Component CreateComponentInstance(string n = null)
+        {
+            return new GameObject(n.Valid() ? n : SpeckleType).AddComponent<TComponent>();
+        }
+
+        public override Component CreateComponentInstance(Transform parent)
+        {
+            return UnityEngine.Object.Instantiate(prefab, parent);
+        }
+
+        public override Component CreateComponentInstance(GameObject obj)
+        {
+            return obj == null ? CreateComponentInstance() : obj.AddComponent<TComponent>();
+        }
+
 
     /// <summary>
     /// Nested method from <see cref="ToNative"/> that sets the types for conversion 
