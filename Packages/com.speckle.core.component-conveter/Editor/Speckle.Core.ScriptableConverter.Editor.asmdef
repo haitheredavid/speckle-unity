@@ -1,0 +1,18 @@
+{
+    "name": "Speckle.Core.ScriptableConverter.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:aed738e295f605e429a0a9ae363a9764"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
