@@ -1,32 +1,45 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using AD= UnityEditor.AssetDatabase;
 
 namespace Speckle.ConnectorUnity.Converter.Editor
 {
 
-    public class MenuControls
+    public static class MenuControls
     {
+        internal class Dirs
+        {
+
+            internal static string Folder => "Speckle";
+            internal static string Main => "Assets";
+            internal static string Converter => "Converter";
+            internal static string Component => "Component";
+
+            internal static string MainPath => $"{Main}/";
+            internal static string FolderPath => $"{MainPath}{Folder}/";
+            internal static string ConverterPath => $"{FolderPath}{Converter}/";
+            internal static string ComponentPath => $"{FolderPath}{Component}/";
+        }
 
         [MenuItem("Speckle/Create Default Converters")]
         public static void CreateDefaultConverters()
         {
-            if (!AssetDatabase.IsValidFolder("Assets/Speckle"))
-            {
-                AssetDatabase.CreateFolder("Assets", "Speckle");
-            }
-
-            if (!AssetDatabase.IsValidFolder("Assets/Speckle/Converter"))
-            {
-                AssetDatabase.CreateFolder("Assets/Speckle", "Converter");
-            }
+            if (!AD.IsValidFolder(Dirs.FolderPath)) AD.CreateFolder(Dirs.Main, Dirs.Folder);
+            if (!AD.IsValidFolder(Dirs.ComponentPath)) AD.CreateFolder(Dirs.FolderPath, Dirs.Component);
+            if (!AD.IsValidFolder(Dirs.ConverterPath)) AD.CreateFolder(Dirs.FolderPath, Dirs.Converter);
 
             var converter = ScriptableObject.CreateInstance<ConverterUnity>();
-            AssetDatabase.CreateAsset(converter, "Assets/Speckle/Converter/Converter-Unity.asset");
+            AD.CreateAsset(converter, $"{Dirs.ConverterPath}{converter.GetLastName()}.asset");
+            
+            converter.Converters.ForEach(x => AD.CreateAsset(x, $"{Dirs.ComponentPath}{x.GetLastName()}.asset"));
+        }
 
-            AssetDatabase.CreateFolder("Assets/Speckle", "Component");
-            converter.Converters.ForEach(x => AssetDatabase.CreateAsset(x,$"Assets/Speckle/Component/{x.GetType().ToString().Split('.').Last()}.asset") );
+        internal static string GetLastName(this object t)
+        {
+            return t.GetType().ToString().Split('.').Last();
         }
 
 
