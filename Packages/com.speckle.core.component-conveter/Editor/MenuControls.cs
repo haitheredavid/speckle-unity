@@ -20,10 +20,10 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Editor
             internal static string Converter => "Converter";
             internal static string Component => "Component";
 
-            internal static string MainPath => $"{Main}/";
-            internal static string FolderPath => $"{MainPath}{Folder}/";
-            internal static string ConverterPath => $"{FolderPath}{Converter}/";
-            internal static string ComponentPath => $"{FolderPath}{Component}/";
+            internal static string MainPath => $"{Main}";
+            internal static string FolderPath => $"{MainPath}/{Folder}";
+            internal static string ConverterPath => $"{FolderPath}/{Converter}";
+            internal static string ComponentPath => $"{FolderPath}/{Component}";
         }
 
         [MenuItem("Speckle/Create Default Converters")]
@@ -34,9 +34,20 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Editor
             if (!AD.IsValidFolder(Dirs.ConverterPath)) AD.CreateFolder(Dirs.FolderPath, Dirs.Converter);
 
             var converter = ScriptableObject.CreateInstance<ConverterUnity>();
-            AD.CreateAsset(converter, $"{Dirs.ConverterPath}{converter.GetLastName()}.asset");
             
-            converter.Converters.ForEach(x => AD.CreateAsset(x, $"{Dirs.ComponentPath}{x.GetLastName()}.asset"));
+            AD.CreateAsset(converter, $"{Dirs.ConverterPath}/{converter.GetLastName()}.asset");
+            List<ComponentConverter> instances = new();
+            
+            foreach (var sc in converter.Converters)
+            {
+                var path = $"{Dirs.ComponentPath}/{sc.GetLastName()}.asset";
+                AD.CreateAsset(sc, path);
+                var i = AD.LoadAssetAtPath<ComponentConverter>(path);
+                instances.Add(i);
+            }
+            converter.Converters = instances;
+            EditorUtility.SetDirty(converter);
+            AD.SaveAssetIfDirty(converter);
         }
 
 
