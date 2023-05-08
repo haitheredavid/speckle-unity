@@ -5,7 +5,7 @@ using System.Reflection;
 using Speckle.ConnectorUnity.Core.ScriptableConverter.Examples;
 using UnityEditor;
 using UnityEngine;
-using AD= UnityEditor.AssetDatabase;
+using AD = UnityEditor.AssetDatabase;
 
 namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Editor
 {
@@ -33,21 +33,35 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Editor
             if (!AD.IsValidFolder(Dirs.ComponentPath)) AD.CreateFolder(Dirs.FolderPath, Dirs.Component);
             if (!AD.IsValidFolder(Dirs.ConverterPath)) AD.CreateFolder(Dirs.FolderPath, Dirs.Converter);
 
-            var converter = ScriptableObject.CreateInstance<ConverterUnity>();
+            BuildConverter<ConverterUnity>(Dirs.ConverterPath, Dirs.ComponentPath, true);
             
-            AD.CreateAsset(converter, $"{Dirs.ConverterPath}/{converter.GetLastName()}.asset");
+        }
+
+
+        internal static ScriptableConverter BuildConverter<TConverter>(string converterPath, string componentPath, bool save = false) where TConverter : ScriptableConverter
+        {
+            var converter = ScriptableObject.CreateInstance<TConverter>();
+
+            AD.CreateAsset(converter, $"{converterPath}/{typeof(TConverter).GetLastName()}.asset");
             List<ComponentConverter> instances = new();
-            
+
             foreach (var sc in converter.Converters)
             {
-                var path = $"{Dirs.ComponentPath}/{sc.GetLastName()}.asset";
+                var path = $"{componentPath}/{sc.GetLastName()}.asset";
                 AD.CreateAsset(sc, path);
                 var i = AD.LoadAssetAtPath<ComponentConverter>(path);
                 instances.Add(i);
             }
+
             converter.Converters = instances;
-            EditorUtility.SetDirty(converter);
-            AD.SaveAssetIfDirty(converter);
+            if (save)
+            {
+                EditorUtility.SetDirty(converter);
+                AD.SaveAssetIfDirty(converter);
+            }
+
+            return converter;
+
         }
 
 
