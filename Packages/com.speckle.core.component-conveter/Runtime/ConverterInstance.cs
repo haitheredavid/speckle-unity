@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Speckle.ConnectorUnity.Models;
 using Speckle.Core.Models;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity.Converter
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
     public sealed class ConverterInstance
     {

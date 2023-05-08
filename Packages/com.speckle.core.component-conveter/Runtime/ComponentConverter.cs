@@ -1,14 +1,15 @@
-using Speckle.Core.Kits;
-using Speckle.Core.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Speckle.Core.Kits;
+using Speckle.Core.Models;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Speckle.ConnectorUnity.Converter
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
 
     public abstract class ComponentConverter : ScriptableObject, IComponentConverter, IComponentConverterEvents
@@ -18,6 +19,7 @@ namespace Speckle.ConnectorUnity.Converter
         /// </summary>
         [SerializeField] protected ComponentInfo info;
 
+  
 
         public ScriptableConverter parent { get; set; }
 

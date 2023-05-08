@@ -1,7 +1,7 @@
 ﻿using Speckle.Core.Models;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity.Converter
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
 
   /// <summary>

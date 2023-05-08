@@ -1,7 +1,6 @@
-﻿using Speckle.ConnectorUnity.Models;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Speckle.ConnectorUnity
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Components
 {
 	public class SpeckleBrep : BaseBehaviour
 	{

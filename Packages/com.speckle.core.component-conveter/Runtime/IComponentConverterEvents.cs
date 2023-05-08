@@ -1,6 +1,6 @@
 ﻿using UnityEngine.Events;
 
-namespace Speckle.ConnectorUnity.Converter
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
 
   public interface IComponentConverterEvents

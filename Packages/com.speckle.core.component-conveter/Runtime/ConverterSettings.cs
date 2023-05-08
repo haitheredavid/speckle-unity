@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Speckle.ConnectorUnity.Converter
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
 	/// <summary>
 	/// A data object for the <see cref="ScriptableConverter"/>

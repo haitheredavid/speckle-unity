@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity.Models
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
 
     public class SpeckleLayer : MonoBehaviour

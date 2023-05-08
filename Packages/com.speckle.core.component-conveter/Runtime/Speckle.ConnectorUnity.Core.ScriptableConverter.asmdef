@@ -1,12 +1,10 @@
 {
-    "name": "Speckle.Core.ScriptableConverter.Editor",
-    "rootNamespace": "",
+    "name": "Speckle.ConnectorUnity.Core.ScriptableConverter",
+    "rootNamespace": "Speckle.ConnectorUnity.Core.ScriptableConverter",
     "references": [
-        "GUID:aed738e295f605e429a0a9ae363a9764"
+        "GUID:eed1b8b83e2c0074d9e5de2348e3ff72"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

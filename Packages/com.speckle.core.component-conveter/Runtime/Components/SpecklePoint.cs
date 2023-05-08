@@ -1,7 +1,6 @@
-﻿using Speckle.ConnectorUnity.Models;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Speckle.ConnectorUnity
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Components
 {
 	// TODO: add in rendering support for speckle point
 	public class SpecklePoint : BaseBehaviour

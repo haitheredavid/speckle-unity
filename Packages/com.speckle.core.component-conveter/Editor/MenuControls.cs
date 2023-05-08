@@ -1,11 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Speckle.ConnectorUnity.Core.ScriptableConverter.Examples;
 using UnityEditor;
 using UnityEngine;
 using AD= UnityEditor.AssetDatabase;
 
-namespace Speckle.ConnectorUnity.Converter.Editor
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Editor
 {
 
     public static class MenuControls
@@ -36,6 +38,7 @@ namespace Speckle.ConnectorUnity.Converter.Editor
             
             converter.Converters.ForEach(x => AD.CreateAsset(x, $"{Dirs.ComponentPath}{x.GetLastName()}.asset"));
         }
+
 
         internal static string GetLastName(this object t)
         {

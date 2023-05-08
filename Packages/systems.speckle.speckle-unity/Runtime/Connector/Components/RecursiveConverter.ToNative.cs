@@ -51,10 +51,6 @@ namespace Speckle.ConnectorUnity.Components
         }
         
         
-        
-        
-        
-        
         public IEnumerator ConvertCoroutine(Base rootObject, Transform? parent, List<GameObject> outCreatedObjects)
             => ConvertCoroutine(rootObject, parent, outCreatedObjects,b => ConverterInstance.CanConvertToNative(b));
         

@@ -1,9 +1,7 @@
-﻿using Speckle.ConnectorUnity.Converter;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-
-namespace Speckle.ConnectorUnity
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
 
   public class ConverterManager : ScriptableObject

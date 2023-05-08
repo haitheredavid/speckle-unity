@@ -1,12 +1,6 @@
-﻿using Speckle.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
 
-namespace Speckle.ConnectorUnity.Models
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Components
 {
 
   [AddComponentMenu(SpeckleUnity.NAMESPACE + "/Base")]

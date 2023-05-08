@@ -15,4 +15,5 @@ MonoBehaviour:
   info:
     speckleTypeName: Objects.Geometry.Polyline
     unityTypeName: UnityEngine.LineRenderer
+  prefab: {fileID: 0}
   diameter: 0

@@ -1,13 +1,15 @@
-﻿using Speckle.Core.Kits;
-using Speckle.Core.Logging;
-using Speckle.Core.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Speckle.Core.Kits;
+using Speckle.Core.Logging;
+using Speckle.Core.Models;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity.Converter
+[assembly: InternalsVisibleTo(assemblyName: "Speckle.ConnectorUnity.Core.ScriptableConverter.Editor")]
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
 
     /// <summary>
@@ -15,8 +17,6 @@ namespace Speckle.ConnectorUnity.Converter
     /// </summary>
     public abstract class ScriptableConverter : ScriptableObject, ISpeckleConverter
     {
-
-        [SerializeField] List<ComponentConverter> converters;
 
         [SerializeField] ConverterSettings settings;
 
@@ -153,7 +153,7 @@ namespace Speckle.ConnectorUnity.Converter
         {
             return TryGetConverter(@base, true, out var converter) ? converter.ToNative(@base) : null;
         }
-        
+
 
         /// <summary>
         /// 
@@ -313,7 +313,7 @@ namespace Speckle.ConnectorUnity.Converter
             return converter != default(object) && comp != null;
         }
 
-        
+
     }
 
 }

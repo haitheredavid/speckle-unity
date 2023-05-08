@@ -1,7 +1,4 @@
-using Speckle.ConnectorUnity.Models;
-using Mesh = Objects.Geometry.Mesh;
-
-namespace Speckle.ConnectorUnity
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Components
 {
 	public class SpeckleMesh : BaseBehaviour
 	{ }

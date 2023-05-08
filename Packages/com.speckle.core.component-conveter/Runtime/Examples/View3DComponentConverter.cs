@@ -2,7 +2,7 @@
 using Speckle.Core.Models;
 using UnityEngine;
 
-namespace Speckle.ConnectorUnity.Converter
+namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Examples
 {
 	[CreateAssetMenu(fileName = nameof(View3DComponentConverter), menuName = SpeckleUnity.Categories.CONVERTERS + "Create View3d Converter")]
 	public class View3DComponentConverter : ComponentConverter<View3D, Camera>
