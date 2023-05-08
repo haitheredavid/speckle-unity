@@ -1,9 +1,8 @@
 {
-    "name": "Speckle.ConnectorUnity.Core.ScriptableConverter",
-    "rootNamespace": "Speckle.ConnectorUnity.Core.ScriptableConverter",
+    "name": "Speckle.ConnectorUnity.Objects",
+    "rootNamespace": "",
     "references": [
-        "GUID:eed1b8b83e2c0074d9e5de2348e3ff72",
-        "GUID:b334c02a92a37c547ac62c2879d3b958"
+        "GUID:eed1b8b83e2c0074d9e5de2348e3ff72"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
