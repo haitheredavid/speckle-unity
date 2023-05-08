@@ -52,7 +52,8 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         /// <summary>
         /// 
         /// </summary>
-        public List<ComponentConverter> Converters { get; private set; } = new();
+        [field: SerializeField]
+        public List<ComponentConverter> Converters { get; internal set; } = new();
 
         /// <summary>
         /// 
@@ -189,7 +190,11 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         {
             Report = new();
             ConversionErrors = new();
-            Converters = converters.Valid() ? converters : GetDefaultConverters();
+            
+            if (!Converters.Valid())
+            {
+                Converters = GetDefaultConverters();
+            }
 
             Converters.ForEach(x => x.parent = this);
 
@@ -212,14 +217,14 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         //TODO: Figure out where this needs to live
         public async Task PostWork()
         {
-            if (!converters.Valid())
-                return;
-
-            foreach (var c in converters)
-            {
-                if (c != null && c.HasWorkToDo)
-                    await c.PostWorkAsync();
-            }
+            // if (!converters.Valid())
+            //     return;
+            //
+            // foreach (var c in converters)
+            // {
+            //     if (c != null && c.HasWorkToDo)
+            //         await c.PostWorkAsync();
+            // }
         }
 
         //TODO: maybe store these in a better way? 
@@ -227,7 +232,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         {
             converter = null;
 
-            if (!converters.Valid())
+            if (!Converters.Valid())
             {
                 SpeckleUnity.Console.Log($"No valid Converters found in {name}");
                 return false;
@@ -239,7 +244,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
                 return false;
             }
 
-            foreach (var c in converters)
+            foreach (var c in Converters)
             {
                 if (c == null)
                     continue;
@@ -263,7 +268,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
             comp = null;
             converter = default(IComponentConverter);
 
-            if (!converters.Valid())
+            if (!Converters.Valid())
             {
                 SpeckleUnity.Console.Log($"No valid Converters found in {name}");
                 return false;
@@ -278,7 +283,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
             switch (obj)
             {
                 case GameObject o:
-                    foreach (var c in converters)
+                    foreach (var c in Converters)
                     {
                         if (c == null || o.GetComponent(c.UnityType))
                             continue;
@@ -295,7 +300,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 
                 case Component o:
                     comp = o;
-                    foreach (var c in converters)
+                    foreach (var c in Converters)
                     {
                         if (c == null || c.UnityType != comp.GetType().ToString())
                             continue;
