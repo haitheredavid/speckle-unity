@@ -16,9 +16,9 @@ MonoBehaviour:
     style: 1
     queueSpeed: 20
     batchSize: 100
-  <Description>k__BackingField: 
-  <Author>k__BackingField: 
-  <WebsiteOrEmail>k__BackingField: 
+  <Description>k__BackingField: The default unity converter
+  <Author>k__BackingField: Speckle
+  <WebsiteOrEmail>k__BackingField: speckle.system
   <ReceiveMode>k__BackingField: 1
   <Converters>k__BackingField:
   - {fileID: 11400000, guid: 288be20dc5e239a4985bd966d80ec39a, type: 2}

@@ -80,10 +80,6 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
             return comp.gameObject;
         }
 
-
-
-
-
         /// <summary>
         /// Actual conversion logic for processing speckle data into the necessary unity component(s)
         /// </summary>
