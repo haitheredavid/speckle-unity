@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a17ffef28bc471d9eedf5779cbad2eb, type: 3}
+  m_Name: MeshComponentConverter
+  m_EditorClassIdentifier: 
+  info:
+    speckleTypeName: Objects.Geometry.Mesh
+    unityTypeName: UnityEngine.MeshFilter
+  prefab: {fileID: 0}
+  <addMeshCollider>k__BackingField: 0
+  <addMeshRenderer>k__BackingField: 0
+  <recenterTransform>k__BackingField: 0
+  <useRenderMaterial>k__BackingField: 0
+  <combineMeshes>k__BackingField: 0
+  <defaultMaterial>k__BackingField: {fileID: 2100000, guid: 6fe0ba5d1c59c7548be17ef9fb8e2e40, type: 2}
