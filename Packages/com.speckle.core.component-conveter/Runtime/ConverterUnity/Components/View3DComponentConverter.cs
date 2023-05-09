@@ -13,7 +13,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Examples
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <param name="instance"></param>
-		protected override void ConvertBase(View3D obj, ref Camera instance)
+		protected override void ToNative(View3D obj, ref Camera instance)
 		{
 			// instance.transform.position = ConverterUtils.VectorByCoordinates(
 			// 	obj.origin.x, obj.origin.y, obj.origin.z, obj.origin.units);
@@ -25,7 +25,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Examples
 			// 	obj.upDirection.x, obj.upDirection.y, obj.upDirection.z, obj.upDirection.units);
 		}
 
-		public override Base ConvertComponent(Camera component) => new View3D
+		public override Base ToSpeckle(Camera component) => new View3D
 		{
 			// origin = component.transform.position.ToPoint(),
 			// forwardDirection = component.transform.forward.ToSpeckle(),

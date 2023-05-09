@@ -9,12 +9,12 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Examples
 	public class PointComponentConverter : ComponentConverter<Point, SpecklePoint>
 	{
 
-		protected override void ConvertBase(Point obj, ref SpecklePoint instance)
+		protected override void ToNative(Point obj, ref SpecklePoint instance)
     {
         // instance.pos = obj.ToVector3();
     }
 
-    public override Base ConvertComponent(SpecklePoint component)
+    public override Base ToSpeckle(SpecklePoint component)
     {
         // return component.pos.ToSpeckle();
         return null;

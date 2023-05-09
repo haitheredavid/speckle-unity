@@ -16,12 +16,12 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Examples
         /// <param name="obj"></param>
         /// <param name="instance"></param>
         /// <returns></returns>
-        protected override void ConvertBase(Polyline obj, ref LineRenderer instance)
+        protected override void ToNative(Polyline obj, ref LineRenderer instance)
         {
             // instance.SetupLineRenderer(obj.GetPoints().ArrayToVector3(obj.units).ToArray(), diameter);
         }
 
-        public override Base ConvertComponent(LineRenderer component)
+        public override Base ToSpeckle(LineRenderer component)
         {
             // TODO: check if this should use world or local scale
             var points = new Vector3[component.positionCount];
