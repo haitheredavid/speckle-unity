@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using Speckle.ConnectorUnity.Core.ScriptableConverter.Examples;
 using UnityEditor;
 using UnityEngine;
 using AD = UnityEditor.AssetDatabase;
@@ -10,9 +8,9 @@ using AD = UnityEditor.AssetDatabase;
 namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Editor
 {
 
-    public static class MenuControls
+    public static class ConnectorUnity
     {
-        internal class Dirs
+        public static class Dirs
         {
 
             internal static string Folder => "Speckle";
@@ -34,11 +32,10 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Editor
             if (!AD.IsValidFolder(Dirs.ConverterPath)) AD.CreateFolder(Dirs.FolderPath, Dirs.Converter);
 
             BuildConverter<ConverterUnity>(Dirs.ConverterPath, Dirs.ComponentPath, true);
-            
+
         }
 
-
-        internal static ScriptableConverter BuildConverter<TConverter>(string converterPath, string componentPath, bool save = false) where TConverter : ScriptableConverter
+        public static ScriptableConverter BuildConverter<TConverter>(string converterPath, string componentPath, bool save = false) where TConverter : ScriptableConverter
         {
             var converter = ScriptableObject.CreateInstance<TConverter>();
 

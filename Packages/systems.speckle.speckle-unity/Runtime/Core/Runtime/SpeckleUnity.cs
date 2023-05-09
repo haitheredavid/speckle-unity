@@ -8,7 +8,7 @@ using Co = Speckle.ConnectorUnity.SpeckleUnity.Console;
 namespace Speckle.ConnectorUnity
 {
 
-    public static class SpeckleUnity
+    public static partial class SpeckleUnity
     {
 
 

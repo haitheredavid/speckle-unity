@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using Speckle.ConnectorUnity.Core.ScriptableConverter;
+using Speckle.ConnectorUnity.Core.ScriptableConverter.Examples;
 
-namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Examples
+namespace Speckle.ConnectorUnity
 {
 
     public class ConverterUnity : ScriptableConverter
