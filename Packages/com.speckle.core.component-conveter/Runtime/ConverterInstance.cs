@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
+
     public sealed class ConverterInstance
     {
 
@@ -16,10 +17,11 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         private SpeckleLayer _topLayer;
 
 
-        public ConverterInstance(ScriptableConverter converter, Base @base)
+        public ConverterInstance(ScriptableConverter converter, Base @base, CancellationToken token)
         {
             _converter = converter;
             _data = @base;
+            _token = token;
         }
 
         public void Run()
