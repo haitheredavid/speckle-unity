@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
@@ -111,13 +108,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         /// <param name="type"></param>
         /// <returns>Returns true if casted type is supported</returns>
         public abstract bool CanConvertToSpeckle(Component type);
-
-        /// <summary>
-        /// Actual conversion logic for processing speckle data into the necessary unity component(s), but with the spice of async
-        /// </summary>
-        /// <param name="base">Speckle Object to convert</param>
-        /// <param name="obj">Referenced scene object with component to send data to</param>
-        public abstract Task ToNativeConversionAsync(Base @base, Component obj);
+        
 
         /// <summary>
         /// Conversion logic to parse the unity components into a Speckle Object
@@ -125,52 +116,6 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         /// <param name="component">Component to convert</param>
         /// <returns>The <see cref="Base"/> processed</returns>
         public abstract Base ToSpeckle(Component component);
-
-        // TODO: Figure out where this should be handled.
-
-        /// <summary>
-        /// Follow up method for handling all conversion data
-        /// Will process speckle data at specific rate set in <see cref="ConverterSettings.queueSpeed"/>
-        /// </summary>
-        public async Task PostWorkAsync()
-        {
-            SpeckleUnity.Console.Log($"{nameof(PostWorkAsync)} for {name} with {queue.Count}");
-
-            try
-            {
-                if (queue.Valid())
-                {
-                    var chunk = new List<ConvertableObjectData>();
-                    while (queue.TryDequeue(out var args))
-                    {
-                        chunk.Add(args);
-
-                        if (queue.Count <= 0 || chunk.Count >= Settings.queueSpeed)
-                        {
-
-                            await Task.WhenAll(chunk.Select(x => ToNativeConversionAsync(x.speckleObj, x.unityObj)));
-
-                            chunk = new List<ConvertableObjectData>();
-
-                            OnQueueSizeChanged?.Invoke(queue.Count);
-
-                            //TODO: break into chunks for unity things
-                            // call for making sure the ui thread doesnt get blocked
-                            // await UniTask.Yield();
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                SpeckleUnity.Console.Warn(e.Message);
-            }
-            finally
-            {
-                SpeckleUnity.Console.Log("Post Work Completed");
-                OnQueueSizeChanged?.Invoke(0);
-            }
-        }
 
         /// <summary>
         /// Returns true if <see cref="ComponentConverter.UnityType"/> and <see cref="ComponentConverter.SpeckleType"/> are same
@@ -240,27 +185,14 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         /// <inheritdoc />
         public override Base ToSpeckle(Component component)
         {
-            return CanConvertToSpeckle(component) ? ConvertComponent((TComponent)component) : null;
+            return CanConvertToSpeckle(component) ? ToSpeckle((TComponent)component) : null;
         }
 
         /// <inheritdoc />
         public override void ToNative(Base @base, ref Component component)
         {
-            if (ValidObjects(@base, component, out var converterObj, out var converterComp)) ConvertBase(converterObj, ref converterComp);
+            if (ValidObjects(@base, component, out var converterObj, out var converterComp)) ToNative(converterObj, ref converterComp);
         }
-
-        // TODO: Not sure if a async method is really needed here
-        /// <inheritdoc />
-        public override async Task ToNativeConversionAsync(Base @base, Component component)
-        {
-            await Task.CompletedTask;
-        }
-        // await UniTask.Create(() =>
-        //   {
-        //     ToNative(@base, ref component);
-        //     return UniTask.CompletedTask;
-        //   }
-        // );
 
         /// <inheritdoc />
         public override Component CreateComponentInstance(string n = null)
@@ -284,14 +216,14 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         /// </summary>
         /// <param name="component"></param>
         /// <returns></returns>
-        public abstract Base ConvertComponent(TComponent component);
+        public abstract Base ToSpeckle(TComponent component);
 
         /// <summary>
-        /// Nested method from <see cref="ToSpeckle"/> that sets the types for conversion
+        /// Nested method from <see cref="ToSpeckle(UnityEngine.Component)"/> that sets the types for conversion
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="instance"></param>
-        protected abstract void ConvertBase(TBase obj, ref TComponent instance);
+        protected abstract void ToNative(TBase obj, ref TComponent instance);
 
         protected virtual void OnEnable()
         {
