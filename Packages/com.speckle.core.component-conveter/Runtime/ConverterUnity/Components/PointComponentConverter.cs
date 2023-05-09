@@ -2,8 +2,9 @@
 using Speckle.ConnectorUnity.Core.ScriptableConverter.Components;
 using Speckle.Core.Models;
 using UnityEngine;
+using Speckle.ConnectorUnity.Core.ScriptableConverter;
 
-namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Examples
+namespace Speckle.ConnectorUnity
 {
 	[CreateAssetMenu(fileName = nameof(PointComponentConverter), menuName = SpeckleUnity.Categories.CONVERTERS + "Create Point Converter")]
 	public class PointComponentConverter : ComponentConverter<Point, SpecklePoint>

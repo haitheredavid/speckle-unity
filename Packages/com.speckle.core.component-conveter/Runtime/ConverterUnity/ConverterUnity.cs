@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using Speckle.ConnectorUnity.Converter;
 using Speckle.ConnectorUnity.Core.ScriptableConverter;
-using Speckle.ConnectorUnity.Core.ScriptableConverter.Examples;
 
 namespace Speckle.ConnectorUnity
 {
@@ -12,7 +12,7 @@ namespace Speckle.ConnectorUnity
         {
            return new List<ComponentConverter>
             {
-                // CreateInstance<MeshComponentConverter>(),
+                CreateInstance<MeshComponentConverter>(),
                 CreateInstance<PolylineComponentConverter>(),
                 CreateInstance<PointComponentConverter>(),
                 // CreateInstance<PointCloudComponentConverter>(),

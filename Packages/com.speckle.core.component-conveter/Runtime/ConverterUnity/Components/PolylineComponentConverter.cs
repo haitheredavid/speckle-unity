@@ -1,8 +1,9 @@
 ﻿using Objects.Geometry;
 using Speckle.Core.Models;
 using UnityEngine;
+using Speckle.ConnectorUnity.Core.ScriptableConverter;
 
-namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Examples
+namespace Speckle.ConnectorUnity
 {
 
     [CreateAssetMenu(fileName = nameof(PolylineComponentConverter), menuName = SpeckleUnity.Categories.CONVERTERS + "Create Polyline Converter")]
