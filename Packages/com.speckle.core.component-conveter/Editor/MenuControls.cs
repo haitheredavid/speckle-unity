@@ -39,7 +39,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Editor
         {
             var converter = ScriptableObject.CreateInstance<TConverter>();
 
-            AD.CreateAsset(converter, $"{converterPath}/{typeof(TConverter).GetLastName()}.asset");
+            AD.CreateAsset(converter, $"{converterPath}/ConverterUnity.asset");
             List<ComponentConverter> instances = new();
 
             foreach (var sc in converter.Converters)

@@ -1,3 +1,14 @@
-﻿fileFormatVersion: 2
+fileFormatVersion: 2
 guid: 7a17ffef28bc471d9eedf5779cbad2eb
-timeCreated: 1683664580
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - prefab: {fileID: 7429264559678571231, guid: 72e5c90505a0e2b478787dcadd9ca49d, type: 3}
+  - builder: {instanceID: 0}
+  - <defaultMaterial>k__BackingField: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

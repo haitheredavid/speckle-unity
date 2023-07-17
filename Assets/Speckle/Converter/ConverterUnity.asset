@@ -16,11 +16,12 @@ MonoBehaviour:
     style: 1
     queueSpeed: 20
     batchSize: 100
-  <Description>k__BackingField: The default unity converter
-  <Author>k__BackingField: Speckle
-  <WebsiteOrEmail>k__BackingField: speckle.system
+  <Description>k__BackingField: 
+  <Author>k__BackingField: 
+  <WebsiteOrEmail>k__BackingField: 
   <ReceiveMode>k__BackingField: 1
   <Converters>k__BackingField:
+  - {fileID: 11400000, guid: 242b979cf0139ed42a71bb1ff651e83f, type: 2}
   - {fileID: 11400000, guid: 288be20dc5e239a4985bd966d80ec39a, type: 2}
   - {fileID: 11400000, guid: 41660bcbfd6be6b49a68e2c24b05d2c0, type: 2}
   - {fileID: 11400000, guid: 8a02b7a6f44220a4b8217e844edc0da3, type: 2}

@@ -15,4 +15,5 @@ MonoBehaviour:
   info:
     speckleTypeName: Objects.Geometry.Point
     unityTypeName: Speckle.ConnectorUnity.Core.ScriptableConverter.Components.SpecklePoint
-  prefab: {fileID: 0}
+  prefab: {fileID: 8033595332425827751, guid: 0d6b9ab7180f42743ab48f320a250a80, type: 3}
+  builder: {fileID: 0}

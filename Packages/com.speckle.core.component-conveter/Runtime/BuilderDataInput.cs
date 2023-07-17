@@ -4,15 +4,12 @@ using UnityEngine;
 namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
 
-    /// <summary>
-    /// A simple object for holding speckle data wanting to be lil unity objects
-    /// </summary>
-    public class ConvertableObjectData
+    public struct BuilderDataInput
     {
-        public Component unityObj;
+        public readonly Component unityObj;
         public readonly Base speckleObj;
 
-        public ConvertableObjectData(Base speckleObj, Component unityObj)
+        public BuilderDataInput(Base speckleObj, Component unityObj)
         {
             this.speckleObj = speckleObj;
             this.unityObj = unityObj;

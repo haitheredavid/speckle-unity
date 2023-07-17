@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Speckle.Core.Api;
@@ -19,7 +22,14 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Scenes
         ScriptableConverter converter;
 
         [SerializeField]
-        string stream, commit;
+        int queueSize = 10;
+        
+        [SerializeField]
+        string streamId = "a823053e07";
+        [SerializeField]
+        string commitId = "";
+        [SerializeField]
+        string objectId = "c4fb5e504ba7299fec99607574b06572";
 
         [SerializeField]
         Transform parent;
@@ -40,22 +50,29 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Scenes
         async void Start()
         {
             Speckle.Core.Logging.SpeckleLog.Initialize(HostApplications.Unity.Name, HostApplications.Unity.GetVersion(HostAppVersion.v2021));
-            var b = await Run();
-            var instance = new ConverterInstance(converter, b, source.Token);
-            instance.Run();
 
+            var items = new List<Base>();
+            for (int i = 0; i < queueSize; i++)
+            {
+                var b = await Run();
+                items.Add(b);
+            }
+            Debug.Log("Done with Recieve");
+
+            foreach (var i in items)
+            {
+                converter.ConvertToNative(i);
+            }
         }
 
         async Task<Base> Run()
         {
-            Debug.Log("Is Running");
             var client = new Client(AccountManager.GetDefaultAccount());
-            var c = await client.CommitGet(stream, commit);
-            Debug.Log("Commit recieved");
-            var obj = await Operations.Receive(c.referencedObject, new ServerTransport(client.Account, stream));
-            if (obj != null) Debug.Log("Success!");
+            var c = await client.ObjectGet(streamId, objectId);
+            var obj = await Operations.Receive(c.id, new ServerTransport(client.Account, streamId));
             return obj;
         }
+
 
 
 

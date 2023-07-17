@@ -1,8 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Speckle.Core.Models;
+using Speckle.Core.Models.Extensions;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity.Core.ScriptableConverter
@@ -10,12 +13,13 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 
     public sealed class ConverterInstance
     {
-
+        
         private ScriptableConverter _converter;
         private CancellationToken _token;
         private Base _data;
         private SpeckleLayer _topLayer;
-
+        
+        public ConcurrentQueue<BuilderDataInput> _queue;
 
         public ConverterInstance(ScriptableConverter converter, Base @base, CancellationToken token)
         {
@@ -28,9 +32,11 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         {
             // create an object that will be the top most parent 
             _topLayer = NewLayer("Parent");
+            _queue = new ConcurrentQueue<BuilderDataInput>();
             ConvertToScene(_data, _topLayer);
         }
 
+        
         /// <summary>
         /// For handling creating objects in a scene without handling how the data needs to converted
         /// </summary>
@@ -38,42 +44,45 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         /// <param name="layer"></param>
         void ConvertToScene(object obj, SpeckleLayer layer)
         {
+
             // 1: Object is supported, so lets convert the object and it's data 
             if (obj.IsBase(out var @base))
             {
-                if (_converter.CanConvertToNative(@base))
-                {
-                    var go = _converter.CreateInstance(@base, layer.transform);
-                    layer.Add(go);
-                }
 
-                // 2: Check for the properties of an object. There might be additional objects that we want to convert as well
-                foreach (var kvp in @base.GetMembers(DynamicBaseMemberType.Dynamic))
-                {
-                    if (_token.IsCancellationRequested)
-                    {
-                        //TODO: throw error properly
-                        // return;
-                    }
-
-                    if (kvp.Value == null) continue;
-
-                    // 2b: Prop is a list!
-                    if (kvp.Value.IsList())
-                    {
-                        var propList = ToList(kvp.Value);
-                        var propLayer = NewLayer(kvp.Key);
-                        layer.AddAndParent(propLayer);
-
-                        foreach (var propItem in propList)
-                        {
-                            if (propItem == null) continue;
-
-                            ConvertToScene(obj, propLayer);
-                        }
-                    }
-
-                }
+                // if (_converter.CanConvertToNative(@base))
+                // {
+                //     var instance = _converter.CreateInst(@base, layer.transform);
+                //     _queue.Enqueue(new BuilderDataInput(@base, instance ));
+                //     layer.Add(instance.gameObject);
+                // }
+                //
+                // // 2: Check for the properties of an object. There might be additional objects that we want to convert as well
+                // foreach (var kvp in @base.GetMembers(DynamicBaseMemberType.Dynamic))
+                // {
+                //     if (_token.IsCancellationRequested)
+                //     {
+                //         //TODO: throw error properly
+                //         // return;
+                //     }
+                //
+                //     if (kvp.Value == null) continue;
+                //
+                //     // 2b: Prop is a list!
+                //     if (kvp.Value.IsList())
+                //     {
+                //         var propList = ToList(kvp.Value);
+                //         var propLayer = NewLayer(kvp.Key);
+                //         layer.AddAndParent(propLayer);
+                //
+                //         foreach (var propItem in propList)
+                //         {
+                //             if (propItem == null) continue;
+                //
+                //             ConvertToScene(obj, propLayer);
+                //         }
+                //     }
+                //
+                // }
                 return;
             }
 
@@ -86,6 +95,77 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
                     ConvertToScene(item, layer);
                 }
             }
+
+        }
+
+        // private List<ConverterData> _chunk;
+        private uint _batchSize;
+        
+        // bool AddAndCheck(ConverterData d)
+        // {
+            // if (_chunk.Count >= _batchSize)
+            // {
+            // }
+        // }
+        
+        /// <summary>
+        /// For handling creating objects in a scene without handling how the data needs to converted
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="layer"></param>
+        IEnumerator ConvertToSceneRoutine(object obj, SpeckleLayer layer)
+        {
+
+            // // 1: Object is supported, so lets convert the object and it's data 
+            // if (obj.IsBase(out var @base))
+            // {
+            //
+            //     if (_converter.CanConvertToNative(@base))
+            //     {
+            //         var instance = _converter.CreateInst(@base, layer.transform);
+            //         _queue.Enqueue(new BuilderDataInput(@base, instance ));
+            //         layer.Add(instance.gameObject);
+            //     }
+            //
+            //     // 2: Check for the properties of an object. There might be additional objects that we want to convert as well
+            //     foreach (var kvp in @base.GetMembers(DynamicBaseMemberType.Dynamic))
+            //     {
+            //         if (_token.IsCancellationRequested)
+            //         {
+            //             //TODO: throw error properly
+            //             // return;
+            //         }
+            //
+            //         if (kvp.Value == null) continue;
+            //
+            //         // 2b: Prop is a list!
+            //         if (kvp.Value.IsList())
+            //         {
+            //             var propList = ToList(kvp.Value);
+            //             var propLayer = NewLayer(kvp.Key);
+            //             layer.AddAndParent(propLayer);
+            //
+            //             foreach (var propItem in propList)
+            //             {
+            //                 if (propItem == null) continue;
+            //
+            //                 ConvertToScene(obj, propLayer);
+            //             }
+            //         }
+            //
+            //     }
+                yield return null ;
+            // }
+
+            // // 3: might be a list (not sure if this is necessary
+            // if (obj.IsList())
+            // {
+            //     var list = ToList(obj);
+            //     foreach (var item in list)
+            //     {
+            //         ConvertToScene(item, layer);
+            //     }
+            // }
 
         }
 
@@ -197,6 +277,75 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         //     // parentLayer.ParentObjects(parentLayer.transform);
         //     return parentLayer;
         // }
+
+        public class Tbd
+        {
+            public ConcurrentQueue<BuilderDataInput> _queue;
+            public delegate bool BaseObjectAction(Base @base);
+
+            
+            
+            
+            public IEnumerable<Base> Traverse(Base node, BaseExtensions.BaseRecursionBreaker recursionBreaker)
+            {
+                Stack<Base> stack = new Stack<Base>();
+                _queue = new ConcurrentQueue<BuilderDataInput>();
+                stack.Push(node);
+                while (stack.Count > 0)
+                {
+                    Base current = stack.Pop();
+                    yield return current;
+                    if (!recursionBreaker(current))
+                    {
+                        foreach (string dynamicMemberName in current.GetDynamicMemberNames())
+                        {
+                            switch (current[dynamicMemberName])
+                            {
+                                case Base @base:
+                                    stack.Push(@base);
+                                    continue;
+                                case IDictionary dictionary:
+                                    IEnumerator enumerator1 = dictionary.Keys.GetEnumerator();
+                                    try
+                                    {
+                                        while (enumerator1.MoveNext())
+                                        {
+                                            if (enumerator1.Current is Base current1)
+                                                stack.Push(current1);
+                                        }
+                                        continue;
+                                    }
+                                    finally
+                                    {
+                                        if (enumerator1 is IDisposable disposable)
+                                            disposable.Dispose();
+                                    }
+                                case IList list:
+                                    IEnumerator enumerator2 = list.GetEnumerator();
+                                    try
+                                    {
+                                        while (enumerator2.MoveNext())
+                                        {
+                                            if (enumerator2.Current is Base current2)
+                                                stack.Push(current2);
+                                        }
+                                        continue;
+                                    }
+                                    finally
+                                    {
+                                        if (enumerator2 is IDisposable disposable)
+                                            disposable.Dispose();
+                                    }
+                                default:
+                                    continue;
+                            }
+                        }
+                        current = (Base)null;
+                    }
+
+                }
+            }
+        }
 
 
 

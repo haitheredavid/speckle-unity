@@ -9,6 +9,7 @@ using Speckle.Core.Models;
 using UnityEngine;
 
 [assembly: InternalsVisibleTo(assemblyName: "Speckle.ConnectorUnity.Core.ScriptableConverter.Editor")]
+
 namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 {
 
@@ -29,46 +30,46 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         /// Simple description of the converter
         /// </summary>
         [field: SerializeField]
-        public string Description { get; private set; }
+        public string Description {get;private set;}
 
         /// <summary>
         /// The human responsible
         /// </summary>
         [field: SerializeField]
-        public string Author { get; private set; }
+        public string Author {get;private set;}
 
         /// <summary>
         /// Some sort of context info
         /// </summary>
         [field: SerializeField]
-        public string WebsiteOrEmail { get; private set; }
+        public string WebsiteOrEmail {get;private set;}
 
         /// <summary>
         /// How an object is handled when the data is received in the application. Default is set to Create
         /// </summary>
         [field: SerializeField]
-        public ReceiveMode ReceiveMode { get; set; } = ReceiveMode.Create;
+        public ReceiveMode ReceiveMode {get;set;} = ReceiveMode.Create;
 
         /// <summary>
         /// 
         /// </summary>
         [field: SerializeField]
-        public List<ComponentConverter> Converters { get; internal set; } = new();
+        public List<ComponentConverter> Converters {get;internal set;} = new();
 
         /// <summary>
         /// 
         /// </summary>
-        public HashSet<Exception> ConversionErrors { get; protected set; } = new();
+        public HashSet<Exception> ConversionErrors {get;protected set;} = new();
 
         /// <summary>
         /// 
         /// </summary>
-        public List<ApplicationObject> ContextObjects { get; set; } = new();
+        public List<ApplicationObject> ContextObjects {get;set;} = new();
 
         /// <summary>
         /// An object for capturing the status of speckle operations
         /// </summary>
-        public ProgressReport Report { get; protected set; } = new();
+        public ProgressReport Report {get;protected set;} = new();
 
         /// <summary>
         /// 
@@ -190,13 +191,8 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         {
             Report = new();
             ConversionErrors = new();
-            
-            if (!Converters.Valid())
-            {
-                Converters = GetDefaultConverters();
-            }
 
-            Converters.ForEach(x => x.parent = this);
+            if (!Converters.Valid()) Converters = GetDefaultConverters();
 
             if (settings == null)
             {
@@ -204,28 +200,6 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
             }
         }
 
-        public GameObject CreateInstance(Base @base, Transform parent)
-        {
-            if (TryGetConverter(@base, true, out var converter))
-            {
-                return converter.CreateComponentInstance(parent).gameObject;
-            }
-            //TODO: a bit messy to pass back data like this 
-            return null;
-        }
-
-        //TODO: Figure out where this needs to live
-        public async Task PostWork()
-        {
-            // if (!converters.Valid())
-            //     return;
-            //
-            // foreach (var c in converters)
-            // {
-            //     if (c != null && c.HasWorkToDo)
-            //         await c.PostWorkAsync();
-            // }
-        }
 
         //TODO: maybe store these in a better way? 
         bool TryGetConverter(Base obj, bool init, out ComponentConverter converter)
@@ -249,13 +223,16 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
                 if (c == null)
                     continue;
 
-                if (c.SpeckleType.Equals(obj.speckle_type))
+                if (c.speckleType.Equals(obj.speckle_type))
                 {
                     converter = c;
 
-                    if (init)
-                        c.Settings = settings;
-
+                    if (init && !c.isInit)
+                    {
+                        c.parent = this;
+                        c.settings = settings;
+                        c.Initialize();
+                    }
                     break;
                 }
             }
@@ -285,13 +262,13 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
                 case GameObject o:
                     foreach (var c in Converters)
                     {
-                        if (c == null || o.GetComponent(c.UnityType))
+                        if (c == null || o.GetComponent(c.unityType))
                             continue;
 
                         converter = c;
 
                         if (init)
-                            c.Settings = settings;
+                            c.settings = settings;
 
                         break;
                     }
@@ -302,7 +279,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
                     comp = o;
                     foreach (var c in Converters)
                     {
-                        if (c == null || c.UnityType != comp.GetType().ToString())
+                        if (c == null || c.unityType != comp.GetType().ToString())
                             continue;
 
                         converter = c;

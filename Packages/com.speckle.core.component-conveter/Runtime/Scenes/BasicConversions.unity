@@ -153,8 +153,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   converter: {fileID: 11400000, guid: 795090483aba0064493e7a201f4d4b98, type: 2}
-  stream: 4ec797e883
-  commit: 4802f6aa80
+  queueSize: 10
+  streamId: a823053e07
+  commitId: 
+  objectId: c4fb5e504ba7299fec99607574b06572
   parent: {fileID: 0}
 --- !u!4 &1077328799
 Transform:

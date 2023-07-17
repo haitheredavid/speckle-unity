@@ -15,4 +15,5 @@ MonoBehaviour:
   info:
     speckleTypeName: Objects.BuiltElements.View:Objects.BuiltElements.View3D
     unityTypeName: UnityEngine.Camera
-  prefab: {fileID: 0}
+  prefab: {fileID: 991874194189472629, guid: 954d54b138e74824b9e4cb6a2c2549d0, type: 3}
+  builder: {fileID: 0}

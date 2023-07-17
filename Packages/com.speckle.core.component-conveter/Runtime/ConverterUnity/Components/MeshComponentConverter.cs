@@ -12,36 +12,37 @@ using Smesh = Objects.Geometry.Mesh;
 
 namespace Speckle.ConnectorUnity.Converter
 {
+
     [CreateAssetMenu(fileName = nameof(MeshComponentConverter), menuName = SpeckleUnity.Categories.CONVERTERS + "Create Mesh Converter")]
     public class MeshComponentConverter : ComponentConverter<Objects.Geometry.Mesh, MeshFilter>, IMeshableConverter, IWantContextObj
     {
 
         /// <inheritdoc />
-        public List<ApplicationObject> contextObjects { get; set; }
+        public List<ApplicationObject> contextObjects {get;set;}
 
         /// <inheritdoc />
         [field: SerializeField]
-        public bool addMeshCollider { get; private set; }
+        public bool addMeshCollider {get;private set;}
 
         /// <inheritdoc />
         [field: SerializeField]
-        public bool addMeshRenderer { get; private set; }
+        public bool addMeshRenderer {get;private set;}
 
         /// <inheritdoc />
         [field: SerializeField]
-        public bool recenterTransform { get; private set; }
+        public bool recenterTransform {get;private set;}
 
         /// <inheritdoc />
         [field: SerializeField]
-        public bool useRenderMaterial { get; private set; }
+        public bool useRenderMaterial {get;private set;}
 
         /// <inheritdoc />
         [field: SerializeField]
-        public bool combineMeshes { get; private set; }
+        public bool combineMeshes {get;private set;}
 
         /// <inheritdoc />
         [field: SerializeField]
-        public UnityEngine.Material defaultMaterial { get; private set; }
+        public Material defaultMaterial {get;private set;}
 
         protected override void OnEnable()
         {
@@ -50,8 +51,33 @@ namespace Speckle.ConnectorUnity.Converter
             if (defaultMaterial == null) defaultMaterial = new UnityEngine.Material(Shader.Find("Standard"));
         }
 
-        protected override void ToNative(Objects.Geometry.Mesh obj, ref MeshFilter instance)
+        protected override MeshFilter CreateComponentInstance(Transform parent = null)
         {
+            var instance = base.CreateComponentInstance(parent);
+            if (addMeshCollider)
+            {
+                var c = instance.gameObject.GetComponent<MeshCollider>();
+                if (c == null) c = instance.gameObject.AddComponent<MeshCollider>();
+
+                c.sharedMesh = ConverterUtils.IsRuntime ? instance.mesh : instance.sharedMesh;
+            }
+
+            if (addMeshRenderer)
+            {
+                var c = instance.gameObject.GetComponent<MeshRenderer>();
+                if (c == null) c = instance.gameObject.AddComponent<MeshRenderer>();
+
+                // c.sharedMaterial = converter.useRenderMaterial ?
+                //   GetMaterial(converter, mesh["renderMaterial"] as RenderMaterial) :
+                //   converter.defaultMaterial;
+            }
+
+            return instance;
+        }
+
+        protected override void BuildNative(Smesh obj, MeshFilter target)
+        {
+
             if (obj == null || obj.vertices.Count == 0 || obj.faces.Count == 0) return;
 
             void AddMesh(Objects.Geometry.Mesh subMesh, ref SpeckleMesh.Data data)
@@ -151,30 +177,13 @@ namespace Speckle.ConnectorUnity.Converter
                 nativeMesh.subMeshCount = data.subMeshes.Count;
                 return nativeMesh;
             }
-            
+
             var nativeMesh = ConvertMeshData(obj);
 
-            if (ConverterUtils.IsRuntime) instance.mesh = nativeMesh;
-            else instance.sharedMesh = nativeMesh;
-
-            if (addMeshCollider)
-            {
-                var c = instance.gameObject.GetComponent<MeshCollider>();
-                if (c == null) c = instance.gameObject.AddComponent<MeshCollider>();
-
-                c.sharedMesh = ConverterUtils.IsRuntime ? instance.mesh : instance.sharedMesh;
-            }
-
-            if (addMeshRenderer)
-            {
-                var c = instance.gameObject.GetComponent<MeshRenderer>();
-                if (c == null) c = instance.gameObject.AddComponent<MeshRenderer>();
-
-                // c.sharedMaterial = converter.useRenderMaterial ?
-                //   GetMaterial(converter, mesh["renderMaterial"] as RenderMaterial) :
-                //   converter.defaultMaterial;
-            }
+            if (ConverterUtils.IsRuntime) target.mesh = nativeMesh;
+            else target.sharedMesh = nativeMesh;
         }
+
 
         public override Base ToSpeckle(MeshFilter component)
         {
@@ -239,7 +248,7 @@ namespace Speckle.ConnectorUnity.Converter
                 textureCoordinates = sTexCoords,
                 units = ConverterUtils.ModelUnits
             };
-            
+
             return this.MeshToSpeckle(component);
         }
 

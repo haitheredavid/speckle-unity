@@ -15,10 +15,11 @@ MonoBehaviour:
   info:
     speckleTypeName: Objects.Geometry.Mesh
     unityTypeName: UnityEngine.MeshFilter
-  prefab: {fileID: 0}
+  prefab: {fileID: 7429264559678571231, guid: 72e5c90505a0e2b478787dcadd9ca49d, type: 3}
+  builder: {fileID: 0}
   <addMeshCollider>k__BackingField: 0
   <addMeshRenderer>k__BackingField: 0
   <recenterTransform>k__BackingField: 0
   <useRenderMaterial>k__BackingField: 0
   <combineMeshes>k__BackingField: 0
-  <defaultMaterial>k__BackingField: {fileID: 2100000, guid: 6fe0ba5d1c59c7548be17ef9fb8e2e40, type: 2}
+  <defaultMaterial>k__BackingField: {fileID: 0}
