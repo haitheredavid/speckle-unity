@@ -26,10 +26,6 @@ namespace Speckle.ConnectorUnity.Converter
 
         /// <inheritdoc />
         [field: SerializeField]
-        public bool addMeshRenderer {get;private set;}
-
-        /// <inheritdoc />
-        [field: SerializeField]
         public bool recenterTransform {get;private set;}
 
         /// <inheritdoc />
@@ -51,32 +47,100 @@ namespace Speckle.ConnectorUnity.Converter
             if (defaultMaterial == null) defaultMaterial = new UnityEngine.Material(Shader.Find("Standard"));
         }
 
-        protected override MeshFilter CreateComponentInstance(Transform parent = null)
+        protected override MeshFilter CreateUnityInstance(Transform parent = null)
         {
-            var instance = base.CreateComponentInstance(parent);
+            var instance = base.CreateUnityInstance(parent);
+            
+            var renderer = instance.gameObject.GetComponent<MeshRenderer>();
+            if (renderer == null) renderer = instance.gameObject.AddComponent<MeshRenderer>();
+            // c.sharedMaterial = converter.useRenderMaterial ?
+            //   GetMaterial(converter, mesh["renderMaterial"] as RenderMaterial) :
+            //   converter.defaultMaterial;
+            
             if (addMeshCollider)
             {
-                var c = instance.gameObject.GetComponent<MeshCollider>();
-                if (c == null) c = instance.gameObject.AddComponent<MeshCollider>();
+                var collider = instance.gameObject.GetComponent<MeshCollider>();
+                if (collider == null) collider = instance.gameObject.AddComponent<MeshCollider>();
 
-                c.sharedMesh = ConverterUtils.IsRuntime ? instance.mesh : instance.sharedMesh;
+                collider.sharedMesh = ConverterUtils.IsRuntime ? instance.mesh : instance.sharedMesh;
             }
 
-            if (addMeshRenderer)
-            {
-                var c = instance.gameObject.GetComponent<MeshRenderer>();
-                if (c == null) c = instance.gameObject.AddComponent<MeshRenderer>();
-
-                // c.sharedMaterial = converter.useRenderMaterial ?
-                //   GetMaterial(converter, mesh["renderMaterial"] as RenderMaterial) :
-                //   converter.defaultMaterial;
-            }
+           
 
             return instance;
         }
 
-        protected override void BuildNative(Smesh obj, MeshFilter target)
+
+        protected override Smesh Deserialize(MeshFilter component)
         {
+            var nativeMesh = ConverterUtils.IsRuntime ? component.mesh : component.sharedMesh;
+
+            var nTriangles = nativeMesh.triangles;
+            var sFaces = new List<int>(nTriangles.Length * 4);
+            for (var i = 2; i < nTriangles.Length; i += 3)
+            {
+                sFaces.Add(0); //Triangle cardinality indicator
+
+                sFaces.Add(nTriangles[i]);
+                sFaces.Add(nTriangles[i - 1]);
+                sFaces.Add(nTriangles[i - 2]);
+            }
+
+            var nVertices = nativeMesh.vertices;
+            var sVertices = new List<double>(nVertices.Length * 3);
+
+            foreach (var vertex in nVertices)
+            {
+                var p = component.gameObject.transform.TransformPoint(vertex);
+                sVertices.Add(p.x);
+                sVertices.Add(p.z); //z and y swapped
+                sVertices.Add(p.y);
+            }
+
+            var nColors = nativeMesh.colors;
+            var sColors = new List<int>(nColors.Length);
+            sColors.AddRange(nColors.Select(c => c.ToIntColor()));
+
+            var nTexCoords = nativeMesh.uv;
+            var sTexCoords = new List<double>(nTexCoords.Length * 2);
+            foreach (var uv in nTexCoords)
+            {
+                sTexCoords.Add(uv.x);
+                sTexCoords.Add(uv.y);
+            }
+
+            // NOTE: this throws some exceptions with trying to set a method that isn't settable.
+            // Looking at other converters it seems like the conversion code should be handling all the prop settings..
+
+            //
+            // // get the speckle data from the go here
+            // // so that if the go comes from speckle, typed props will get overridden below
+            // // TODO: Maybe handle a better way of overriding props? Or maybe this is just the typical logic for connectors 
+            // if (convertProps)
+            // {
+            //   // Base behaviour is the standard unity mono type that stores the speckle props data
+            //   var baseBehaviour = component.GetComponent(typeof(BaseBehaviour)) as BaseBehaviour;
+            //   if (baseBehaviour != null && baseBehaviour.properties != null)
+            //   {
+            //     baseBehaviour.properties.AttachUnityProperties(mesh, excludedProps);
+            //   }
+            // }
+
+            return new Smesh
+            {
+                vertices = sVertices,
+                faces = sFaces,
+                colors = sColors,
+                textureCoordinates = sTexCoords,
+                units = ConverterUtils.ModelUnits
+            };
+
+            return this.MeshToSpeckle(component);
+        }
+
+        protected override void Serialize(Smesh obj, MeshFilter target)
+        {
+            Debug.Log("Building Native From Mesh");
 
             if (obj == null || obj.vertices.Count == 0 || obj.faces.Count == 0) return;
 
@@ -182,74 +246,6 @@ namespace Speckle.ConnectorUnity.Converter
 
             if (ConverterUtils.IsRuntime) target.mesh = nativeMesh;
             else target.sharedMesh = nativeMesh;
-        }
-
-
-        public override Base ToSpeckle(MeshFilter component)
-        {
-            var nativeMesh = ConverterUtils.IsRuntime ? component.mesh : component.sharedMesh;
-
-            var nTriangles = nativeMesh.triangles;
-            var sFaces = new List<int>(nTriangles.Length * 4);
-            for (var i = 2; i < nTriangles.Length; i += 3)
-            {
-                sFaces.Add(0); //Triangle cardinality indicator
-
-                sFaces.Add(nTriangles[i]);
-                sFaces.Add(nTriangles[i - 1]);
-                sFaces.Add(nTriangles[i - 2]);
-            }
-
-            var nVertices = nativeMesh.vertices;
-            var sVertices = new List<double>(nVertices.Length * 3);
-
-            foreach (var vertex in nVertices)
-            {
-                var p = component.gameObject.transform.TransformPoint(vertex);
-                sVertices.Add(p.x);
-                sVertices.Add(p.z); //z and y swapped
-                sVertices.Add(p.y);
-            }
-
-            var nColors = nativeMesh.colors;
-            var sColors = new List<int>(nColors.Length);
-            sColors.AddRange(nColors.Select(c => c.ToIntColor()));
-
-            var nTexCoords = nativeMesh.uv;
-            var sTexCoords = new List<double>(nTexCoords.Length * 2);
-            foreach (var uv in nTexCoords)
-            {
-                sTexCoords.Add(uv.x);
-                sTexCoords.Add(uv.y);
-            }
-
-            // NOTE: this throws some exceptions with trying to set a method that isn't settable.
-            // Looking at other converters it seems like the conversion code should be handling all the prop settings..
-
-            //
-            // // get the speckle data from the go here
-            // // so that if the go comes from speckle, typed props will get overridden below
-            // // TODO: Maybe handle a better way of overriding props? Or maybe this is just the typical logic for connectors 
-            // if (convertProps)
-            // {
-            //   // Base behaviour is the standard unity mono type that stores the speckle props data
-            //   var baseBehaviour = component.GetComponent(typeof(BaseBehaviour)) as BaseBehaviour;
-            //   if (baseBehaviour != null && baseBehaviour.properties != null)
-            //   {
-            //     baseBehaviour.properties.AttachUnityProperties(mesh, excludedProps);
-            //   }
-            // }
-
-            return new Smesh
-            {
-                vertices = sVertices,
-                faces = sFaces,
-                colors = sColors,
-                textureCoordinates = sTexCoords,
-                units = ConverterUtils.ModelUnits
-            };
-
-            return this.MeshToSpeckle(component);
         }
 
     }

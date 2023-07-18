@@ -124,7 +124,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         {
             if (builder == null) builder = new GameObject().AddComponent<ConverterObjectBuilder>();
 
-            builder.Initialize(data => BuildNative((TBase)data.speckleObj, (TComponent)data.unityObj));
+            builder.Initialize(data => Serialize((TBase)data.speckleObj, (TComponent)data.unityObj));
             builder.OnQueueSizeChange += this.OnQueueSizeChanged;
 
         }
@@ -144,13 +144,14 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         /// <inheritdoc />
         public override Base ToSpeckle(Component component)
         {
-            return CanConvertToSpeckle(component) ? ToSpeckle((TComponent)component) : null;
+            
+            return CanConvertToSpeckle(component) ? Deserialize((TComponent)component) : null;
         }
-        
+
 
         public override GameObject ToNative(Base @base)
         {
-            var comp = CreateComponentInstance();
+            var comp = CreateUnityInstance();
 
             if (@base is not TBase obj)
             {
@@ -163,12 +164,13 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
             return comp.gameObject;
         }
 
+
         /// <summary>
         /// Creates a <see cref="Component"/> with the type component attached to it
         /// </summary>
         /// <param name="parent"></param>
         /// <returns></returns>
-        protected virtual TComponent CreateComponentInstance(Transform parent = null)
+        protected virtual TComponent CreateUnityInstance(Transform parent = null)
         {
             var obj = Instantiate(prefab, parent);
             obj.name = speckleType;
@@ -176,20 +178,20 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         }
 
 
+        protected virtual TBase CreateSpeckleInstance()
+        {
+            return Activator.CreateInstance<TBase>();
+        }
+        
+
         /// <summary>
         /// Nested method from <see cref="ToSpeckle(UnityEngine.Component)"/> that sets the types for conversion
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="target"></param>
-        protected abstract void BuildNative(TBase obj, TComponent target);
+        protected abstract void Serialize(TBase obj, TComponent target);
 
-
-        /// <summary>
-        /// Nested method from <see cref="ToSpeckle(UnityEngine.Component)"/> that sets the types for conversion 
-        /// </summary>
-        /// <param name="component"></param>
-        /// <returns></returns>
-        public abstract Base ToSpeckle(TComponent component);
+        protected abstract TBase Deserialize(TComponent obj);
 
 
         protected virtual void OnEnable()

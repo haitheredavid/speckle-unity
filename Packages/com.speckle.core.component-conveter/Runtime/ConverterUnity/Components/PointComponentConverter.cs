@@ -9,15 +9,17 @@ namespace Speckle.ConnectorUnity
 	[CreateAssetMenu(fileName = nameof(PointComponentConverter), menuName = SpeckleUnity.Categories.CONVERTERS + "Create Point Converter")]
 	public class PointComponentConverter : ComponentConverter<Point, SpecklePoint>
 	{
-      
-    protected override void BuildNative(Point obj, SpecklePoint target)
+
+
+      protected override void Serialize(Point obj, SpecklePoint target)
     {
         target.pos = obj.ToVector3();
     }
 
-    public override Base ToSpeckle(SpecklePoint component)
+    protected override Point Deserialize(SpecklePoint obj)
     {
-        return component.pos.ToSpeckle();
+        return obj.pos.ToPoint();
     }
+    
   }
 }

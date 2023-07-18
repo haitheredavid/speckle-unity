@@ -13,13 +13,6 @@
         }
         
         /// <summary>
-        /// Adds a mesh renderer to each object, helpful if you want to see what you're looking at
-        /// </summary>
-        public bool addMeshRenderer
-        {
-            get;
-        }
-        /// <summary>
         /// Repositions the origin of the mesh object to the center of the mesh bounds 
         /// </summary>
         public bool recenterTransform

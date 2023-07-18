@@ -41,6 +41,13 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Scenes
             source = new CancellationTokenSource();
         }
 
+        
+
+        private void OnGUI()
+        {
+            GUI.Box(new Rect(10,10, 200, 20), Time.timeSinceLevelLoad.ToString());
+        }
+
         private void OnDisable()
         {
             if (source.IsCancellationRequested) source.Token.ThrowIfCancellationRequested();
@@ -56,6 +63,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Scenes
             {
                 var b = await Run();
                 items.Add(b);
+                Debug.Log($"Added! {items.Count}");
             }
             Debug.Log("Done with Recieve");
 

@@ -13,24 +13,30 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
     public class ConverterObjectBuilder : MonoBehaviour
     {
 
-
         [SerializeField] private ConcurrentQueue<BuilderDataInput> queue;
         [SerializeField] Action<BuilderDataInput> buildAction;
 
-        public bool isWorking {get;private set;}
+        private Coroutine _routine;
 
+        /// <summary>
+        /// returns true if there are objects in the queue and the action routine is in process
+        /// </summary>
+        public bool isWorking => queue.Valid() && _routine != null;
+
+        /// <summary>
+        /// returns true if the queue is setup and the action serialized 
+        /// </summary>
         public bool isInit => buildAction != null && queue != null;
 
         public event Action<int> OnQueueSizeChange;
         public event Action OnStateChange;
 
+
         public void Initialize(Action<BuilderDataInput> unwrap)
         {
-            this.buildAction = unwrap;
-            this.queue = new ConcurrentQueue<BuilderDataInput>();
+            buildAction = unwrap;
+            queue = new ConcurrentQueue<BuilderDataInput>();
         }
-
-        private Coroutine routine;
 
         public void AddToQueue(BuilderDataInput builderDataInput)
         {
@@ -41,21 +47,23 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
             OnQueueSizeChange?.Invoke(queue.Count);
         }
 
-
-        public void Update()
+        void Update()
         {
-            routine = queue.IsEmpty switch
+            _routine = queue.IsEmpty switch
             {
-                false when routine == null => StartCoroutine(DoWork()),
-                true when routine != null => null,
-                _ => routine
+                false when _routine == null => StartCoroutine(DoWork()),
+                true when _routine != null => null,
+                _ => _routine
             };
         }
 
+        private void OnDestroy()
+        {
+            if (_routine != null) StopCoroutine(_routine);
+        }
 
         IEnumerator DoWork()
         {
-            isWorking = true;
             while (queue.TryDequeue(out var item))
             {
                 Debug.Log($"Doing work on {item}");
@@ -64,9 +72,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
             }
 
             OnQueueSizeChange?.Invoke(queue.Count);
-
             Debug.Log("All done!");
-            isWorking = false;
         }
 
 

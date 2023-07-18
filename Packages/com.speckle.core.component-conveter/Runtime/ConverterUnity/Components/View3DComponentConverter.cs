@@ -15,7 +15,7 @@ namespace Speckle.ConnectorUnity
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="target"></param>
-        protected override void BuildNative(View3D obj, Camera target)
+        protected override void Serialize(View3D obj, Camera target)
         {
             target.transform.position = ConverterUtils.VectorByCoordinates(
                 obj.origin.x,
@@ -36,7 +36,7 @@ namespace Speckle.ConnectorUnity
                 obj.upDirection.units);
         }
 
-        public override Base ToSpeckle(Camera component)
+        protected override View3D Deserialize(Camera component)
         {
             return new View3D
             {

@@ -18,12 +18,12 @@ namespace Speckle.ConnectorUnity
         /// <param name="obj"></param>
         /// <param name="target"></param>
         /// <returns></returns>
-        protected override void BuildNative(Polyline obj, LineRenderer target)
+        protected override void Serialize(Polyline obj, LineRenderer target)
         {
             target.SetupLineRenderer(obj.GetPoints().ArrayToVector3(obj.units).ToArray(), diameter);
         }
 
-        public override Base ToSpeckle(LineRenderer component)
+        protected override Polyline Deserialize(LineRenderer component)
         {
             // TODO: check if this should use world or local scale
             var points = new Vector3[component.positionCount];

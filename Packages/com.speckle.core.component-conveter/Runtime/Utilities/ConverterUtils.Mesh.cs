@@ -139,15 +139,12 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
                 c.sharedMesh = IsRuntime ? filter.mesh : filter.sharedMesh;
             }
 
-            if (converter.addMeshRenderer)
-            {
-                var c = filter.gameObject.GetComponent<MeshRenderer>();
-                if (c == null) c = filter.gameObject.AddComponent<MeshRenderer>();
+            var meshRenderer = filter.gameObject.GetComponent<MeshRenderer>();
+            if (meshRenderer == null) meshRenderer = filter.gameObject.AddComponent<MeshRenderer>();
 
-                // c.sharedMaterial = converter.useRenderMaterial ?
-                //   GetMaterial(converter, mesh["renderMaterial"] as RenderMaterial) :
-                //   converter.defaultMaterial;
-            }
+            // c.sharedMaterial = converter.useRenderMaterial ?
+            //   GetMaterial(converter, mesh["renderMaterial"] as RenderMaterial) :
+            //   converter.defaultMaterial;
         }
 
 
@@ -214,9 +211,6 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 
             if (converter.addMeshCollider)
                 filter.gameObject.AddComponent<MeshCollider>().sharedMesh = IsRuntime ? filter.mesh : filter.sharedMesh;
-
-            if (converter.addMeshRenderer)
-                filter.gameObject.AddComponent<MeshRenderer>().sharedMaterials = nativeMaterials;
 
             return obj;
         }
