@@ -197,16 +197,11 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 
         protected abstract TBase Deserialize(TComponent obj);
 
-
         protected virtual void OnEnable()
         {
             info = new ComponentInfo(typeof(TComponent).ToString(), Activator.CreateInstance<TBase>().speckle_type);
         }
-
-        protected void OnDisable()
-        { }
-
-
+        
     }
 
 }

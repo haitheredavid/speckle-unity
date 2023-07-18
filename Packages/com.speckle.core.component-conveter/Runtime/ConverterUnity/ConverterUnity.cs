@@ -15,9 +15,9 @@ namespace Speckle.ConnectorUnity
                 CreateInstance<MeshToMeshFilter>(),
                 CreateInstance<PolylineToLineRenderer>(),
                 CreateInstance<PointToSpecklePoint>(),
-                // CreateInstance<PointCloudComponentConverter>(),
+                CreateInstance<PointCloudToParticleSystem>(),
                 CreateInstance<View3DToCamera>(),
-                // CreateInstance<BrepComponentConverter>()
+                // CreateInstance<BrepToMeshFilter>()
             };
         }
     }

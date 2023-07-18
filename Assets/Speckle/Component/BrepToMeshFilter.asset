@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7d41f305e2d4e2fae5c76b48b60e54d, type: 3}
+  m_Name: BrepToMeshFilter
+  m_EditorClassIdentifier: 
+  info:
+    speckleTypeName: Objects.Geometry.Brep
+    unityTypeName: Speckle.ConnectorUnity.Core.ScriptableConverter.Components.SpeckleBrep
+  prefab: {fileID: 499238680493778535, guid: 6923ae3db7bbf514091122c86ee12e0f, type: 3}
+  builder: {fileID: 0}
