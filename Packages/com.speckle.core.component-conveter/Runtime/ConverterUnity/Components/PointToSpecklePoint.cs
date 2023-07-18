@@ -6,8 +6,8 @@ using Speckle.ConnectorUnity.Core.ScriptableConverter;
 
 namespace Speckle.ConnectorUnity
 {
-	[CreateAssetMenu(fileName = nameof(PointComponentConverter), menuName = SpeckleUnity.Categories.CONVERTERS + "Create Point Converter")]
-	public class PointComponentConverter : ComponentConverter<Point, SpecklePoint>
+	[CreateAssetMenu(fileName = nameof(PointToSpecklePoint), menuName = SpeckleUnity.Categories.CONVERTERS + "Create Point Converter")]
+	public class PointToSpecklePoint : ComponentConverter<Point, SpecklePoint>
 	{
 
 

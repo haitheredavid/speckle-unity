@@ -13,8 +13,8 @@ using Smesh = Objects.Geometry.Mesh;
 namespace Speckle.ConnectorUnity.Converter
 {
 
-    [CreateAssetMenu(fileName = nameof(MeshComponentConverter), menuName = SpeckleUnity.Categories.CONVERTERS + "Create Mesh Converter")]
-    public class MeshComponentConverter : ComponentConverter<Objects.Geometry.Mesh, MeshFilter>, IMeshableConverter, IWantContextObj
+    [CreateAssetMenu(fileName = nameof(MeshToMeshFilter), menuName = SpeckleUnity.Categories.CONVERTERS + "Create Mesh Converter")]
+    public class MeshToMeshFilter : ComponentConverter<Objects.Geometry.Mesh, MeshFilter>, IMeshableConverter, IWantContextObj
     {
 
         /// <inheritdoc />

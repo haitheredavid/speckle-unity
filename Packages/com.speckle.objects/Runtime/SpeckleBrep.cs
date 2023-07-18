@@ -2,11 +2,9 @@
 
 namespace Speckle.ConnectorUnity.Core.ScriptableConverter.Components
 {
-	public class SpeckleBrep : BaseBehaviour
-	{
-		public MeshFilter mesh
-		{
-			get => gameObject.GetComponent<MeshFilter>();
-		}
-	}
+
+    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+    public class SpeckleBrep : BaseBehaviour
+    { }
+
 }

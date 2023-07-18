@@ -6,8 +6,8 @@ using Speckle.ConnectorUnity.Core.ScriptableConverter;
 namespace Speckle.ConnectorUnity
 {
 
-    [CreateAssetMenu(fileName = nameof(View3DComponentConverter), menuName = SpeckleUnity.Categories.CONVERTERS + "Create View3d Converter")]
-    public class View3DComponentConverter : ComponentConverter<View3D, Camera>
+    [CreateAssetMenu(fileName = nameof(View3DToCamera), menuName = SpeckleUnity.Categories.CONVERTERS + "Create View3d Converter")]
+    public class View3DToCamera : ComponentConverter<View3D, Camera>
     {
 
         /// <summary>

@@ -12,11 +12,11 @@ namespace Speckle.ConnectorUnity
         {
            return new List<ComponentConverter>
             {
-                CreateInstance<MeshComponentConverter>(),
-                CreateInstance<PolylineComponentConverter>(),
-                CreateInstance<PointComponentConverter>(),
+                CreateInstance<MeshToMeshFilter>(),
+                CreateInstance<PolylineToLineRenderer>(),
+                CreateInstance<PointToSpecklePoint>(),
                 // CreateInstance<PointCloudComponentConverter>(),
-                CreateInstance<View3DComponentConverter>(),
+                CreateInstance<View3DToCamera>(),
                 // CreateInstance<BrepComponentConverter>()
             };
         }

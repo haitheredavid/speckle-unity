@@ -108,7 +108,8 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
 
         [SerializeField] protected TComponent prefab;
 
-        [SerializeField, HideInInspector]
+        [SerializeField]
+        [HideInInspector]
         protected ConverterObjectBuilder builder;
 
         /// <summary>
@@ -116,9 +117,12 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         /// </summary>
         public bool isWorking => builder != null && builder.isWorking;
 
-        public event Action<int> OnQueueSizeChanged;
-
+        /// <summary>
+        /// checks if the parent and builder are ready to go
+        /// </summary>
         public override bool isInit => base.isInit && builder != null && builder.isInit;
+
+        public event Action<int> OnQueueSizeChanged;
 
         public override void Initialize()
         {
@@ -144,7 +148,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         /// <inheritdoc />
         public override Base ToSpeckle(Component component)
         {
-            
+
             return CanConvertToSpeckle(component) ? Deserialize((TComponent)component) : null;
         }
 
@@ -182,7 +186,7 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         {
             return Activator.CreateInstance<TBase>();
         }
-        
+
 
         /// <summary>
         /// Nested method from <see cref="ToSpeckle(UnityEngine.Component)"/> that sets the types for conversion
@@ -197,24 +201,10 @@ namespace Speckle.ConnectorUnity.Core.ScriptableConverter
         protected virtual void OnEnable()
         {
             info = new ComponentInfo(typeof(TComponent).ToString(), Activator.CreateInstance<TBase>().speckle_type);
-   
         }
 
         protected void OnDisable()
         { }
-
-        public struct ConverterObjectData
-        {
-            public readonly TComponent unityObj;
-            public readonly TBase speckleObj;
-
-            public ConverterObjectData(TBase speckleObj, TComponent unityObj)
-            {
-                this.speckleObj = speckleObj;
-                this.unityObj = unityObj;
-            }
-
-        }
 
 
     }
